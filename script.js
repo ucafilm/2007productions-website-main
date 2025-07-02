@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
+    if (typeof gsap === 'undefined') {
+        console.error("GSAP not loaded!");
+        return;
+    }
     gsap.registerPlugin(ScrollTrigger);
     
     const loadingOverlay = document.getElementById('loadingOverlay');
