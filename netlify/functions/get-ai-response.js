@@ -1,17 +1,4 @@
 exports.handler = async function(event) {
-    // Only allow POST requests
-    if (event.httpMethod !== 'POST') {
-        return { 
-            statusCode: 405, 
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS'
-            },
-            body: 'Method Not Allowed' 
-        };
-    }
-
     // Handle CORS preflight
     if (event.httpMethod === 'OPTIONS') {
         return {
@@ -25,9 +12,22 @@ exports.handler = async function(event) {
         };
     }
 
+    // Only allow POST requests
+    if (event.httpMethod !== 'POST') {
+        return { 
+            statusCode: 405, 
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS'
+            },
+            body: 'Method Not Allowed' 
+        };
+    }
+
     try {
         const { message } = JSON.parse(event.body);
-        const geminiApiKey = process.env.GEMINI_API_KEY; // Securely get key from Netlify
+        const geminiApiKey = process.env.GEMINI_API_KEY;
 
         if (!geminiApiKey) {
             throw new Error("API key is not set in environment variables.");
@@ -46,7 +46,8 @@ Team Members:
 
 Respond in a conversational, slightly quirky tone that matches the 2007 Productions brand. Keep responses concise but engaging.`;
 
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + geminiApiKey, {
+        // Updated Gemini API endpoint
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -59,10 +60,16 @@ Respond in a conversational, slightly quirky tone that matches the 2007 Producti
         });
 
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Gemini API error: ${response.status} - ${errorText}`);
             throw new Error(`Gemini API responded with status: ${response.status}`);
         }
 
         const data = await response.json();
+
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+            throw new Error('Invalid response from Gemini API');
+        }
 
         return {
             statusCode: 200,
@@ -85,7 +92,7 @@ Respond in a conversational, slightly quirky tone that matches the 2007 Producti
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ 
-                error: "My circuits are a bit fried right now. Try asking again!",
+                error: "My circuits are having a moment. Try asking again!",
                 details: error.message 
             })
         };
