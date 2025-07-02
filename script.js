@@ -4,70 +4,112 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
-    if (typeof gsap === 'undefined') { console.error("GSAP not loaded!"); return; }
+    if (typeof gsap === 'undefined') {
+        console.error("GSAP not loaded!");
+        return;
+    }
     gsap.registerPlugin(ScrollTrigger);
-    
+
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
-        gsap.to(loadingOverlay, { opacity: 0, duration: 0.8, delay: 0.5, onComplete: () => {
-            loadingOverlay.style.display = 'none';
-            initializeAnimations();
-        }});
+        gsap.to(loadingOverlay, {
+            opacity: 0,
+            duration: 0.8,
+            delay: 0.5,
+            onComplete: () => {
+                loadingOverlay.style.display = 'none';
+                initializeAnimations();
+            }
+        });
     }
-    
+
     showPage('home');
     initializeInteractions();
     initializeCursor();
     initializeMobileMenu();
+    initializeEasterEggs();
+
+    setInterval(createChaosElement, 5000);
+}
+
+// --- CURSOR SYSTEM ---
+function initializeCursor() {
+    const cursor = document.getElementById('cursor');
+    const cursorTrail = document.getElementById('cursorTrail');
+    if (!cursor || !cursorTrail || window.innerWidth <= 768) return;
+
+    let mouseX = 0, mouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    function animateCursor() {
+        gsap.to(cursor, { duration: 0.2, x: mouseX, y: mouseY, ease: "power2.out" });
+        gsap.to(cursorTrail, { duration: 0.5, x: mouseX, y: mouseY, ease: "power2.out" });
+        requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
 }
 
 // --- PAGE NAVIGATION & ANIMATIONS ---
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(l => l.classList.remove('active'));
-    
+
     const targetPage = document.getElementById(pageId);
     if (targetPage) targetPage.classList.add('active');
-    
+
     document.querySelector(`.nav-link[href="#${pageId}"]`)?.classList.add('active');
     document.querySelector(`.mobile-nav-link[href="#${pageId}"]`)?.classList.add('active');
+
+    if (pageId !== 'home' && targetPage) {
+        gsap.fromTo(targetPage.querySelectorAll('.slide-in-left, .slide-in-right'),
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 }
+        );
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function initializeAnimations() {
-    // Staggered hero text animation
-    gsap.from(".hero-content > *", {
-        duration: 1.2,
-        y: 50,
-        opacity: 0,
-        ease: "power3.out",
-        stagger: 0.2,
-        delay: 0.5
-    });
+    gsap.from(".hero-year", { duration: 1.2, y: 100, opacity: 0, ease: 'power3.out', delay: 0.5 });
+    gsap.from(".hero-company", { duration: 1.2, y: 50, opacity: 0, ease: 'power3.out', delay: 0.7 });
+}
 
-    // Animate elements on scroll (the "locomotive" effect)
-    document.querySelectorAll('.page').forEach(page => {
-        const elementsToAnimate = page.querySelectorAll('.slide-in-left, .slide-in-right, .member-skill, .member-contact > *');
-        gsap.from(elementsToAnimate, {
-            scrollTrigger: {
-                trigger: page,
-                start: "top 80%",
-                toggleActions: "play none none none",
-            },
-            opacity: 0,
-            y: 40,
-            duration: 0.8,
-            ease: "power3.out",
-            stagger: 0.15
+function initTextMorph() {
+    // This function is for the WORK/AGENCY text swapping
+    document.querySelectorAll('.hero-descriptor, .member-label').forEach(el => el.classList.add('text-morph'));
+}
+
+function createChaosElement() {
+    // This function creates the floating shapes, if you want them
+}
+
+// --- INTERACTIVE ELEMENTS ---
+function initializeInteractions() {
+    // Add any general interactive element setups here
+}
+
+// --- MOBILE MENU ---
+function initializeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+    if (mobileMenu && mobileNavOverlay) {
+        mobileMenu.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+            mobileNavOverlay.classList.toggle('active');
         });
-    });
+    }
+}
 
-    // Nav shadow on scroll
-    ScrollTrigger.create({
-        start: 'top -80',
-        end: 99999,
-        toggleClass: { className: 'scrolled', targets: '.nav' }
-    });
+function closeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+    if (mobileMenu && mobileNavOverlay) {
+        mobileMenu.classList.remove('active');
+        mobileNavOverlay.classList.remove('active');
+    }
 }
 
 // --- MODE SWITCHING ---
@@ -82,9 +124,6 @@ function switchMode(mode, event) {
     }
 }
 
-// --- AI CHATBOT & OTHER FUNCTIONS ---
-// (No changes needed for the AI, cursor, or mobile menu logic. Keep them as they are.)
-// ... (Your existing code for AI, cursor, etc. goes here)
 
 // --- AI CHATBOT LOGIC ---
 const advancedAI = {
@@ -92,7 +131,7 @@ const advancedAI = {
     async getAIResponse(userMessage) {
         if (this.isTyping) return;
         this.isTyping = true;
-        
+
         const typingIndicator = showTypingIndicator();
         try {
             const response = await fetch('/.netlify/functions/get-ai-response', {
@@ -114,11 +153,19 @@ const advancedAI = {
 };
 
 function toggleAI() {
-    document.getElementById('aiChat').classList.toggle('active');
+    const aiChat = document.getElementById('aiChat');
+    aiChat.classList.toggle('active');
+    if (aiChat.classList.contains('active')) {
+        // Correctly focus on the input field
+        setTimeout(() => aiChat.querySelector('.ai-input').focus(), 400);
+    }
 }
 
+
 function handleAIInput(event) {
-    if (event.key === 'Enter') sendAIMessage();
+    if (event.key === 'Enter') {
+        sendAIMessage();
+    }
 }
 
 function sendAIMessage() {
@@ -147,9 +194,7 @@ function showTypingIndicator() {
     return indicator;
 }
 
-// --- OTHER INITIALIZATIONS ---
-function initializeInteractions() { /* ... desktop hover effects ... */ }
-function initializeMobileMenu() { /* ... mobile menu logic ... */ }
-function initializeEasterEggs() { /* ... konami code etc. ... */ }
-function createChaosElement() { /* ... chaos element logic ... */ }
-function switchMode(mode, event) { /* ... mode switching logic ... */ }
+// --- EASTER EGG ---
+function initializeEasterEggs() {
+    // Your konami code logic can go here
+}
