@@ -12,24 +12,20 @@
     --glow-orange: 0 0 20px rgba(255, 107, 53, 0.4);
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+body.agency-mode {
+    --accent-electric: #00d4ff;
+    --accent-cyber: #7c3aed;
+    --primary-bg: #000011;
 }
 
-html {
-    scroll-behavior: smooth;
-    overflow-x: hidden;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--primary-bg); color: var(--text-primary); overflow-x: hidden; cursor: none; transition: background 0.5s ease; }
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--primary-bg);
-    color: var(--text-primary);
-    overflow-x: hidden;
-    cursor: none;
-}
+.nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid transparent; transition: all 0.4s ease; }
+.nav.scrolled { box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: var(--border); }
+
+/* ... (Keep all your other CSS rules here) ... */
 
 .loading-overlay {
     position: fixed;
