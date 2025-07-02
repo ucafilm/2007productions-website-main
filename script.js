@@ -1,5 +1,8 @@
 // --- SETUP & INITIALIZATION --- 
-gsap.registerPlugin(ScrollTrigger);
+// Check if GSAP is loaded, if not use fallback
+if (typeof gsap !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const loadingOverlay = document.getElementById('loadingOverlay');
