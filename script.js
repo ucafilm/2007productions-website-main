@@ -8,24 +8,22 @@ function initializeApp() {
         console.error("GSAP not loaded!");
         return;
     }
-
-    // Register the necessary plugins
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
-    // CREATE THE SMOOTH SCROLLING EFFECT
+    // Activate smooth scrolling
     ScrollSmoother.create({
         wrapper: "#smooth-wrapper",
         content: "#smooth-content",
-        smooth: 1.5, // How much to smooth (1.5 is a good start)
-        effects: true // Applies parallax effects to elements with data-speed
+        smooth: 1.5,
+        effects: true
     });
 
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
-        gsap.to(loadingOverlay, { 
-            opacity: 0, 
-            duration: 0.8, 
-            delay: 0.5, 
+        gsap.to(loadingOverlay, {
+            opacity: 0,
+            duration: 0.8,
+            delay: 0.5,
             onComplete: () => {
                 loadingOverlay.style.display = 'none';
                 initializeAnimations();
@@ -37,9 +35,6 @@ function initializeApp() {
     initializeInteractions();
     initializeCursor();
     initializeMobileMenu();
-    initializeEasterEggs();
-
-    setInterval(createChaosElement, 5000);
 }
 
 // --- CURSOR SYSTEM ---
@@ -76,19 +71,10 @@ function showPage(pageId) {
     
     document.querySelector(`.nav-link[href="#${pageId}"]`)?.classList.add('active');
     document.querySelector(`.mobile-nav-link[href="#${pageId}"]`)?.classList.add('active');
-
-    // Animate content of the new page
-    if (pageId !== 'home' && targetPage) {
-        gsap.fromTo(targetPage.querySelectorAll('.slide-in-left, .slide-in-right'), 
-            { opacity: 0, y: 40 }, 
-            { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.15 }
-        );
-    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function initializeAnimations() {
-    // Hero Text Animation
     gsap.from(".hero-content > *", {
         duration: 1.2,
         y: 50,
@@ -97,35 +83,24 @@ function initializeAnimations() {
         stagger: 0.2
     });
 
-    // Animate elements as they scroll into view
-    document.querySelectorAll('.member-layout').forEach(section => {
-        const elementsToAnimate = section.querySelectorAll('.member-info > *, .member-visual');
-        gsap.from(elementsToAnimate, {
+    // Locomotive-style scroll-in animations
+    document.querySelectorAll('.slide-in-left, .slide-in-right').forEach(elem => {
+        gsap.from(elem, {
             scrollTrigger: {
-                trigger: section,
+                trigger: elem,
                 start: "top 85%",
                 toggleActions: "play none none none",
             },
             opacity: 0,
             y: 50,
             duration: 1,
-            stagger: 0.1
+            ease: "power3.out"
         });
     });
-
-    // Nav shadow on scroll
-    ScrollTrigger.create({
-        start: 'top -80px',
-        end: 99999,
-        toggleClass: { className: 'scrolled', targets: '.nav' }
-    });
 }
 
-// --- INTERACTIVE & UI FUNCTIONS ---
-function initializeInteractions() {
-    // This is a good place for hover effects, etc.
-}
-
+// --- UI & INTERACTION INITIALIZERS ---
+function initializeInteractions() { /* For future hover effects etc. */ }
 function initializeMobileMenu() {
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNavOverlay = document.getElementById('mobileNavOverlay');
@@ -136,24 +111,13 @@ function initializeMobileMenu() {
         });
     }
 }
-
-function closeMobileMenu() {
-    const mobileMenu = document.getElementById('mobileMenu');
-    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
-    if (mobileMenu && mobileNavOverlay) {
-        mobileMenu.classList.remove('active');
-        mobileNavOverlay.classList.remove('active');
-    }
-}
-
+function initializeEasterEggs() { /* For Konami code etc. */ }
+function createChaosElement() { /* For floating shapes etc. */ }
 function switchMode(mode, event) {
     document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
     if (event.target) event.target.classList.add('active');
     document.body.className = mode === 'agency' ? 'agency-mode' : '';
 }
-
-function createChaosElement() { /* Chaos element creation logic */ }
-function initializeEasterEggs() { /* Konami code logic */ }
 
 // --- AI CHATBOT LOGIC ---
 const advancedAI = {
@@ -161,19 +125,17 @@ const advancedAI = {
     async getAIResponse(userMessage) {
         if (this.isTyping) return;
         this.isTyping = true;
-        
         const typingIndicator = showTypingIndicator();
         try {
             const response = await fetch('/.netlify/functions/get-ai-response', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: userMessage })
             });
             if (!response.ok) throw new Error('Network error.');
             const data = await response.json();
             addAIMessage(data.reply, 'bot');
         } catch (error) {
-            addAIMessage("Sorry, my circuits are a bit scrambled. Try again.", 'bot');
+            addAIMessage("My circuits are tangled. Please try again.", 'bot');
         } finally {
             this.isTyping = false;
             typingIndicator.remove();
@@ -185,15 +147,18 @@ function toggleAI() {
     const aiChat = document.getElementById('aiChat');
     aiChat.classList.toggle('active');
     if (aiChat.classList.contains('active')) {
-        setTimeout(() => aiChat.querySelector('.ai-input').focus(), 400);
+        // This is the corrected code
+        setTimeout(() => {
+            const input = aiChat.querySelector('.ai-input');
+            if (input) { // Check if the input exists before trying to focus
+                input.focus();
+            }
+        }, 400);
     }
 }
 
 function handleAIInput(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        sendAIMessage();
-    }
+    if (event.key === 'Enter') sendAIMessage();
 }
 
 function sendAIMessage() {
