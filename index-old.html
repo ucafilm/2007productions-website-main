@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2007 Productions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 25px 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .logo {
+            font-family: 'Oswald', sans-serif;
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: 4px;
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 50px;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #ff6b35;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: #ff6b35;
+        }
+
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .mobile-menu span {
+            width: 30px;
+            height: 3px;
+            background: #fff;
+            margin: 4px 0;
+            transition: 0.3s;
+        }
+
+        /* Main Container */
+        .main-container {
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Video Background */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .video-background video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hero-content h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 5.5rem;
+            margin-bottom: 30px;
+            letter-spacing: 8px;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease 0.5s forwards;
+            text-shadow: 3px 3px 15px rgba(0,0,0,0.9);
+        }
+
+        .hero-content .tagline {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.6rem;
+            margin-bottom: 50px;
+            opacity: 0.9;
+            letter-spacing: 4px;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease 1s forwards;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation: fadeInUp 1.5s ease 2s forwards;
+        }
+
+        .scroll-arrow {
+            width: 2px;
+            height: 60px;
+            background: #fff;
+            margin: 0 auto 10px;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Individual Pages */
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 120px 0 80px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            min-height: calc(100vh - 200px);
+        }
+
+        .member-info h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 4.5rem;
+            margin-bottom: 20px;
+            letter-spacing: 6px;
+            color: #ff6b35;
+            font-weight: 300;
+        }
+
+        .member-role {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            color: #ccc;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .member-bio {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #ddd;
+            margin-bottom: 40px;
+        }
+
+        .member-skills {
+            margin-bottom: 40px;
+        }
+
+        .member-skills h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #ff6b35;
+            letter-spacing: 1px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .skill-tag {
+            background: rgba(255, 107, 53, 0.2);
+            border: 1px solid #ff6b35;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .member-video {
+            width: 100%;
+            height: 400px;
+            background: rgba(17, 17, 17, 0.8);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #ff6b35;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .member-video:hover {
+            border-color: #ff6b35;
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 107, 53, 0.3);
+        }
+
+        .contact-info {
+            margin-top: 30px;
+        }
+
+        .contact-info a {
+            color: #ff6b35;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .contact-info a:hover {
+            color: #fff;
+        }
+
+        /* Home page specific */
+        .home-page {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px 0;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .footer p {
+            color: #666;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .page-content {
+                grid-template-columns: 1fr;
+                gap: 50px;
+                text-align: center;
+            }
+
+            .member-info h2 {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: rgba(0, 0, 0, 0.95);
+                flex-direction: column;
+                padding: 20px 0;
+                gap: 20px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: flex;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .hero-content h1 {
+                font-size: 3rem;
+                letter-spacing: 3px;
+            }
+
+            .hero-content .tagline {
+                font-size: 1.3rem;
+            }
+
+            .member-info h2 {
+                font-size: 2.5rem;
+            }
+
+            .member-role {
+                font-size: 1.2rem;
+            }
+
+            .member-bio {
+                font-size: 1.1rem;
+            }
+
+            .page-content {
+                padding: 0 20px;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Video play button overlay */
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: #fff;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .member-video:hover .play-overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Background -->
+    <div class="video-background">
+        <!-- Direct HTML5 Video -->
+        <video autoplay muted loop playsinline>
+            <source src="./2007_productions_reel_1.mp4" type="video/mp4">
+            <!-- Fallback message -->
+            Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">2007 PRODUCTIONS</div>
+            <ul class="nav-links">
+                <li><a href="#home" onclick="showPage('home')">Home</a></li>
+                <li><a href="#collin" onclick="showPage('collin')">Collin</a></li>
+                <li><a href="#corey" onclick="showPage('corey')">Corey</a></li>
+                <li><a href="#levi" onclick="showPage('levi')">Levi</a></li>
+                <li><a href="#tim" onclick="showPage('tim')">Tim</a></li>
+                <li><a href="#terrell" onclick="showPage('terrell')">Terrell</a></li>
+            </ul>
+            <div class="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Home Page -->
+        <div id="home" class="page home-page">
+            <section class="hero">
+                <div class="hero-content">
+                    <h1>2007 PRODUCTIONS</h1>
+                    <p class="tagline">Films • Webisodes • Music</p>
+                </div>
+                <div class="scroll-indicator">
+                    <div class="scroll-arrow"></div>
+                    <div class="scroll-text">Explore Our Team</div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Collin's Page -->
+        <div id="collin" class="page">
+            <div class="page-content">
+                <div class="member-info fade-in">
+                    <h2>COLLIN</h2>
+                    <div class="member-role">Co-Founder / Director</div>
+                    <div class="member-bio">
+                        Collin brings visionary storytelling to every project. As co-founder of 2007 Productions, he's dedicated to crafting compelling narratives that resonate with audiences and push creative boundaries.
+                    </div>
+                    <div class="member-skills">
+                        <h3>Specialties</h3>
+                        <div class="skills-list">
+                            <span class="skill-tag">Directing</span>
+                            <span class="skill-tag">Storytelling</span>
+                            <span class="skill-tag">Creative Vision</span>
+                            <span class="skill-tag">Project Management</span>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <a href="mailto:collin@2007productions.com">collin@2007productions.com</a>
+                    </div>
+                </div>
+                <div class="member-video fade-in">
+                    <div class="play-overlay">▶</div>
+                    <span>COLLIN'S REEL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Corey's Page -->
+        <div id="corey" class="page">
+            <div class="page-content">
+                <div class="member-info fade-in">
+                    <h2>COREY</h2>
+                    <div class="member-role">Cinematographer / Editor</div>
+                    <div class="member-bio">
+                        Corey captures the world through a unique lens, combining technical excellence with artistic vision. His cinematography and editing bring stories to life with stunning visual impact.
+                    </div>
+                    <div class="member-skills">
+                        <h3>Specialties</h3>
+                        <div class="skills-list">
+                            <span class="skill-tag">Cinematography</span>
+                            <span class="skill-tag">Video Editing</span>
+                            <span class="skill-tag">Color Grading</span>
+                            <span class="skill-tag">Visual Effects</span>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <a href="mailto:corey@2007productions.com">corey@2007productions.com</a>
+                    </div>
+                </div>
+                <div class="member-video fade-in">
+                    <div class="play-overlay">▶</div>
+                    <span>COREY'S REEL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Levi's Page -->
+        <div id="levi" class="page">
+            <div class="page-content">
+                <div class="member-info fade-in">
+                    <h2>LEVI</h2>
+                    <div class="member-role">Producer / Sound Designer</div>
+                    <div class="member-bio">
+                        Levi orchestrates every aspect of production, ensuring seamless execution from concept to completion. His expertise in sound design adds the perfect audio landscape to our visual stories.
+                    </div>
+                    <div class="member-skills">
+                        <h3>Specialties</h3>
+                        <div class="skills-list">
+                            <span class="skill-tag">Production</span>
+                            <span class="skill-tag">Sound Design</span>
+                            <span class="skill-tag">Audio Mixing</span>
+                            <span class="skill-tag">Project Coordination</span>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <a href="mailto:levi@2007productions.com">levi@2007productions.com</a>
+                    </div>
+                </div>
+                <div class="member-video fade-in">
+                    <div class="play-overlay">▶</div>
+                    <span>LEVI'S REEL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tim's Page -->
+        <div id="tim" class="page">
+            <div class="page-content">
+                <div class="member-info fade-in">
+                    <h2>TIM</h2>
+                    <div class="member-role">Co-Founder / Creative Director</div>
+                    <div class="member-bio">
+                        Tim leads the creative vision at 2007 Productions, bringing innovative concepts to life. As co-founder, he ensures every project maintains the highest standards of artistic excellence and professional delivery.
+                    </div>
+                    <div class="member-skills">
+                        <h3>Specialties</h3>
+                        <div class="skills-list">
+                            <span class="skill-tag">Creative Direction</span>
+                            <span class="skill-tag">Concept Development</span>
+                            <span class="skill-tag">Brand Strategy</span>
+                            <span class="skill-tag">Client Relations</span>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <a href="mailto:tim@2007productions.com">tim@2007productions.com</a>
+                    </div>
+                </div>
+                <div class="member-video fade-in">
+                    <div class="play-overlay">▶</div>
+                    <span>TIM'S REEL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terrell's Page -->
+        <div id="terrell" class="page">
+            <div class="page-content">
+                <div class="member-info fade-in">
+                    <h2>TERRELL</h2>
+                    <div class="member-role">Music Producer / Composer</div>
+                    <div class="member-bio">
+                        Terrell creates the sonic foundation that elevates every project. His musical compositions and production expertise bring emotional depth and professional polish to our content.
+                    </div>
+                    <div class="member-skills">
+                        <h3>Specialties</h3>
+                        <div class="skills-list">
+                            <span class="skill-tag">Music Production</span>
+                            <span class="skill-tag">Composition</span>
+                            <span class="skill-tag">Sound Engineering</span>
+                            <span class="skill-tag">Audio Post</span>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <a href="mailto:terrell@2007productions.com">terrell@2007productions.com</a>
+                    </div>
+                </div>
+                <div class="member-video fade-in">
+                    <div class="play-overlay">▶</div>
+                    <span>TERRELL'S REEL</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 2007 Productions. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Page navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Add animation to elements
+            setTimeout(() => {
+                document.querySelectorAll(`#${pageId} .fade-in`).forEach((el, index) => {
+                    setTimeout(() => {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, index * 200);
+                });
+            }, 100);
+        }
+
+        // Mobile menu toggle
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(0, 0, 0, 0.95)';
+            } else {
+                nav.style.background = 'rgba(0, 0, 0, 0.7)';
+            }
+        });
+
+        // Video click handlers
+        document.querySelectorAll('.member-video').forEach(video => {
+            video.addEventListener('click', () => {
+                alert('Individual demo reel would play here. Replace with actual video elements or embed codes.');
+            });
+        });
+
+        // Video modal functions
+        function openVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('vimeoPlayer');
+            
+            // Set the Vimeo source when opening
+            iframe.src = 'https://player.vimeo.com/video/104821590?autoplay=1&byline=0&title=0';
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const iframe = document.getElementById('vimeoPlayer');
+            
+            // Clear the source to stop the video
+            iframe.src = '';
+            
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+            }
+        });
+
+        // Add scroll indicator functionality
+        document.querySelector('.scroll-indicator').addEventListener('click', () => {
+            showPage('collin');
+        });
+    </script>
+
+    <!-- 
+    TO ADD YOUR VIDEO BACKGROUND:
+    Replace the .video-placeholder div with:
+    
+    <video autoplay muted loop>
+        <source src="your-demo-reel.mp4" type="video/mp4">
+        <source src="your-demo-reel.webm" type="video/webm">
+    </video>
+    
+    For best results:
+    - Use a high-quality video (1920x1080 or higher)
+    - Keep file size under 50MB for web performance
+    - Ensure the video loops seamlessly
+    - Consider hosting on a CDN for faster loading
+    -->
+</body>
+</html>
