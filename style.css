@@ -198,8 +198,232 @@ body::before {
 @keyframes aiPulse { 50% { transform: scale(1.05); box-shadow: 0 0 25px var(--accent-neon); } }
 
 /* Mobile and Responsive Styles */
+@media (max-width: 1024px) {
+    .member-layout {
+        grid-template-columns: 1fr;
+        gap: 60px;
+        text-align: center;
+    }
+    
+    .nav-container {
+        padding: 0 40px;
+    }
+    
+    .page-container {
+        padding: 0 40px;
+    }
+
+    .member-visual {
+        height: 500px;
+    }
+
+    .member-visual .reel-title {
+        font-size: 2rem;
+    }
+
+    .reel-descriptor {
+        font-size: 15px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .thumbnail-overlay {
+        opacity: 0.7;
+    }
+
+    .play-button {
+        transform: scale(1);
+        width: 70px;
+        height: 70px;
+    }
+}
+
 @media (max-width: 768px) {
-    .nav-container { padding: 0 20px; flex-wrap: wrap; }
+    .nav-container { padding: 0 20px; }
     .nav-links { display: none; }
     .mobile-menu { display: flex; }
+    
+    .hero-year {
+        font-size: clamp(4rem, 15vw, 8rem);
+        line-height: 0.85;
+    }
+
+    .hero-company {
+        font-size: clamp(1rem, 4vw, 2rem);
+        letter-spacing: 8px;
+    }
+
+    .hero-descriptor {
+        font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+        letter-spacing: 2px;
+    }
+    
+    .member-name {
+        font-size: clamp(2.5rem, 8vw, 4rem);
+        line-height: 0.9;
+        margin-bottom: 15px;
+    }
+
+    .member-role {
+        font-size: 14px;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+    }
+
+    .member-bio {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 40px;
+    }
+    
+    .page-container {
+        padding: 0 20px;
+    }
+    
+    .member-layout {
+        gap: 50px;
+    }
+
+    .member-visual {
+        height: 400px;
+        margin: 0 auto;
+        max-width: 100%;
+    }
+
+    .reel-title {
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+    }
+
+    .reel-descriptor {
+        font-size: 14px;
+        padding: 0 20px;
+    }
+
+    .play-button {
+        width: 60px;
+        height: 60px;
+    }
+
+    .play-button::after {
+        font-size: 20px;
+    }
+    
+    .skills-grid {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .skill-tag {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    .cursor,
+    .cursor-trail {
+        display: none;
+    }
+
+    body {
+        cursor: auto;
+    }
+
+    .scroll-indicator {
+        bottom: 40px;
+    }
+
+    .scroll-line {
+        height: 60px;
+    }
+
+    .scroll-text {
+        font-size: 10px;
+    }
+
+    .logo-symbol {
+        width: 35px;
+        height: 35px;
+    }
+
+    .logo-text {
+        font-size: 20px;
+        letter-spacing: 1px;
+    }
+
+    .contact-link {
+        font-size: 13px;
+        padding: 10px 0;
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-year {
+        font-size: clamp(3rem, 12vw, 6rem);
+    }
+
+    .hero-company {
+        letter-spacing: 4px;
+    }
+
+    .hero-descriptor {
+        letter-spacing: 1px;
+    }
+
+    .member-name {
+        font-size: clamp(2rem, 7vw, 3rem);
+    }
+
+    .member-visual {
+        height: 350px;
+    }
+
+    .reel-title {
+        font-size: 1.5rem;
+    }
+
+    .nav-container,
+    .page-container {
+        padding: 0 15px;
+    }
+
+    .floating-element {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        padding: 60px 0;
+    }
+
+    .hero-year {
+        font-size: clamp(3rem, 10vw, 5rem);
+    }
+
+    .hero-company {
+        font-size: clamp(1rem, 3vw, 1.5rem);
+        margin-bottom: 20px;
+    }
+
+    .hero-descriptor {
+        margin-bottom: 40px;
+    }
+
+    .scroll-indicator {
+        bottom: 20px;
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo-symbol svg,
+    .loading-symbol svg {
+        shape-rendering: geometricPrecision;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px;
+    }
 }
