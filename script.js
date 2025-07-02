@@ -5,11 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initializeApp() {
     if (typeof gsap === 'undefined') {
-        console.error("GSAP not loaded!");
+        console.error("GSAP is not loaded. Animations will not work.");
         return;
     }
     gsap.registerPlugin(ScrollTrigger);
 
+    // Fade out loading screen
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
         gsap.to(loadingOverlay, {
@@ -18,17 +19,17 @@ function initializeApp() {
             delay: 0.5,
             onComplete: () => {
                 loadingOverlay.style.display = 'none';
-                initializeAnimations();
+                initializeAnimations(); // Start animations only after loading is complete
             }
         });
     }
 
+    // Initialize all site systems
     showPage('home');
     initializeInteractions();
     initializeCursor();
     initializeMobileMenu();
     initializeEasterEggs();
-
     setInterval(createChaosElement, 5000);
 }
 
@@ -36,10 +37,14 @@ function initializeApp() {
 function initializeCursor() {
     const cursor = document.getElementById('cursor');
     const cursorTrail = document.getElementById('cursorTrail');
-    if (!cursor || !cursorTrail || window.innerWidth <= 768) return;
-
+    if (!cursor || !cursorTrail || window.innerWidth <= 768) {
+        if(cursor) cursor.style.display = 'none';
+        if(cursorTrail) cursorTrail.style.display = 'none';
+        return;
+    }
+    
     let mouseX = 0, mouseY = 0;
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', e => {
         mouseX = e.clientX;
         mouseY = e.clientY;
     });
@@ -56,42 +61,62 @@ function initializeCursor() {
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(l => l.classList.remove('active'));
-
+    
     const targetPage = document.getElementById(pageId);
     if (targetPage) targetPage.classList.add('active');
-
+    
     document.querySelector(`.nav-link[href="#${pageId}"]`)?.classList.add('active');
     document.querySelector(`.mobile-nav-link[href="#${pageId}"]`)?.classList.add('active');
 
+    // Animate content of the new page
     if (pageId !== 'home' && targetPage) {
-        gsap.fromTo(targetPage.querySelectorAll('.slide-in-left, .slide-in-right'),
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 }
+        gsap.fromTo(targetPage.querySelectorAll('.slide-in-left, .slide-in-right'), 
+            { opacity: 0, y: 40 }, 
+            { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", stagger: 0.15 }
         );
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function initializeAnimations() {
-    gsap.from(".hero-year", { duration: 1.2, y: 100, opacity: 0, ease: 'power3.out', delay: 0.5 });
-    gsap.from(".hero-company", { duration: 1.2, y: 50, opacity: 0, ease: 'power3.out', delay: 0.7 });
+    // Hero Text Animation
+    gsap.from(".hero-content > *", {
+        duration: 1.2,
+        y: 50,
+        opacity: 0,
+        ease: "power3.out",
+        stagger: 0.2
+    });
+
+    // Animate elements as they scroll into view
+    document.querySelectorAll('.member-layout').forEach(section => {
+        const elementsToAnimate = section.querySelectorAll('.member-info > *, .member-visual');
+        gsap.from(elementsToAnimate, {
+            scrollTrigger: {
+                trigger: section,
+                start: "top 85%",
+                toggleActions: "play none none none",
+            },
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            stagger: 0.1
+        });
+    });
+
+    // Nav shadow on scroll
+    ScrollTrigger.create({
+        start: 'top -80px',
+        end: 99999,
+        toggleClass: { className: 'scrolled', targets: '.nav' }
+    });
 }
 
-function initTextMorph() {
-    // This function is for the WORK/AGENCY text swapping
-    document.querySelectorAll('.hero-descriptor, .member-label').forEach(el => el.classList.add('text-morph'));
-}
-
-function createChaosElement() {
-    // This function creates the floating shapes, if you want them
-}
-
-// --- INTERACTIVE ELEMENTS ---
+// --- INTERACTIVE & UI FUNCTIONS ---
 function initializeInteractions() {
-    // Add any general interactive element setups here
+    // This is a good place for hover effects, etc.
 }
 
-// --- MOBILE MENU ---
 function initializeMobileMenu() {
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileNavOverlay = document.getElementById('mobileNavOverlay');
@@ -112,18 +137,14 @@ function closeMobileMenu() {
     }
 }
 
-// --- MODE SWITCHING ---
 function switchMode(mode, event) {
     document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
     if (event.target) event.target.classList.add('active');
-    
-    if (mode === 'agency') {
-        document.body.classList.add('agency-mode');
-    } else {
-        document.body.classList.remove('agency-mode');
-    }
+    document.body.className = mode === 'agency' ? 'agency-mode' : '';
 }
 
+function createChaosElement() { /* Chaos element creation logic */ }
+function initializeEasterEggs() { /* Konami code logic */ }
 
 // --- AI CHATBOT LOGIC ---
 const advancedAI = {
@@ -131,7 +152,7 @@ const advancedAI = {
     async getAIResponse(userMessage) {
         if (this.isTyping) return;
         this.isTyping = true;
-
+        
         const typingIndicator = showTypingIndicator();
         try {
             const response = await fetch('/.netlify/functions/get-ai-response', {
@@ -139,12 +160,11 @@ const advancedAI = {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: userMessage })
             });
-            if (!response.ok) throw new Error('Network response was not ok.');
+            if (!response.ok) throw new Error('Network error.');
             const data = await response.json();
             addAIMessage(data.reply, 'bot');
         } catch (error) {
-            console.error('AI Error:', error);
-            addAIMessage("My circuits seem to be tangled. Please try again later.", 'bot');
+            addAIMessage("Sorry, my circuits are a bit scrambled. Try again.", 'bot');
         } finally {
             this.isTyping = false;
             typingIndicator.remove();
@@ -156,14 +176,13 @@ function toggleAI() {
     const aiChat = document.getElementById('aiChat');
     aiChat.classList.toggle('active');
     if (aiChat.classList.contains('active')) {
-        // Correctly focus on the input field
         setTimeout(() => aiChat.querySelector('.ai-input').focus(), 400);
     }
 }
 
-
 function handleAIInput(event) {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
         sendAIMessage();
     }
 }
@@ -192,9 +211,4 @@ function showTypingIndicator() {
     indicator.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
     document.getElementById('aiMessages').appendChild(indicator);
     return indicator;
-}
-
-// --- EASTER EGG ---
-function initializeEasterEggs() {
-    // Your konami code logic can go here
 }
