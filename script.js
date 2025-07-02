@@ -5,31 +5,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initializeApp() {
     if (typeof gsap === 'undefined') {
-        console.error("GSAP is not loaded. Animations will not work.");
+        console.error("GSAP not loaded!");
         return;
     }
-    gsap.registerPlugin(ScrollTrigger);
 
-    // Fade out loading screen
+    // Register the necessary plugins
+    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+
+    // CREATE THE SMOOTH SCROLLING EFFECT
+    ScrollSmoother.create({
+        wrapper: "#smooth-wrapper",
+        content: "#smooth-content",
+        smooth: 1.5, // How much to smooth (1.5 is a good start)
+        effects: true // Applies parallax effects to elements with data-speed
+    });
+
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
-        gsap.to(loadingOverlay, {
-            opacity: 0,
-            duration: 0.8,
-            delay: 0.5,
+        gsap.to(loadingOverlay, { 
+            opacity: 0, 
+            duration: 0.8, 
+            delay: 0.5, 
             onComplete: () => {
                 loadingOverlay.style.display = 'none';
-                initializeAnimations(); // Start animations only after loading is complete
+                initializeAnimations();
             }
         });
     }
 
-    // Initialize all site systems
     showPage('home');
     initializeInteractions();
     initializeCursor();
     initializeMobileMenu();
     initializeEasterEggs();
+
     setInterval(createChaosElement, 5000);
 }
 

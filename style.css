@@ -97,3 +97,17 @@ body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; heigh
     .nav-links { display: none; }
     .mobile-menu { display: flex; }
 }
+
+#smooth-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#smooth-content {
+    overflow: visible;
+    width: 100%;
+}
