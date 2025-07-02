@@ -1,4 +1,4 @@
-// --- SETUP & INITIALIZATION ---
+// --- SETUP & INITIALIZATION --- 
 gsap.registerPlugin(ScrollTrigger);
 
 document.addEventListener('DOMContentLoaded', () => {
