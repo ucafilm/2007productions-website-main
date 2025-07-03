@@ -595,32 +595,6 @@ function createBokeh() {
     }
 }
 
-function switchMode(mode, event) {
-    document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
-    if (event && event.target) event.target.classList.add('active');
-    document.body.className = mode === 'agency' ? 'agency-mode' : '';
-    
-    // Text morphing effect
-    document.querySelectorAll('.text-morph').forEach(el => {
-        el.classList.add('text-rearranging');
-        setTimeout(() => el.classList.remove('text-rearranging'), 600);
-    });
-    
-    setTimeout(() => {
-        const heroDescriptor = document.querySelector('.hero-descriptor');
-        const workLabels = ['The Rule Breaker', 'The Frame Wizard', 'The Sound Alchemist', 'The Idea Whisperer', 'The Beat Architect'];
-        const agencyLabels = ['The Visionary', 'The Craftsman', 'The Producer', 'The Strategist', 'The Composer'];
-        const labels = mode === 'agency' ? agencyLabels : workLabels;
-
-        if (heroDescriptor) {
-           heroDescriptor.textContent = mode === 'agency' ? 'Creating Legendary Experiences' : 'Where Stories Get Weird';
-        }
-        document.querySelectorAll('.member-label').forEach((label, i) => {
-            if(labels[i]) label.textContent = labels[i];
-        });
-    }, 300);
-}
-
 function initializeInteractions() {
     // Add magnetic attribute to interactive elements
     document.querySelectorAll('button, .nav-link, .skill-tag, .contact-link').forEach(el => {
