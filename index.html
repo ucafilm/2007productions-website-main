@@ -5,13 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2007 Productions</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="smooth-wrapper">
         <div id="smooth-content">
             <div class="loading-overlay" id="loadingOverlay">
-                <div class="loading-text">INITIALIZING...</div>
+                <div class="loading-content">
+                    <div class="loading-symbol">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="loadingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <polygon points="20,80 50,20 80,80" fill="none" stroke="url(#loadingGrad)" stroke-width="3">
+                                <animateTransform attributeName="transform" type="rotate" values="0 50 50;360 50 50" dur="2s" repeatCount="indefinite"/>
+                            </polygon>
+                            <circle cx="50" cy="50" r="8" fill="url(#loadingGrad)"/>
+                        </svg>
+                    </div>
+                    <div class="loading-text">INITIALIZING...</div>
+                </div>
             </div>
 
             <div class="cursor" id="cursor"></div>
@@ -19,57 +36,266 @@
 
             <nav class="nav">
                 <div class="nav-container">
-                    <div class="logo-container">
-                        <div class="logo-text">2007</div>
+                    <div class="logo-container" data-magnetic>
+                        <div class="logo-symbol">
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <polygon points="50,15 85,75 15,75" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+                                <circle cx="35" cy="60" r="4" fill="url(#logoGrad)"/>
+                                <circle cx="50" cy="60" r="4" fill="url(#logoGrad)"/>
+                                <circle cx="65" cy="60" r="4" fill="url(#logoGrad)"/>
+                                <polygon points="45,35 55,35 50,45" fill="url(#logoGrad)"/>
+                            </svg>
+                        </div>
+                        <div class="logo-text" data-morph="WEIRD">2007</div>
                     </div>
                     <div class="nav-mode-switch">
-                        <button class="mode-button active" onclick="switchMode('work', event)">WORK</button>
-                        <button class="mode-button" onclick="switchMode('agency', event)">AGENCY</button>
+                        <button class="mode-button active" data-magnetic onclick="switchMode('work', event)">WORK</button>
+                        <button class="mode-button" data-magnetic onclick="switchMode('agency', event)">AGENCY</button>
                     </div>
                     <ul class="nav-links">
-                        <li><a href="#home" onclick="showPage('home')" class="nav-link active">Home</a></li>
-                        <li><a href="#collin" onclick="showPage('collin')" class="nav-link">Collin</a></li>
-                        <li><a href="#corey" onclick="showPage('corey')" class="nav-link">Corey</a></li>
-                        <li><a href="#levi" onclick="showPage('levi')" class="nav-link">Levi</a></li>
-                        <li><a href="#tim" onclick="showPage('tim')" class="nav-link">Tim</a></li>
-                        <li><a href="#terrell" onclick="showPage('terrell')" class="nav-link">Terrell</a></li>
+                        <li><a href="#home" data-magnetic onclick="showPage('home')" class="nav-link active">Home</a></li>
+                        <li><a href="#collin" data-magnetic onclick="showPage('collin')" class="nav-link">Collin</a></li>
+                        <li><a href="#corey" data-magnetic onclick="showPage('corey')" class="nav-link">Corey</a></li>
+                        <li><a href="#levi" data-magnetic onclick="showPage('levi')" class="nav-link">Levi</a></li>
+                        <li><a href="#tim" data-magnetic onclick="showPage('tim')" class="nav-link">Tim</a></li>
+                        <li><a href="#terrell" data-magnetic onclick="showPage('terrell')" class="nav-link">Terrell</a></li>
                     </ul>
                 </div>
             </nav>
 
             <main>
                 <div id="home" class="page home-page active">
-                    <section class="hero">
-                        <div class="hero-video-background">
+                    <section class="hero parallax-section">
+                        <div class="hero-video-background parallax-bg">
                             <div class="video-overlay"></div>
                             <video playsinline autoplay muted loop>
                                 <source src="2007_productions_reel_1.mp4" type="video/mp4">
                             </video>
                         </div>
-                        <div class="hero-content">
-                            <h1 class="hero-year anim-chars">2007</h1>
-                            <h2 class="hero-company anim-chars">PRODUCTIONS</h2>
-                            <p class="hero-descriptor anim-line">Where Stories Get Weird</p>
+                        <div class="hero-content parallax-content">
+                            <h1 class="hero-year anim-chars" data-reveal>2007</h1>
+                            <h2 class="hero-company anim-chars" data-reveal>PRODUCTIONS</h2>
+                            <p class="hero-descriptor anim-line" data-morph="Creating Legendary Experiences">Where Stories Get Weird</p>
                         </div>
+                        
+                        <!-- Enhanced floating elements -->
+                        <div class="floating-element" style="top: 15%; left: 8%;">◊</div>
+                        <div class="floating-element" style="top: 65%; right: 12%;">∆</div>
+                        <div class="floating-element" style="bottom: 25%; left: 15%;">○</div>
+                        <div class="floating-element" style="top: 30%; right: 25%;">□</div>
                     </section>
                 </div>
-                <div id="collin" class="page"></div>
-                <div id="corey" class="page"></div>
-                <div id="levi" class="page"></div>
-                <div id="tim" class="page"></div>
-                <div id="terrell" class="page"></div>
+
+                <!-- Enhanced Collin Page -->
+                <div id="collin" class="page">
+                    <div class="page-container">
+                        <div class="member-layout parallax-section">
+                            <div class="member-info parallax-content">
+                                <div class="member-label" data-reveal>The Rule Breaker</div>
+                                <h2 class="member-name" data-magnetic data-morph="VISIONARY">COLLIN</h2>
+                                <div class="member-role" data-reveal>CO-FOUNDER / DIRECTOR</div>
+                                <div class="member-quirk" data-reveal>"If it makes sense, we're doing it wrong"</div>
+                                <div class="member-bio" data-reveal>
+                                    Collin brings visionary storytelling to every project. As co-founder of 2007 Productions, he's dedicated to crafting compelling narratives that make people go "wait, what?" and then "holy shit, that's brilliant." He believes the best stories live in the weird spaces between logic and magic.
+                                </div>
+                                <div class="member-skills">
+                                    <h3 class="skills-title" data-reveal>Powers & Abilities</h3>
+                                    <div class="skills-grid">
+                                        <span class="skill-tag" data-magnetic>MIND_BENDING</span>
+                                        <span class="skill-tag" data-magnetic>STORY_ALCHEMY</span>
+                                        <span class="skill-tag" data-magnetic>CHAOS_WRANGLING</span>
+                                        <span class="skill-tag" data-magnetic>VISION_QUEST</span>
+                                    </div>
+                                </div>
+                                <div class="member-contact">
+                                    <a href="mailto:collin@2007productions.com" class="contact-link" data-magnetic>collin@2007productions.com</a>
+                                    <div class="member-status" data-reveal>🎬 Currently: Plotting something magnificent</div>
+                                </div>
+                            </div>
+                            <div class="member-visual parallax-content" data-member="collin" data-magnetic>
+                                <div class="visual-content">
+                                    <div class="reel-type">Director's</div>
+                                    <div class="reel-title">SHOWCASE</div>
+                                    <div class="reel-descriptor">Narrative-driven pieces showcasing directorial vision and storytelling mastery</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Corey Page -->
+                <div id="corey" class="page">
+                    <div class="page-container">
+                        <div class="member-layout parallax-section">
+                            <div class="member-info parallax-content">
+                                <div class="member-label" data-reveal>The Frame Wizard</div>
+                                <h2 class="member-name" data-magnetic data-morph="CRAFTSMAN">COREY</h2>
+                                <div class="member-role" data-reveal>CINEMATOGRAPHER / EDITOR</div>
+                                <div class="member-quirk" data-reveal>"Every pixel has trust issues"</div>
+                                <div class="member-bio" data-reveal>
+                                    Corey captures the world through a lens that somehow makes reality look cooler than reality. His editing style is part surgical precision, part controlled explosion. Warning: May cause spontaneous "how did they do that?" moments.
+                                </div>
+                                <div class="member-skills">
+                                    <h3 class="skills-title" data-reveal>Powers & Abilities</h3>
+                                    <div class="skills-grid">
+                                        <span class="skill-tag" data-magnetic>FRAME_SORCERY</span>
+                                        <span class="skill-tag" data-magnetic>TIME_SCULPTOR</span>
+                                        <span class="skill-tag" data-magnetic>LIGHT_WHISPERER</span>
+                                        <span class="skill-tag" data-magnetic>REALITY_ENHANCER</span>
+                                    </div>
+                                </div>
+                                <div class="member-contact">
+                                    <a href="mailto:corey@2007productions.com" class="contact-link" data-magnetic>corey@2007productions.com</a>
+                                    <div class="member-status" data-reveal>📹 Currently: Making the impossible look inevitable</div>
+                                </div>
+                            </div>
+                            <div class="member-visual parallax-content" data-member="corey" data-magnetic>
+                                <div class="visual-content">
+                                    <div class="reel-type">Cinematographer's</div>
+                                    <div class="reel-title">PORTFOLIO</div>
+                                    <div class="reel-descriptor">Visual storytelling through dynamic cinematography and precision editing</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Levi Page -->
+                <div id="levi" class="page">
+                    <div class="page-container">
+                        <div class="member-layout parallax-section">
+                            <div class="member-info parallax-content">
+                                <div class="member-label" data-reveal>The Sound Alchemist</div>
+                                <h2 class="member-name" data-magnetic data-morph="PRODUCER">LEVI</h2>
+                                <div class="member-role" data-reveal>PRODUCER / SOUND DESIGNER</div>
+                                <div class="member-quirk" data-reveal>"Silence is just sound taking a break"</div>
+                                <div class="member-bio" data-reveal>
+                                    Levi turns chaos into symphony and deadlines into art. He's the guy who makes sure everything sounds like it was meant to happen, even when it definitely wasn't. Master of the ancient art of "making it work, somehow."
+                                </div>
+                                <div class="member-skills">
+                                    <h3 class="skills-title" data-reveal>Powers & Abilities</h3>
+                                    <div class="skills-grid">
+                                        <span class="skill-tag" data-magnetic>HERDING_CATS</span>
+                                        <span class="skill-tag" data-magnetic>SONIC_ALCHEMY</span>
+                                        <span class="skill-tag" data-magnetic>DEADLINE_NINJA</span>
+                                        <span class="skill-tag" data-magnetic>CHAOS_COORDINATOR</span>
+                                    </div>
+                                </div>
+                                <div class="member-contact">
+                                    <a href="mailto:levi@2007productions.com" class="contact-link" data-magnetic>levi@2007productions.com</a>
+                                    <div class="member-status" data-reveal>🎧 Currently: Making beautiful noise</div>
+                                </div>
+                            </div>
+                            <div class="member-visual parallax-content" data-member="levi" data-magnetic>
+                                <div class="visual-content">
+                                    <div class="reel-type">Producer's</div>
+                                    <div class="reel-title">ARCHIVES</div>
+                                    <div class="reel-descriptor">Production excellence and immersive soundscapes across diverse projects</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Tim Page -->
+                <div id="tim" class="page">
+                    <div class="page-container">
+                        <div class="member-layout parallax-section">
+                            <div class="member-info parallax-content">
+                                <div class="member-label" data-reveal>The Idea Whisperer</div>
+                                <h2 class="member-name" data-magnetic data-morph="STRATEGIST">TIM</h2>
+                                <div class="member-role" data-reveal>CO-FOUNDER / CREATIVE DIRECTOR</div>
+                                <div class="member-quirk" data-reveal>"Normal is the enemy of memorable"</div>
+                                <div class="member-bio" data-reveal>
+                                    Tim is the guy who asks "but what if we made it weirder?" and somehow always makes things better. Co-founder of controlled creative mayhem, he turns client briefs into adventures and impossible ideas into Tuesday afternoons.
+                                </div>
+                                <div class="member-skills">
+                                    <h3 class="skills-title" data-reveal>Powers & Abilities</h3>
+                                    <div class="skills-grid">
+                                        <span class="skill-tag" data-magnetic>IDEA_ARCHAEOLOGY</span>
+                                        <span class="skill-tag" data-magnetic>WEIRD_SCIENCE</span>
+                                        <span class="skill-tag" data-magnetic>CLIENT_THERAPY</span>
+                                        <span class="skill-tag" data-magnetic>MAGIC_MAKER</span>
+                                    </div>
+                                </div>
+                                <div class="member-contact">
+                                    <a href="mailto:tim@2007productions.com" class="contact-link" data-magnetic>tim@2007productions.com</a>
+                                    <div class="member-status" data-reveal>💡 Currently: Turning crazy into brilliant</div>
+                                </div>
+                            </div>
+                            <div class="member-visual parallax-content" data-member="tim" data-magnetic>
+                                <div class="visual-content">
+                                    <div class="reel-type">Creative Director's</div>
+                                    <div class="reel-title">COLLECTION</div>
+                                    <div class="reel-descriptor">Strategic creative solutions and innovative brand experiences</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Terrell Page -->
+                <div id="terrell" class="page">
+                    <div class="page-container">
+                        <div class="member-layout parallax-section">
+                            <div class="member-info parallax-content">
+                                <div class="member-label" data-reveal>The Beat Architect</div>
+                                <h2 class="member-name" data-magnetic data-morph="COMPOSER">TERRELL</h2>
+                                <div class="member-role" data-reveal>MUSIC PRODUCER / COMPOSER</div>
+                                <div class="member-quirk" data-reveal>"I speak fluent emotion"</div>
+                                <div class="member-bio" data-reveal>
+                                    Terrell builds sonic worlds where feelings live. He's the reason you get chills during that one scene, and why you can't get that melody out of your head. Warning: His beats have been known to cause spontaneous dancing.
+                                </div>
+                                <div class="member-skills">
+                                    <h3 class="skills-title" data-reveal>Powers & Abilities</h3>
+                                    <div class="skills-grid">
+                                        <span class="skill-tag" data-magnetic>SOUL_ENGINEERING</span>
+                                        <span class="skill-tag" data-magnetic>VIBE_CURATOR</span>
+                                        <span class="skill-tag" data-magnetic>FREQUENCY_WIZARD</span>
+                                        <span class="skill-tag" data-magnetic>MOOD_ARCHITECT</span>
+                                    </div>
+                                </div>
+                                <div class="member-contact">
+                                    <a href="mailto:terrell@2007productions.com" class="contact-link" data-magnetic>terrell@2007productions.com</a>
+                                    <div class="member-status" data-reveal>🎵 Currently: Composing your next favorite song</div>
+                                </div>
+                            </div>
+                            <div class="member-visual parallax-content" data-member="terrell" data-magnetic>
+                                <div class="visual-content">
+                                    <div class="reel-type">Composer's</div>
+                                    <div class="reel-title">REPERTOIRE</div>
+                                    <div class="reel-descriptor">Original compositions and production work spanning multiple genres and moods</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
 
+            <!-- Enhanced AI Assistant -->
             <div class="ai-assistant">
-                <button class="ai-button" onclick="toggleAI()"></button>
+                <button class="ai-button" data-magnetic onclick="toggleAI()"></button>
                 <div class="ai-chat" id="aiChat">
-                    <div class="ai-header"><h3>ARIA</h3></div>
+                    <div class="ai-header">
+                        <div class="ai-avatar">🤖</div>
+                        <div class="ai-info">
+                            <h3>ARIA</h3>
+                            <p>2007 AI Assistant</p>
+                        </div>
+                    </div>
                     <div class="ai-messages" id="aiMessages">
                         <div class="ai-message bot">Ask me anything...</div>
                     </div>
                     <div class="ai-input-area">
                         <input type="text" class="ai-input" placeholder="Type a message..." onkeypress="handleAIInput(event)">
-                        <button class="ai-send" onclick="sendAIMessage()">→</button>
+                        <button class="ai-send" data-magnetic onclick="sendAIMessage()">→</button>
                     </div>
                 </div>
             </div>
