@@ -654,12 +654,12 @@ class LocomotiveAboutPage {
         this.mouse = { x: 0, y: 0 };
         this.isInitialized = false;
         this.imageUrls = [
-            "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&q=80", // camera
-            "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=800&q=80", // director
-            "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80", // studio
-            "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80", // editing
-            "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80", // crew
-            "https://images.unsplash.com/photo-1518985250321-7a0d8b57ee8e?w=800&q=80"  // lights
+            { id: "camera", url: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&q=80" },
+            { id: "director", url: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=800&q=80" },
+            { id: "studio", url: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80" },
+            { id: "editing", url: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80" },
+            { id: "crew", url: "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80" },
+            { id: "lights", url: "https://images.unsplash.com/photo-1518985250321-7a0d8b57ee8e?w=800&q=80" }
         ];
         this.init();
     }
@@ -674,11 +674,12 @@ class LocomotiveAboutPage {
     }
 
     setupImageGallery() {
-        this.imageUrls.forEach(url => {
+        this.imageUrls.forEach(imageData => {
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'gallery-image';
+            imgWrapper.dataset.image = imageData.id; // Set the data-image attribute
             const img = document.createElement('img');
-            img.src = url;
+            img.src = imageData.url;
             img.alt = "Dynamic gallery image";
             imgWrapper.appendChild(img);
             this.imageGallery.appendChild(imgWrapper);
