@@ -593,15 +593,191 @@ function initLocomotiveCursor() {
 }
 
 // Original functions (preserved and optimized)
+// Enhanced About Page Functionality (Locomotive-inspired)
+class AboutPageAnimations {
+    constructor() {
+        this.revealedImages = new Set();
+        this.init();
+    }
+
+    init() {
+        this.setupTextRevealAnimations();
+        this.setupScrollCallbacks();
+        this.setupImageRevealSystem();
+    }
+
+    // Text reveal animations (chars and words)
+    setupTextRevealAnimations() {
+        // Split text into spans for animation
+        document.querySelectorAll('[data-reveal="chars"]').forEach(element => {
+            const text = element.textContent;
+            element.innerHTML = text.split('').map(char => 
+                `<span>${char === ' ' ? '&nbsp;' : char}</span>`
+            ).join('');
+        });
+
+        document.querySelectorAll('[data-reveal="words"]').forEach(element => {
+            const text = element.textContent;
+            element.innerHTML = text.split(' ').map(word => 
+                `<span>${word}</span>`
+            ).join(' ');
+        });
+
+        // Setup ScrollTrigger for text reveals
+        gsap.utils.toArray('[data-reveal]').forEach(element => {
+            const spans = element.querySelectorAll('span');
+            
+            gsap.set(spans, { y: '100%', opacity: 0 });
+            
+            ScrollTrigger.create({
+                trigger: element,
+                start: 'top 80%',
+                onEnter: () => {
+                    gsap.to(spans, {
+                        y: '0%',
+                        opacity: 1,
+                        duration: 0.8,
+                        stagger: 0.03,
+                        ease: 'power3.out',
+                        onComplete: () => {
+                            spans.forEach(span => span.classList.add('revealed'));
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    // Image reveal system triggered by scroll calls
+    setupImageRevealSystem() {
+        // Setup scroll callbacks for image reveals
+        ScrollTrigger.batch('.story-paragraph', {
+            onEnter: (elements) => {
+                elements.forEach(paragraph => {
+                    const imageId = paragraph.getAttribute('data-scroll-id');
+                    if (imageId) {
+                        this.revealImage(imageId);
+                    }
+                });
+            },
+            start: 'top 60%',
+            end: 'bottom 40%'
+        });
+
+        // Highlight animation
+        gsap.utils.toArray('.highlight').forEach(highlight => {
+            ScrollTrigger.create({
+                trigger: highlight,
+                start: 'top 70%',
+                onEnter: () => {
+                    highlight.classList.add('revealed');
+                }
+            });
+        });
+    }
+
+    // Reveal specific image by ID
+    revealImage(imageId) {
+        if (this.revealedImages.has(imageId)) return;
+        
+        const image = document.querySelector(`[data-scroll-id="${imageId}"]`);
+        if (!image) return;
+        
+        this.revealedImages.add(imageId);
+        
+        // Hide previously revealed images with a subtle fade
+        document.querySelectorAll('.stack-image.revealed').forEach(img => {
+            gsap.to(img, {
+                opacity: 0.3,
+                scale: 0.95,
+                duration: 0.5,
+                ease: 'power2.out'
+            });
+        });
+        
+        // Show new image
+        gsap.set(image, { opacity: 0, scale: 0.8, rotation: 5 });
+        image.classList.add('revealed');
+        
+        gsap.to(image, {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 1,
+            ease: 'back.out(1.7)',
+            delay: 0.2
+        });
+        
+        // Add some floating animation
+        gsap.to(image, {
+            y: '-=10',
+            duration: 3,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            delay: 1
+        });
+    }
+
+    // Setup scroll-based callbacks
+    setupScrollCallbacks() {
+        // Simulated locomotive scroll calls
+        ScrollTrigger.create({
+            trigger: '.about-story',
+            start: 'top bottom',
+            end: 'bottom top',
+            onUpdate: (self) => {
+                const progress = self.progress;
+                const imageElements = document.querySelectorAll('.stack-image');
+                
+                // Progressive image reveals based on scroll progress
+                const imageIndex = Math.floor(progress * imageElements.length);
+                for (let i = 0; i <= imageIndex && i < imageElements.length; i++) {
+                    const img = imageElements[i];
+                    const imageId = img.getAttribute('data-scroll-id');
+                    if (imageId && !this.revealedImages.has(imageId)) {
+                        this.revealImage(imageId);
+                    }
+                }
+            }
+        });
+    }
+
+    // Cleanup on page change
+    destroy() {
+        this.revealedImages.clear();
+        document.querySelectorAll('.stack-image').forEach(img => {
+            img.classList.remove('revealed');
+            gsap.set(img, { clearProps: 'all' });
+        });
+    }
+}
+
+// Global about page animations instance
+let aboutAnimations = null;
+
 function showPage(pageId) {
+    // Cleanup previous about animations if switching away from about
+    if (aboutAnimations && pageId !== 'about') {
+        aboutAnimations.destroy();
+        aboutAnimations = null;
+    }
+    
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(pageId)?.classList.add('active');
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.querySelector(`.nav-link[href="#${pageId}"]`)?.classList.add('active');
     
-    // Trigger page animations
+    // Initialize About page animations
+    if (pageId === 'about') {
+        setTimeout(() => {
+            aboutAnimations = new AboutPageAnimations();
+        }, 100);
+    }
+    
+    // Trigger page animations for other pages
     const targetPage = document.getElementById(pageId);
-    if (targetPage && pageId !== 'home') {
+    if (targetPage && pageId !== 'home' && pageId !== 'about') {
         // Reset animations
         gsap.set(targetPage.querySelectorAll('[data-reveal]'), { opacity: 0, y: 50 });
         
@@ -697,9 +873,35 @@ function initializeInteractions() {
     });
 }
 
-function initializeMobileMenu() { 
-    // Mobile menu implementation would go here
-    console.log('Mobile menu initialized');
+function initializeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+
+    if (mobileMenu && mobileNavOverlay) {
+        mobileMenu.addEventListener('click', toggleMobileMenu);
+    }
+}
+
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+    
+    if (mobileMenu && mobileNavOverlay) {
+        mobileMenu.classList.toggle('active');
+        mobileNavOverlay.classList.toggle('active');
+        document.body.style.overflow = mobileNavOverlay.classList.contains('active') ? 'hidden' : 'auto';
+    }
+}
+
+function closeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+    
+    if (mobileMenu && mobileNavOverlay) {
+        mobileMenu.classList.remove('active');
+        mobileNavOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
 }
 
 function initializeEasterEggs() {
