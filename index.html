@@ -206,114 +206,149 @@
                     </div>
                 </div>
 
-                <!-- Enhanced About Page -->
+                <!-- Enhanced About Page - Locomotive Style -->
                 <div id="about" class="page">
-                    <div class="about-container">
-                        <!-- Hero Section with Text Animation -->
-                        <section class="about-hero">
+                    <div class="about-container" data-scroll-container>
+                        <!-- Hero Section with Stunning Typography -->
+                        <section class="about-hero" data-scroll-section>
                             <div class="about-hero-content">
-                                <h1 class="about-title" data-scroll data-scroll-speed="-2">
-                                    <span class="title-line" data-reveal="chars">About</span>
-                                    <span class="title-line" data-reveal="chars">2007</span>
+                                <h1 class="about-title">
+                                    <span class="title-word" data-scroll data-scroll-speed="-4" data-reveal="chars">BORN</span>
+                                    <span class="title-word" data-scroll data-scroll-speed="-3" data-reveal="chars">FROM</span>
+                                    <span class="title-word" data-scroll data-scroll-speed="-2" data-reveal="chars">CHAOS</span>
                                 </h1>
-                                <div class="about-subtitle" data-scroll data-scroll-speed="-1" data-reveal="words">
-                                    Where Stories Get Weird & Magic Happens
+                                <div class="about-subtitle" data-scroll data-scroll-speed="-1">
+                                    <span data-reveal="words">2007 Productions: Where Stories Get Weird</span>
                                 </div>
                             </div>
                         </section>
 
-                        <!-- Story Section with Scroll-Triggered Images -->
+                        <!-- Story Section with Mouse-Following Images -->
                         <section class="about-story" data-scroll-section>
                             <div class="story-content">
-                                <!-- Image Stack (Hidden by default, revealed on scroll) -->
-                                <div class="image-stack">
-                                    <div class="stack-image" data-scroll data-scroll-call="revealImage" data-scroll-id="img1">
-                                        <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400" alt="Creative workspace" />
+                                <!-- Mouse-Following Image Gallery -->
+                                <div class="image-gallery" id="imageGallery">
+                                    <div class="gallery-image" data-image="camera">
+                                        <img src="https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&q=80" alt="Film camera in action" />
+                                        <div class="image-overlay">Behind the Lens</div>
                                     </div>
-                                    <div class="stack-image" data-scroll data-scroll-call="revealImage" data-scroll-id="img2">
-                                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400" alt="Team collaboration" />
+                                    <div class="gallery-image" data-image="director">
+                                        <img src="https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=800&q=80" alt="Director's chair on set" />
+                                        <div class="image-overlay">Directing Vision</div>
                                     </div>
-                                    <div class="stack-image" data-scroll data-scroll-call="revealImage" data-scroll-id="img3">
-                                        <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400" alt="Creative tools" />
+                                    <div class="gallery-image" data-image="studio">
+                                        <img src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80" alt="Recording studio" />
+                                        <div class="image-overlay">Sonic Alchemy</div>
                                     </div>
-                                    <div class="stack-image" data-scroll data-scroll-call="revealImage" data-scroll-id="img4">
-                                        <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=400" alt="Studio environment" />
+                                    <div class="gallery-image" data-image="editing">
+                                        <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80" alt="Video editing suite" />
+                                        <div class="image-overlay">Post Magic</div>
                                     </div>
-                                    <div class="stack-image" data-scroll data-scroll-call="revealImage" data-scroll-id="img5">
-                                        <img src="https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=400" alt="Video production" />
+                                    <div class="gallery-image" data-image="crew">
+                                        <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80" alt="Film crew working" />
+                                        <div class="image-overlay">The Collective</div>
                                     </div>
-                                    <div class="stack-image" data-scroll data-scroll-call="revealImage" data-scroll-id="img6">
-                                        <img src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400" alt="Sound engineering" />
+                                    <div class="gallery-image" data-image="lights">
+                                        <img src="https://images.unsplash.com/photo-1518985250321-7a0d8b57ee8e?w=800&q=80" alt="Studio lighting setup" />
+                                        <div class="image-overlay">Light & Shadow</div>
                                     </div>
                                 </div>
 
-                                <!-- Story Text with Trigger Points -->
+                                <!-- Premium Typography Story Text -->
                                 <div class="story-text">
-                                    <p class="story-paragraph" data-scroll data-scroll-call="revealImage" data-scroll-id="img1" data-reveal="words">
-                                        We are <strong>2007 Productions</strong>, a collective of creative rebels who believe that 
-                                        <span class="highlight">normal is the enemy of memorable</span>. Founded on the principle that 
-                                        the best stories live in the weird spaces between logic and magic.
-                                    </p>
+                                    <div class="story-block" data-scroll data-scroll-speed="1" data-trigger-image="camera">
+                                        <p class="story-paragraph large" data-reveal="words">
+                                            We are <span class="accent-text">2007 Productions</span>, 
+                                            a collective of <strong>creative rebels</strong> who believe that 
+                                            <span class="highlight-orange">normal is the enemy of memorable</span>.
+                                        </p>
+                                    </div>
 
-                                    <p class="story-paragraph" data-scroll data-scroll-call="revealImage" data-scroll-id="img2" data-reveal="words">
-                                        Our journey began with a simple question: 
-                                        <span class="highlight">"What if we made it weirder?"</span> 
-                                        This philosophy has guided us through countless projects, from mind-bending films 
-                                        to webisodes that make people question reality.
-                                    </p>
+                                    <div class="story-block" data-scroll data-scroll-speed="0.8" data-trigger-image="director">
+                                        <p class="story-paragraph" data-reveal="words">
+                                            Founded on the principle that the <strong>best stories live</strong> 
+                                            in the weird spaces between <span class="highlight-blue">logic and magic</span>. 
+                                            Our journey began with a simple question: 
+                                            <em>"What if we made it weirder?"</em>
+                                        </p>
+                                    </div>
 
-                                    <p class="story-paragraph" data-scroll data-scroll-call="revealImage" data-scroll-id="img3" data-reveal="words">
-                                        We don't just create content; we craft <strong>experiences that linger</strong>. 
-                                        Our team of visionaries, rule-breakers, and creative alchemists work together 
-                                        to turn impossible ideas into Tuesday afternoons.
-                                    </p>
+                                    <div class="story-block" data-scroll data-scroll-speed="1.2" data-trigger-image="studio">
+                                        <p class="story-paragraph" data-reveal="words">
+                                            We don't just create content; we craft <strong>experiences that linger</strong>. 
+                                            From <span class="highlight-purple">mind-bending films</span> to webisodes that make people 
+                                            question reality, every frame is crafted with obsessive attention to detail.
+                                        </p>
+                                    </div>
 
-                                    <p class="story-paragraph" data-scroll data-scroll-call="revealImage" data-scroll-id="img4" data-reveal="words">
-                                        From our state-of-the-art studio to remote locations around the globe, 
-                                        we bring stories to life with <span class="highlight">surgical precision and controlled explosion</span>. 
-                                        Every pixel, every beat, every frame is crafted with obsessive attention to detail.
-                                    </p>
+                                    <div class="story-block" data-scroll data-scroll-speed="0.6" data-trigger-image="editing">
+                                        <p class="story-paragraph" data-reveal="words">
+                                            Our team of <strong>visionaries, rule-breakers, and creative alchemists</strong> 
+                                            work together to turn impossible ideas into Tuesday afternoons. 
+                                            <span class="highlight-orange">Surgical precision meets controlled explosion</span>.
+                                        </p>
+                                    </div>
 
-                                    <p class="story-paragraph" data-scroll data-scroll-call="revealImage" data-scroll-id="img5" data-reveal="words">
-                                        Whether we're directing narrative-driven pieces, capturing reality through a lens 
-                                        that makes it cooler than reality, or building sonic worlds where feelings live, 
-                                        <strong>we guarantee weirdness</strong> in everything we create.
-                                    </p>
+                                    <div class="story-block" data-scroll data-scroll-speed="1.4" data-trigger-image="crew">
+                                        <p class="story-paragraph" data-reveal="words">
+                                            Whether we're directing narrative-driven pieces, capturing reality through 
+                                            a lens that makes it <em>cooler than reality</em>, or building 
+                                            <span class="highlight-blue">sonic worlds where feelings live</span> — 
+                                            we guarantee weirdness in everything we create.
+                                        </p>
+                                    </div>
 
-                                    <p class="story-paragraph" data-scroll data-scroll-call="revealImage" data-scroll-id="img6" data-reveal="words">
-                                        Join us on this beautiful journey of controlled creative mayhem. 
-                                        Where chaos becomes symphony, deadlines become art, and 
-                                        <span class="highlight">your wildest ideas become reality</span>.
-                                    </p>
+                                    <div class="story-block" data-scroll data-scroll-speed="1" data-trigger-image="lights">
+                                        <p class="story-paragraph large" data-reveal="words">
+                                            Join us on this beautiful journey of <strong>controlled creative mayhem</strong>. 
+                                            Where chaos becomes symphony, deadlines become art, and 
+                                            <span class="highlight-purple">your wildest ideas become reality</span>.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </section>
 
-                        <!-- Values Section -->
+                        <!-- Values Section with Better Typography -->
                         <section class="about-values" data-scroll-section>
-                            <h2 class="values-title" data-reveal="chars">Our Values</h2>
-                            <div class="values-grid">
-                                <div class="value-item" data-scroll data-scroll-speed="0.5">
-                                    <h3 data-reveal="words">Break Rules For Fun</h3>
-                                    <p data-reveal="words">We believe that innovation comes from questioning everything and doing the unexpected.</p>
-                                </div>
-                                <div class="value-item" data-scroll data-scroll-speed="0.8">
-                                    <h3 data-reveal="words">Chaos Into Art</h3>
-                                    <p data-reveal="words">We transform the impossible into the inevitable through creative problem-solving.</p>
-                                </div>
-                                <div class="value-item" data-scroll data-scroll-speed="0.3">
-                                    <h3 data-reveal="words">Guarantee Weirdness</h3>
-                                    <p data-reveal="words">Every project we touch gets infused with our signature blend of strange and brilliant.</p>
+                            <div class="values-container">
+                                <h2 class="values-title" data-scroll data-scroll-speed="-1" data-reveal="chars">
+                                    Our Creative DNA
+                                </h2>
+                                
+                                <div class="values-grid">
+                                    <div class="value-item" data-scroll data-scroll-speed="0.5">
+                                        <div class="value-number">01</div>
+                                        <h3 data-reveal="words">Break Rules For Fun</h3>
+                                        <p data-reveal="words">Innovation comes from questioning everything and doing the unexpected. We thrive in the spaces where conventional wisdom fears to tread.</p>
+                                    </div>
+                                    
+                                    <div class="value-item" data-scroll data-scroll-speed="0.8">
+                                        <div class="value-number">02</div>
+                                        <h3 data-reveal="words">Transform Chaos Into Art</h3>
+                                        <p data-reveal="words">We master the ancient art of making impossible deadlines into masterpieces. Controlled mayhem is our specialty.</p>
+                                    </div>
+                                    
+                                    <div class="value-item" data-scroll data-scroll-speed="0.3">
+                                        <div class="value-number">03</div>
+                                        <h3 data-reveal="words">Guarantee Weirdness</h3>
+                                        <p data-reveal="words">Every project gets infused with our signature blend of strange and brilliant. Normal is not in our vocabulary.</p>
+                                    </div>
                                 </div>
                             </div>
                         </section>
 
                         <!-- CTA Section -->
                         <section class="about-cta" data-scroll-section>
-                            <div class="cta-content" data-scroll data-scroll-speed="-1">
-                                <h2 data-reveal="chars">Ready to Get Weird?</h2>
-                                <p data-reveal="words">Let's create something magnificent together.</p>
-                                <button class="cta-button" data-magnetic onclick="showPage('collin')">Meet The Team</button>
+                            <div class="cta-content" data-scroll data-scroll-speed="-0.5">
+                                <h2 class="cta-title" data-reveal="chars">Ready to Get Weird?</h2>
+                                <p class="cta-subtitle" data-reveal="words">
+                                    Let's create something magnificent together
+                                </p>
+                                <button class="cta-button" data-magnetic onclick="showPage('collin')">
+                                    <span>Meet The Collective</span>
+                                    <div class="button-bg"></div>
+                                </button>
                             </div>
                         </section>
                     </div>
