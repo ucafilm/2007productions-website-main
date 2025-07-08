@@ -146,13 +146,15 @@ class LocomotiveCursor {
             }
 
             .locomotive-cursor.video-hover .cursor-inner::after {
-                content: '▶';
+                content: '';
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                transform: translate(-40%, -50%);
-                color: #fff;
-                font-size: 8px;
+                transform: translate(-50%, -50%);
+                width: 16px;
+                height: 16px;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
+                background-size: contain;
             }
 
             .locomotive-cursor.video-hover .cursor-outer {
@@ -348,10 +350,55 @@ class EnhancedInteractions {
     initPixelatedHovers() {
         this.pixelatedElements.forEach((element, index) => {
             const memberName = element.getAttribute('data-member');
-            
+            const imageSrc = element.dataset.image; // Assumes you add a data-image attribute to your .member-visual elements
+
+            if (!imageSrc) return;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'pixel-overlay';
+            const canvas = document.createElement('canvas');
+            canvas.className = 'pixel-canvas';
+            overlay.appendChild(canvas);
+            element.appendChild(overlay);
+
+            const ctx = canvas.getContext('2d');
+            const image = new Image();
+            image.src = imageSrc;
+            image.crossOrigin = "Anonymous"; // Required for Unsplash images
+
+            image.onload = () => {
+                canvas.width = image.naturalWidth;
+                canvas.height = image.naturalHeight;
+                ctx.drawImage(image, 0, 0);
+            };
+
             // Click handler for video modal
             element.addEventListener('click', () => {
                 this.showVideoModal(memberName || 'member');
+            });
+
+            // Scroll-triggered reveal
+            ScrollTrigger.create({
+                trigger: element,
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(canvas, { 
+                        opacity: 1, 
+                        filter: 'blur(0px) saturate(1)', 
+                        scale: 1, 
+                        duration: 0.8, 
+                        ease: 'power2.out' 
+                    });
+                },
+                onLeaveBack: () => {
+                    gsap.to(canvas, { 
+                        opacity: 0, 
+                        filter: 'blur(10px) saturate(0)', 
+                        scale: 1.1, 
+                        duration: 0.8, 
+                        ease: 'power2.in' 
+                    });
+                }
             });
         });
     }
@@ -436,46 +483,38 @@ class EnhancedInteractions {
                     }
                 });
             }
-            
-            if (content) {
-                gsap.fromTo(content, 
-                    { y: 100, opacity: 0 },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 1,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: content,
-                            start: "top 80%",
-                            end: "bottom 20%",
-                            toggleActions: "play none none reverse"
-                        }
-                    }
-                );
-            }
         });
 
-        // Text reveal on scroll
+        // Text reveal on scroll (chars, words, lines)
         gsap.utils.toArray('[data-reveal]').forEach(element => {
-            const text = element.textContent;
-            element.innerHTML = text.split(' ').map(word => 
-                `<span class="word">${word}</span>`
-            ).join(' ');
+            const revealType = element.getAttribute('data-reveal') || 'words';
+            let split;
+
+            if (revealType === 'chars') {
+                const text = element.textContent;
+                element.innerHTML = text.split('').map(char => 
+                    `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`
+                ).join('');
+                split = element.querySelectorAll('.char');
+            } else { // Default to words
+                const text = element.textContent;
+                element.innerHTML = text.split(' ').map(word => 
+                    `<span class="word">${word}</span>`
+                ).join(' ');
+                split = element.querySelectorAll('.word');
+            }
             
-            const words = element.querySelectorAll('.word');
+            gsap.set(split, { y: 100, opacity: 0 });
             
-            gsap.set(words, { y: 100, opacity: 0 });
-            
-            gsap.to(words, {
+            gsap.to(split, {
                 y: 0,
                 opacity: 1,
-                duration: 0.6,
-                stagger: 0.1,
-                ease: "power2.out",
+                duration: 0.8,
+                stagger: revealType === 'chars' ? 0.02 : 0.1,
+                ease: "power3.out",
                 scrollTrigger: {
                     trigger: element,
-                    start: "top 80%"
+                    start: "top 85%"
                 }
             });
         });
@@ -565,7 +604,7 @@ class EnhancedInteractions {
                     cursor: pointer; 
                     letter-spacing: 1px;
                     transition: all 0.3s ease;
-                ">CLOSE</button>
+                "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use xlink:href="#icon-close"/></svg></button>
             </div>
         `;
         
