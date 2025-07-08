@@ -466,20 +466,33 @@ class EnhancedInteractions {
 
     // Advanced Scroll Effects
     initAdvancedScrollEffects() {
-        // Parallax sections
-        gsap.utils.toArray('.parallax-section').forEach(section => {
-            const bg = section.querySelector('.parallax-bg');
-            const content = section.querySelector('.parallax-content');
-            
-            if (bg) {
-                gsap.to(bg, {
-                    yPercent: -50,
+        // General parallax for background elements
+        gsap.utils.toArray('.parallax-bg').forEach(bg => {
+            gsap.to(bg, {
+                yPercent: -50,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: bg.closest('.parallax-section'),
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
+        });
+
+        // Enhanced parallax for member pages
+        gsap.utils.toArray('.member-layout.parallax-section').forEach(section => {
+            const visual = section.querySelector('.member-visual');
+
+            if (visual) {
+                gsap.to(visual, {
+                    yPercent: -25, // Adjust this value for more/less parallax
                     ease: "none",
                     scrollTrigger: {
                         trigger: section,
                         start: "top bottom",
                         end: "bottom top",
-                        scrub: true
+                        scrub: 0.5 // A bit of smoothing
                     }
                 });
             }
@@ -637,242 +650,116 @@ class LocomotiveAboutPage {
     constructor() {
         this.mouseX = 0;
         this.mouseY = 0;
-        this.currentImage = null;
-        this.imageElements = [];
+        this.imageStack = [];
         this.isInitialized = false;
         this.init();
     }
 
     init() {
-        this.setupImageElements();
         this.setupMouseTracking();
         this.setupScrollTriggers();
         this.setupTextAnimations();
         this.isInitialized = true;
     }
 
-    setupImageElements() {
-        this.imageElements = document.querySelectorAll('.gallery-image');
-        
-        // Position images initially off-screen
-        this.imageElements.forEach(img => {
-            gsap.set(img, {
-                x: window.innerWidth + 200,
-                y: window.innerHeight / 2,
-                opacity: 0,
-                scale: 0.8,
-                rotation: gsap.utils.random(-10, 10)
-            });
-        });
-    }
-
     setupMouseTracking() {
-        let mouseTimeout;
-        
+        // Use GSAP's quickTo for efficient mouse tracking
+        this.imageX = gsap.quickTo(".gallery-image", "x", {duration: 0.5, ease: "power2.out"});
+        this.imageY = gsap.quickTo(".gallery-image", "y", {duration: 0.5, ease: "power2.out"});
+
         document.addEventListener('mousemove', (e) => {
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
-            
-            if (this.currentImage && this.currentImage.classList.contains('visible')) {
-                // Smooth follow with slight delay and easing
-                gsap.to(this.currentImage, {
-                    x: this.mouseX - 200, // Offset so cursor isn't directly on image
-                    y: this.mouseY - 150,
-                    duration: 0.8,
-                    ease: "power2.out"
-                });
-            }
-            
-            // Clear any existing timeout
-            clearTimeout(mouseTimeout);
-            
-            // Set new timeout to hide image if mouse stops
-            mouseTimeout = setTimeout(() => {
-                if (this.currentImage) {
-                    this.hideCurrentImage();
-                }
-            }, 2000);
+            this.imageX(this.mouseX - 200);
+            this.imageY(this.mouseY - 150);
         });
     }
 
     setupScrollTriggers() {
-        // Setup triggers for each story block
         document.querySelectorAll('.story-block').forEach((block, index) => {
             const imageId = block.getAttribute('data-trigger-image');
-            
             ScrollTrigger.create({
                 trigger: block,
                 start: 'top 70%',
                 end: 'bottom 30%',
-                onEnter: () => {
-                    this.showImage(imageId);
-                },
-                onLeave: () => {
-                    // Keep image visible until next one triggers
-                },
-                onEnterBack: () => {
-                    this.showImage(imageId);
-                },
-                onLeaveBack: () => {
-                    // Keep image visible until previous one triggers
-                }
+                onEnter: () => this.showImage(imageId),
+                onLeave: () => this.hideImage(imageId),
+                onEnterBack: () => this.showImage(imageId),
+                onLeaveBack: () => this.hideImage(imageId)
             });
-        });
-        
-        // Hide images when leaving story section
-        ScrollTrigger.create({
-            trigger: '.about-story',
-            start: 'top bottom',
-            end: 'bottom top',
-            onLeave: () => {
-                this.hideAllImages();
-            },
-            onLeaveBack: () => {
-                this.hideAllImages();
-            }
         });
     }
 
     showImage(imageId) {
         const targetImage = document.querySelector(`[data-image="${imageId}"]`);
-        if (!targetImage || targetImage === this.currentImage) return;
-        
-        // Hide current image
-        if (this.currentImage) {
-            this.hideCurrentImage();
-        }
-        
-        // Show new image
-        this.currentImage = targetImage;
-        targetImage.classList.add('visible');
-        
-        // Animate in with premium easing
+        if (!targetImage || this.imageStack.includes(targetImage)) return;
+
+        // Add to stack and animate in
+        this.imageStack.push(targetImage);
         gsap.fromTo(targetImage, 
-            {
-                x: this.mouseX + gsap.utils.random(100, 300),
-                y: this.mouseY + gsap.utils.random(-100, 100),
-                opacity: 0,
-                scale: 0.6,
-                rotation: gsap.utils.random(-15, 15)
+            { 
+                opacity: 0, 
+                scale: 0.8, 
+                rotation: gsap.utils.random(-15, 15),
+                x: this.mouseX - 200 + gsap.utils.random(-50, 50),
+                y: this.mouseY - 150 + gsap.utils.random(-50, 50)
             },
-            {
-                x: this.mouseX - 200,
-                y: this.mouseY - 150,
-                opacity: 1,
-                scale: 1,
-                rotation: 0,
-                duration: 1.2,
-                ease: "back.out(1.4)"
+            { 
+                opacity: 1, 
+                scale: 1, 
+                rotation: gsap.utils.random(-5, 5),
+                duration: 0.8, 
+                ease: "power3.out",
+                delay: this.imageStack.length * 0.1 // Stagger the animation
             }
         );
-        
-        // Add subtle floating animation
-        gsap.to(targetImage, {
-            y: `+=${gsap.utils.random(-20, 20)}`,
-            rotation: `+=${gsap.utils.random(-3, 3)}`,
-            duration: 4,
-            ease: "sine.inOut",
-            repeat: -1,
-            yoyo: true
-        });
     }
 
-    hideCurrentImage() {
-        if (!this.currentImage) return;
-        
-        gsap.to(this.currentImage, {
-            opacity: 0,
-            scale: 0.8,
-            rotation: gsap.utils.random(-10, 10),
-            duration: 0.6,
-            ease: "power2.in",
-            onComplete: () => {
-                if (this.currentImage) {
-                    this.currentImage.classList.remove('visible');
-                    gsap.killTweensOf(this.currentImage);
-                }
-            }
-        });
-        
-        this.currentImage = null;
-    }
+    hideImage(imageId) {
+        const targetImage = document.querySelector(`[data-image="${imageId}"]`);
+        if (!targetImage || !this.imageStack.includes(targetImage)) return;
 
-    hideAllImages() {
-        this.imageElements.forEach(img => {
-            img.classList.remove('visible');
-            gsap.to(img, {
-                opacity: 0,
-                scale: 0.6,
-                duration: 0.8,
-                ease: "power2.in"
-            });
+        // Remove from stack and animate out
+        this.imageStack = this.imageStack.filter(img => img !== targetImage);
+        gsap.to(targetImage, { 
+            opacity: 0, 
+            scale: 0.8, 
+            rotation: gsap.utils.random(-15, 15),
+            duration: 0.6, 
+            ease: "power2.in"
         });
-        this.currentImage = null;
     }
 
     setupTextAnimations() {
-        // Enhanced text splitting for premium animations
-        document.querySelectorAll('[data-reveal="chars"]').forEach(element => {
-            const text = element.textContent;
-            element.innerHTML = text.split('').map(char => 
-                `<span style="display: inline-block; transform: translateY(120%); opacity: 0;">${char === ' ' ? '&nbsp;' : char}</span>`
-            ).join('');
-        });
+        gsap.utils.toArray('[data-reveal="words"]').forEach(element => {
+            const words = element.textContent.split(' ');
+            element.innerHTML = words.map(word => `<span class="word-wrapper"><span class="word">${word}</span></span>`).join(' ');
+            const wordSpans = element.querySelectorAll('.word');
 
-        document.querySelectorAll('[data-reveal="words"]').forEach(element => {
-            const text = element.textContent;
-            element.innerHTML = text.split(' ').map(word => 
-                `<span style="display: inline-block; transform: translateY(100%); opacity: 0;">${word}</span>`
-            ).join(' ');
-        });
+            gsap.set(wordSpans, { yPercent: 110 });
 
-        // Setup premium text reveal animations
-        gsap.utils.toArray('[data-reveal]').forEach(element => {
-            const spans = element.querySelectorAll('span');
-            const isChars = element.getAttribute('data-reveal') === 'chars';
-            
             ScrollTrigger.create({
                 trigger: element,
                 start: 'top 85%',
                 onEnter: () => {
-                    gsap.to(spans, {
-                        y: 0,
-                        opacity: 1,
-                        duration: isChars ? 1.2 : 0.8,
-                        stagger: isChars ? 0.02 : 0.08,
-                        ease: "back.out(1.4)",
-                        onComplete: () => {
-                            spans.forEach(span => span.classList.add('revealed'));
-                        }
+                    gsap.to(wordSpans, {
+                        yPercent: 0,
+                        duration: 0.8,
+                        stagger: 0.05,
+                        ease: "power3.out"
                     });
-                }
-            });
-        });
-
-        // Highlight animations
-        gsap.utils.toArray('.highlight-orange, .highlight-blue, .highlight-purple').forEach(highlight => {
-            ScrollTrigger.create({
-                trigger: highlight,
-                start: 'top 80%',
-                onEnter: () => {
-                    highlight.classList.add('revealed');
                 }
             });
         });
     }
 
-    // Cleanup method
     destroy() {
         if (!this.isInitialized) return;
-        
-        this.hideAllImages();
         ScrollTrigger.getAll().forEach(trigger => {
             if (trigger.trigger && trigger.trigger.closest('.about-container')) {
                 trigger.kill();
             }
         });
-        
-        document.removeEventListener('mousemove', this.handleMouseMove);
         this.isInitialized = false;
     }
 }

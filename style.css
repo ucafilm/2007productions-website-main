@@ -609,13 +609,15 @@ body {
 }
 
 .gallery-image {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+    position: fixed; /* Changed from absolute */
+    width: 400px;
+    height: 500px;
     opacity: 0;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    pointer-events: none; /* Let mouse events pass through */
+    z-index: 10;
 }
 
 .gallery-image img {
@@ -1031,22 +1033,18 @@ body {
     transition: transform 0.3s ease;
 }
 
-.char, .word {
+.word-wrapper {
+    display: inline-block;
+    overflow: hidden;
+}
+
+.word {
     display: inline-block;
     will-change: transform;
-    overflow: hidden; /* Hide characters/words until revealed */
 }
 
-.char span, .word span {
-    display: inline-block;
-    transform: translateY(110%);
-    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
 
-[data-reveal].revealed .char span,
-[data-reveal].revealed .word span {
-    transform: translateY(0);
-}
+
 
 /* --- RESPONSIVE DESIGN --- */
 .mobile-menu {
