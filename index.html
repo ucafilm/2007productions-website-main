@@ -8,63 +8,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Loading Overlay - Outside smooth scroll container for proper fixed positioning -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-symbol">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="loadingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="20,80 50,20 80,80" fill="none" stroke="url(#loadingGrad)" stroke-width="3">
+                        <animateTransform attributeName="transform" type="rotate" values="0 50 50;360 50 50" dur="2s" repeatCount="indefinite"/>
+                    </polygon>
+                    <circle cx="50" cy="50" r="8" fill="url(#loadingGrad)"/>
+                </svg>
+            </div>
+            <div class="loading-text">INITIALIZING...</div>
+        </div>
+    </div>
+
     <div id="smooth-wrapper">
         <div id="smooth-content">
-            <div class="loading-overlay" id="loadingOverlay">
-                <div class="loading-content">
-                    <div class="loading-symbol">
-                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="loadingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
-                                    <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
-                                </linearGradient>
-                            </defs>
-                            <polygon points="20,80 50,20 80,80" fill="none" stroke="url(#loadingGrad)" stroke-width="3">
-                                <animateTransform attributeName="transform" type="rotate" values="0 50 50;360 50 50" dur="2s" repeatCount="indefinite"/>
-                            </polygon>
-                            <circle cx="50" cy="50" r="8" fill="url(#loadingGrad)"/>
-                        </svg>
-                    </div>
-                    <div class="loading-text">INITIALIZING...</div>
-                </div>
-            </div>
 
             <div class="cursor" id="cursor"></div>
             <div class="cursor-trail" id="cursorTrail"></div>
-
-            <nav class="nav">
-                <div class="nav-container">
-                    <div class="logo-container" data-magnetic>
-                        <div class="logo-symbol">
-                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
-                                        <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
-                                        <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
-                                    </linearGradient>
-                                </defs>
-                                <polygon points="50,15 85,75 15,75" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
-                                <circle cx="35" cy="60" r="4" fill="url(#logoGrad)"/>
-                                <circle cx="50" cy="60" r="4" fill="url(#logoGrad)"/>
-                                <circle cx="65" cy="60" r="4" fill="url(#logoGrad)"/>
-                                <polygon points="45,35 55,35 50,45" fill="url(#logoGrad)"/>
-                            </svg>
-                        </div>
-                        <div class="logo-text" data-morph="WEIRD">2007</div>
-                    </div>
-                    <ul class="nav-links">
-                        <li><a href="#home" data-magnetic onclick="showPage('home')" class="nav-link active">Home</a></li>
-                        <li><a href="#collin" data-magnetic onclick="showPage('collin')" class="nav-link">Collin</a></li>
-                        <li><a href="#corey" data-magnetic onclick="showPage('corey')" class="nav-link">Corey</a></li>
-                        <li><a href="#levi" data-magnetic onclick="showPage('levi')" class="nav-link">Levi</a></li>
-                        <li><a href="#tim" data-magnetic onclick="showPage('tim')" class="nav-link">Tim</a></li>
-                        <li><a href="#terrell" data-magnetic onclick="showPage('terrell')" class="nav-link">Terrell</a></li>
-                    </ul>
-                </div>
-            </nav>
 
             <main>
                 <div id="home" class="page home-page active">
@@ -273,26 +243,63 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
 
-            <!-- Enhanced AI Assistant -->
-            <div class="ai-assistant">
-                <button class="ai-button" data-magnetic onclick="toggleAI()"></button>
-                <div class="ai-chat" id="aiChat">
-                    <div class="ai-header">
-                        <div class="ai-avatar">🤖</div>
-                        <div class="ai-info">
-                            <h3>ARIA</h3>
-                            <p>2007 AI Assistant</p>
-                        </div>
-                    </div>
-                    <div class="ai-messages" id="aiMessages">
-                        <div class="ai-message bot">Ask me anything...</div>
-                    </div>
-                    <div class="ai-input-area">
-                        <input type="text" class="ai-input" placeholder="Type a message..." onkeypress="handleAIInput(event)">
-                        <button class="ai-send" data-magnetic onclick="sendAIMessage()">→</button>
-                    </div>
+    <!-- Navigation - Outside smooth scroll container for proper fixed positioning -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo-container" data-magnetic>
+                <div class="logo-symbol">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points="50,15 85,75 15,75" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+                        <circle cx="35" cy="60" r="4" fill="url(#logoGrad)"/>
+                        <circle cx="50" cy="60" r="4" fill="url(#logoGrad)"/>
+                        <circle cx="65" cy="60" r="4" fill="url(#logoGrad)"/>
+                        <polygon points="45,35 55,35 50,45" fill="url(#logoGrad)"/>
+                    </svg>
                 </div>
+                <div class="logo-text" data-morph="WEIRD">2007</div>
+            </div>
+            <div class="nav-mode-switch">
+                <button class="mode-button active" data-magnetic onclick="switchMode('work', event)">WORK</button>
+                <button class="mode-button" data-magnetic onclick="switchMode('agency', event)">AGENCY</button>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" data-magnetic onclick="showPage('home')" class="nav-link active">Home</a></li>
+                <li><a href="#collin" data-magnetic onclick="showPage('collin')" class="nav-link">Collin</a></li>
+                <li><a href="#corey" data-magnetic onclick="showPage('corey')" class="nav-link">Corey</a></li>
+                <li><a href="#levi" data-magnetic onclick="showPage('levi')" class="nav-link">Levi</a></li>
+                <li><a href="#tim" data-magnetic onclick="showPage('tim')" class="nav-link">Tim</a></li>
+                <li><a href="#terrell" data-magnetic onclick="showPage('terrell')" class="nav-link">Terrell</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Enhanced AI Assistant - Outside smooth scroll container for proper fixed positioning -->
+    <div class="ai-assistant">
+        <button class="ai-button" data-magnetic onclick="toggleAI()"></button>
+        <div class="ai-chat" id="aiChat">
+            <div class="ai-header">
+                <div class="ai-avatar">🤖</div>
+                <div class="ai-info">
+                    <h3>ARIA</h3>
+                    <p>2007 AI Assistant</p>
+                </div>
+            </div>
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message bot">Ask me anything...</div>
+            </div>
+            <div class="ai-input-area">
+                <input type="text" class="ai-input" placeholder="Type a message..." onkeypress="handleAIInput(event)">
+                <button class="ai-send" data-magnetic onclick="sendAIMessage()">→</button>
             </div>
         </div>
     </div>
