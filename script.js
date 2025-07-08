@@ -648,9 +648,9 @@ function initLocomotiveCursor() {
 // Enhanced About Page Functionality (Locomotive-level quality)
 class LocomotiveAboutPage {
     constructor() {
-        this.imagePool = [];
-        this.activeImages = [];
-        this.maxImages = 10; // Limit the number of images in the trail
+        this.imageGallery = document.getElementById('imageGallery');
+        this.galleryImages = [];
+        this.activeImage = null;
         this.mouse = { x: 0, y: 0 };
         this.isInitialized = false;
         this.imageUrls = [
@@ -661,94 +661,81 @@ class LocomotiveAboutPage {
             "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80", // crew
             "https://images.unsplash.com/photo-1518985250321-7a0d8b57ee8e?w=800&q=80"  // lights
         ];
-        this.currentImageIndex = 0;
         this.init();
     }
 
     init() {
-        this.createImagePool();
+        if (!this.imageGallery) return;
+        this.setupImageGallery();
         this.bindEvents();
         this.setupTextAnimations();
+        this.setupScrollTriggers();
         this.isInitialized = true;
     }
 
-    createImagePool() {
-        const galleryContainer = document.getElementById('imageGallery');
-        if (!galleryContainer) return;
-
-        for (let i = 0; i < this.maxImages; i++) {
+    setupImageGallery() {
+        this.imageUrls.forEach(url => {
             const imgWrapper = document.createElement('div');
             imgWrapper.className = 'gallery-image';
             const img = document.createElement('img');
-            img.src = this.imageUrls[i % this.imageUrls.length]; // Cycle through available images
+            img.src = url;
             img.alt = "Dynamic gallery image";
             imgWrapper.appendChild(img);
-            galleryContainer.appendChild(imgWrapper);
-            this.imagePool.push(imgWrapper);
-            gsap.set(imgWrapper, { opacity: 0, x: -9999, y: -9999 }); // Hide off-screen initially
-        }
+            this.imageGallery.appendChild(imgWrapper);
+            this.galleryImages.push(imgWrapper);
+            gsap.set(imgWrapper, { opacity: 0, scale: 0.8, rotation: gsap.utils.random(-10, 10) });
+        });
     }
 
     bindEvents() {
         document.addEventListener('mousemove', (e) => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
-            this.spawnImage();
-        });
-    }
-
-    spawnImage() {
-        if (this.imagePool.length === 0) return;
-
-        const img = this.imagePool.shift(); // Get an image from the pool
-        this.activeImages.push(img);
-
-        // Set initial position and animate in
-        gsap.set(img, {
-            x: this.mouse.x + gsap.utils.random(-50, 50),
-            y: this.mouse.y + gsap.utils.random(-50, 50),
-            scale: 0.2,
-            rotation: gsap.utils.random(-30, 30),
-            opacity: 0
-        });
-
-        gsap.to(img, {
-            opacity: 1,
-            scale: 1,
-            rotation: gsap.utils.random(-5, 5),
-            duration: 0.8,
-            ease: "power3.out"
-        });
-
-        // Animate image along mouse path with delay
-        gsap.to(img, {
-            x: this.mouse.x + gsap.utils.random(-20, 20),
-            y: this.mouse.y + gsap.utils.random(-20, 20),
-            duration: 1.5, // How long it follows the mouse
-            ease: "none",
-            onUpdate: () => {
-                // Keep updating position relative to mouse
-                gsap.to(img, {
-                    x: this.mouse.x + gsap.utils.random(-20, 20),
-                    y: this.mouse.y + gsap.utils.random(-20, 20),
-                    duration: 0.1, // Small duration for responsiveness
-                    ease: "power1.out"
+            if (this.activeImage) {
+                gsap.to(this.activeImage, {
+                    x: this.mouse.x,
+                    y: this.mouse.y,
+                    duration: 0.3,
+                    ease: "power2.out"
                 });
             }
         });
 
-        // Remove oldest image if too many active
-        if (this.activeImages.length > this.maxImages) {
-            const oldestImg = this.activeImages.shift();
-            gsap.to(oldestImg, {
-                opacity: 0,
-                scale: 0,
-                duration: 0.5,
-                onComplete: () => {
-                    this.imagePool.push(oldestImg); // Return to pool
-                    gsap.set(oldestImg, { x: -9999, y: -9999 }); // Reset position
-                }
+        document.querySelectorAll('.story-block').forEach(block => {
+            block.addEventListener('mouseenter', () => {
+                const imageId = block.getAttribute('data-trigger-image');
+                this.showImage(imageId);
             });
+            block.addEventListener('mouseleave', () => {
+                const imageId = block.getAttribute('data-trigger-image');
+                this.hideImage(imageId);
+            });
+        });
+    }
+
+    showImage(imageId) {
+        const targetImage = this.galleryImages.find(img => img.dataset.image === imageId);
+        if (targetImage && targetImage !== this.activeImage) {
+            if (this.activeImage) {
+                gsap.to(this.activeImage, { opacity: 0, scale: 0.8, duration: 0.3 });
+            }
+            this.activeImage = targetImage;
+            gsap.to(this.activeImage, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.5,
+                ease: "back.out(1.7)",
+                x: this.mouse.x,
+                y: this.mouse.y
+            });
+        }
+    }
+
+    hideImage(imageId) {
+        const targetImage = this.galleryImages.find(img => img.dataset.image === imageId);
+        if (targetImage && targetImage === this.activeImage) {
+            gsap.to(targetImage, { opacity: 0, scale: 0.8, duration: 0.3 });
+            this.activeImage = null;
         }
     }
 
@@ -764,6 +751,31 @@ class LocomotiveAboutPage {
                 onLeave: () => this.hideImage(imageId),
                 onEnterBack: () => this.showImage(imageId),
                 onLeaveBack: () => this.hideImage(imageId)
+            });
+        });
+
+        // Pixel fade for video section
+        ScrollTrigger.create({
+            trigger: ".about-video-section",
+            start: "top bottom",
+            end: "center center",
+            scrub: true,
+            onUpdate: (self) => {
+                gsap.to("#pixelOverlay", { opacity: 1 - self.progress, ease: "none" });
+            }
+        });
+
+        // Scrolling text animation
+        gsap.utils.toArray(".scrolling-text").forEach((textElement, i) => {
+            const direction = i % 2 === 0 ? 1 : -1; // Alternate direction
+            gsap.to(textElement, {
+                xPercent: -100 * direction,
+                repeat: -1,
+                duration: 20, // Adjust speed as needed
+                ease: "none",
+                modifiers: {
+                    xPercent: gsap.utils.wrap(-100, 100)
+                }
             });
         });
     }
@@ -798,13 +810,12 @@ class LocomotiveAboutPage {
                 trigger.kill();
             }
         });
-        // Clear active images and return to pool
-        this.activeImages.forEach(img => {
+        // Hide all gallery images
+        this.galleryImages.forEach(img => {
             gsap.killTweensOf(img);
-            gsap.set(img, { opacity: 0, x: -9999, y: -9999 });
-            this.imagePool.push(img);
+            gsap.set(img, { opacity: 0, scale: 0.8 });
         });
-        this.activeImages = [];
+        this.activeImage = null;
         this.isInitialized = false;
     }
 }

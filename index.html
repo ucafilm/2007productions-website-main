@@ -363,8 +363,148 @@
                                 </button>
                             </div>
                         </section>
+
+                        <!-- Scrolling Text Section -->
+                        <section class="scrolling-text-section" data-scroll-section>
+                            <div class="scrolling-text-container">
+                                <div class="scrolling-text" data-scroll data-scroll-speed="2">
+                                    <span>WORK WITH US • GOOD PEOPLE • GOOD TIMES • ANNUAL TRIP • </span>
+                                    <span>WORK WITH US • GOOD PEOPLE • GOOD TIMES • ANNUAL TRIP • </span>
+                                </div>
+                                <div class="scrolling-text" data-scroll data-scroll-speed="-2">
+                                    <span>CREATIVE CHAOS • VISIONARY STORIES • PIXEL PERFECTION • SOUND ALCHEMY • </span>
+                                    <span>CREATIVE CHAOS • VISIONARY STORIES • PIXEL PERFECTION • SOUND ALCHEMY • </span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Video Section with Pixel Fade -->
+                        <section class="about-video-section" data-scroll-section>
+                            <div class="video-overlay-pixel" id="pixelOverlay"></div>
+                            <video playsinline autoplay muted loop class="about-video">
+                                <source src="2007_productions_reel_1.mp4" type="video/mp4">
+                            </video>
+                            <div class="video-content">
+                                <h2 data-reveal="chars">Experience the Unconventional</h2>
+                                <p data-reveal="words">Where every frame tells a weird story.</p>
+                            </div>
+                        </section>
+
                     </div>
                 </div>
+                <div id="terrell" class="page">
+                    <div class="page-container">
+                        <div class="member-layout parallax-section">
+                            <div class="member-info parallax-content">
+                                <div class="member-label" data-reveal="words">The Beat Architect</div>
+                                <h2 class="member-name" data-magnetic data-morph="COMPOSER">TERRELL</h2>
+                                <div class="member-role" data-reveal>MUSIC PRODUCER / COMPOSER</div>
+                                <div class="member-quirk" data-reveal>"I speak fluent emotion"</div>
+                                <div class="member-bio" data-reveal>
+                                    Terrell builds sonic worlds where feelings live. He's the reason you get chills during that one scene, and why you can't get that melody out of your head. Warning: His beats have been known to cause spontaneous dancing.
+                                </div>
+                                <div class="member-skills">
+                                    <h3 class="skills-title" data-reveal>Powers & Abilities</h3>
+                                    <div class="skills-grid">
+                                        <span class="skill-tag" data-magnetic>SOUL_ENGINEERING</span>
+                                        <span class="skill-tag" data-magnetic>VIBE_CURATOR</span>
+                                        <span class="skill-tag" data-magnetic>FREQUENCY_WIZARD</span>
+                                        <span class="skill-tag" data-magnetic>MOOD_ARCHITECT</span>
+                                    </div>
+                                </div>
+                                <div class="member-contact">
+                                    <a href="mailto:terrell@2007productions.com" class="contact-link" data-magnetic>terrell@2007productions.com</a>
+                                    <div class="member-status" data-reveal="words">🎵 Currently: Composing your next favorite song</div>
+                                </div>
+                            </div>
+                            <div class="member-visual parallax-content" data-member="terrell" data-magnetic data-image="https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80">
+                                <div class="visual-content">
+                                    <div class="reel-type" data-reveal="words">Composer's</div>
+                                    <div class="reel-title" data-reveal="words">REPERTOIRE</div>
+                                    <div class="reel-descriptor" data-reveal="words">Original compositions and production work spanning multiple genres and moods</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>2007 Productions</h3>
+                <p>Where Stories Get Weird</p>
+            </div>
+            <div class="footer-column">
+                <h4>Contact Us</h4>
+                <p>Email: info@2007productions.com</p>
+                <p>Phone: +1 (555) 200-7200</p>
+            </div>
+            <div class="footer-column">
+                <h4>Address</h4>
+                <p>123 Creative Lane</p>
+                <p>Studio City, CA 91604</p>
+                <p>USA</p>
+            </div>
+            <div class="footer-column">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#" class="social-icon">FB</a>
+                    <a href="#" class="social-icon">IG</a>
+                    <a href="#" class="social-icon">TW</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2027 2007 Productions. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Navigation - Outside smooth scroll container for proper fixed positioning -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo-container" data-magnetic>
+                <div class="logo-symbol">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                                <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <polygon points="50,15 85,75 15,75" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+                        <circle cx="35" cy="60" r="4" fill="url(#logoGrad)"/>
+                        <circle cx="50" cy="60" r="4" fill="url(#logoGrad)"/>
+                        <circle cx="65" cy="60" r="4" fill="url(#logoGrad)"/>
+                        <polygon points="45,35 55,35 50,45" fill="url(#logoGrad)"/>
+                    </svg>
+                </div>
+                <div class="logo-text" data-morph="WEIRD">2007</div>
+            </div>
+            <div class="nav-mode-switch">
+                <button class="mode-button active" data-magnetic onclick="switchMode('work', event)">WORK</button>
+                <button class="mode-button" data-magnetic onclick="switchMode('agency', event)">AGENCY</button>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" data-magnetic onclick="showPage('home')" class="nav-link active">Home</a></li>
+                <li><a href="#about" data-magnetic onclick="showPage('about')" class="nav-link">About</a></li>
+                <li><a href="#collin" data-magnetic onclick="showPage('collin')" class="nav-link">Collin</a></li>
+                <li><a href="#corey" data-magnetic onclick="showPage('corey')" class="nav-link">Corey</a></li>
+                <li><a href="#levi" data-magnetic onclick="showPage('levi')" class="nav-link">Levi</a></li>
+                <li><a href="#tim" data-magnetic onclick="showPage('tim')" class="nav-link">Tim</a></li>
+                <li><a href="#terrell" data-magnetic onclick="showPage('terrell')" class="nav-link">Terrell</a></li>
+            </ul>
+            <div class="mobile-menu" id="mobileMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
                 <div id="terrell" class="page">
                     <div class="page-container">
                         <div class="member-layout parallax-section">
@@ -458,6 +598,38 @@
             <a href="#terrell" onclick="showPage('terrell'); closeMobileMenu();" class="mobile-nav-link">Terrell</a>
         </div>
     </div>
+
+    <!-- Footer Section -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>2007 Productions</h3>
+                <p>Where Stories Get Weird</p>
+            </div>
+            <div class="footer-column">
+                <h4>Contact Us</h4>
+                <p>Email: info@2007productions.com</p>
+                <p>Phone: +1 (555) 200-7200</p>
+            </div>
+            <div class="footer-column">
+                <h4>Address</h4>
+                <p>123 Creative Lane</p>
+                <p>Studio City, CA 91604</p>
+                <p>USA</p>
+            </div>
+            <div class="footer-column">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#" class="social-icon">FB</a>
+                    <a href="#" class="social-icon">IG</a>
+                    <a href="#" class="social-icon">TW</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2027 2007 Productions. All rights reserved.</p>
+        </div>
+    </footer>
 
     <!-- Enhanced AI Assistant - Outside smooth scroll container for proper fixed positioning -->
     <div class="ai-assistant">
