@@ -66,20 +66,28 @@ class KineticTypography {
         if (!wrapper) return;
 
         wrapper.classList.remove('exiting');
-        gsap.set(wrapper, { opacity: 0 });
-
-        gsap.to(wrapper, {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            duration: 1,
-            ease: 'power3.out',
-            onComplete: () => {
-                if (!this.isDestroyed) {
-                    wrapper.classList.add('active');
+        
+        // Check if GSAP is available
+        if (typeof gsap !== 'undefined') {
+            gsap.set(wrapper, { opacity: 0 });
+            gsap.to(wrapper, {
+                opacity: 1,
+                x: 0,
+                y: 0,
+                duration: 1,
+                ease: 'power3.out',
+                onComplete: () => {
+                    if (!this.isDestroyed) {
+                        wrapper.classList.add('active');
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            // Fallback to CSS animations
+            wrapper.style.opacity = '1';
+            wrapper.classList.add('active');
+            console.warn('GSAP not available, using CSS fallback');
+        }
     }
 
     hideText(index) {
@@ -102,17 +110,27 @@ class KineticTypography {
             default: exitProps = { opacity: 0 };
         }
 
-        gsap.to(wrapper, {
-            ...exitProps,
-            opacity: 0,
-            duration: 1,
-            ease: 'power3.in',
-            onComplete: () => {
-                if (!this.isDestroyed) {
-                    gsap.set(wrapper, { x: 0, y: 0 });
+        if (typeof gsap !== 'undefined') {
+            gsap.to(wrapper, {
+                ...exitProps,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.in',
+                onComplete: () => {
+                    if (!this.isDestroyed) {
+                        gsap.set(wrapper, { x: 0, y: 0 });
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            // CSS fallback
+            wrapper.style.opacity = '0';
+            setTimeout(() => {
+                if (!this.isDestroyed) {
+                    wrapper.style.transform = 'translate(0, 0)';
+                }
+            }, 1000);
+        }
     }
 
     nextText() {

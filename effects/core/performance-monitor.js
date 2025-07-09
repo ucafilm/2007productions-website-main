@@ -94,7 +94,12 @@ class PerformanceMonitor {
     }
 
     monitorLoadTimes() {
-        // Monitor effect initialization times
+        // Wait for effect manager to be ready
+        if (!window.effectManager) {
+            setTimeout(() => this.monitorLoadTimes(), 100);
+            return;
+        }
+
         const originalRegisterEffect = window.effectManager.registerEffect;
         window.effectManager.registerEffect = (name, effect) => {
             const loadTime = performance.now() - this.startTime;

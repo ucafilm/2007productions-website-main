@@ -48,6 +48,22 @@ class DeviceOptimizer {
         return settings[effectType][this.performanceLevel];
     }
 
+    supportsEnhancedFeatures() {
+        return (
+            'requestAnimationFrame' in window &&
+            'IntersectionObserver' in window &&
+            navigator.hardwareConcurrency > 2
+        );
+    }
+
+    supportsAdvancedFeatures() {
+        return (
+            this.performanceLevel === 'high' &&
+            !this.deviceInfo.isMobile &&
+            !this.deviceInfo.hasReducedMotion
+        );
+    }
+
     shouldEnableEffect(effectType) {
         if (this.deviceInfo.hasReducedMotion) return false;
         

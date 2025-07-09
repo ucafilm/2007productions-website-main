@@ -555,17 +555,37 @@
     <!-- Initialize effects -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize progressive enhancement
-            const loader = new ProgressiveEffectLoader();
-            loader.loadEffects().then(() => {
-                console.log('Effects loaded successfully');
-                
-                // Initialize performance monitoring
-                window.performanceMonitor = new PerformanceMonitor();
-            }).catch(error => {
-                console.warn('Some effects failed to load:', error);
-                window.effectErrorHandler.handleEffectError('initialization', error);
-            });
+            // Ensure all modules are loaded before initialization
+            setTimeout(() => {
+                try {
+                    console.log('Checking dependencies...');
+                    console.log('DeviceOptimizer:', typeof window.deviceOptimizer);
+                    console.log('EffectManager:', typeof window.effectManager);
+                    console.log('GSAP:', typeof gsap);
+                    
+                    if (typeof ProgressiveEffectLoader !== 'undefined') {
+                        const loader = new ProgressiveEffectLoader();
+                        loader.loadEffects().then(() => {
+                            console.log('✅ Effects loaded successfully');
+                            if (typeof PerformanceMonitor !== 'undefined') {
+                                window.performanceMonitor = new PerformanceMonitor();
+                            }
+                        }).catch(error => {
+                            console.error('❌ Effects failed to load:', error);
+                            if (window.effectErrorHandler) {
+                                window.effectErrorHandler.handleEffectError('initialization', error);
+                            }
+                        });
+                    } else {
+                        console.error('❌ ProgressiveEffectLoader not available');
+                    }
+                } catch (error) {
+                    console.error('❌ Initialization error:', error);
+                    if (window.effectErrorHandler) {
+                        window.effectErrorHandler.handleEffectError('initialization', error);
+                    }
+                }
+            }, 200); // Increased delay to ensure all scripts are parsed
         });
     </script>
 </body>
