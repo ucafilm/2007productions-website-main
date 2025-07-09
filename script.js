@@ -692,6 +692,13 @@ class LocomotiveAboutPage {
         document.addEventListener('mousemove', (e) => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
+            // Update the position of the image gallery container
+            gsap.to(this.imageGallery, {
+                x: this.mouse.x,
+                y: this.mouse.y,
+                duration: 0.3, // Adjust for desired smoothness
+                ease: "power2.out"
+            });
             if (this.activeImage) {
                 gsap.to(this.activeImage, {
                     x: this.mouse.x,

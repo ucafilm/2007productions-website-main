@@ -599,7 +599,7 @@ body {
 }
 
 .image-gallery {
-    position: fixed;
+    position: fixed; /* Reverted to fixed */
     top: 0;
     left: 0;
     width: 400px;
@@ -609,7 +609,7 @@ body {
 }
 
 .gallery-image {
-    position: fixed; /* Changed from absolute */
+    position: fixed; /* Reverted to fixed */
     width: 400px;
     height: 500px;
     opacity: 0;
@@ -1346,17 +1346,17 @@ body {
 
 /* --- IMAGE GALLERY ENHANCEMENTS --- */
 .image-gallery {
-    position: absolute; /* Changed from fixed to absolute for scroll-section */
-    top: 0; /* Will be positioned by JS */
-    left: 0; /* Will be positioned by JS */
-    width: 400px; /* Example size */
-    height: 500px; /* Example size */
+    position: fixed; /* Reverted to fixed */
+    top: 0;
+    left: 0;
+    width: 400px;
+    height: 500px;
     z-index: 10;
-    pointer-events: none; /* Allow interaction with text below */
+    pointer-events: none;
 }
 
 .gallery-image {
-    position: absolute; /* Changed from fixed to absolute */
+    position: fixed; /* Reverted to fixed */
     width: 100%;
     height: 100%;
     opacity: 0;
