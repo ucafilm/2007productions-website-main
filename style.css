@@ -30,12 +30,8 @@ html {
     overflow-x: hidden;
 }
 
-body {
-    font-family: var(--font-body);
-    background: var(--primary-bg);
-    color: var(--text-primary);
-    overflow-x: hidden;
-    /* cursor: none; is now managed by the LocomotiveCursor class in script.js */
+body.enhanced-effects {
+    cursor: none;
 }
 
 #smooth-wrapper {
