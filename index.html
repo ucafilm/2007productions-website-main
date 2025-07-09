@@ -224,16 +224,25 @@
                         <!-- Hero Section with Stunning Typography -->
                         <section class="about-hero" data-scroll-section>
                             <div class="about-hero-content">
-                                <h1 class="about-title">
-                                    <span class="title-word" data-scroll data-scroll-speed="-4" data-reveal="chars">BORN</span>
-                                    <span class="title-word" data-scroll data-scroll-speed="-3" data-reveal="chars">FROM</span>
-                                    <span class="title-word" data-scroll data-scroll-speed="-2" data-reveal="chars">CHAOS</span>
-                                </h1>
-                                <div class="about-subtitle" data-scroll data-scroll-speed="-1">
-                                    <span data-reveal="words">2007 Productions: Where Stories Get Weird</span>
+                                <div class="kinetic-container">
+                                    <div class="text-wrapper" data-text="BORN FROM CHAOS" data-enter="left" data-exit="right">
+                                        <h2>BORN FROM CHAOS</h2>
+                                    </div>
+                                    <div class="text-wrapper" data-text="WHERE STORIES GET WEIRD" data-enter="top" data-exit="bottom">
+                                        <h2>WHERE STORIES GET WEIRD</h2>
+                                    </div>
+                                    <div class="text-wrapper" data-text="CREATIVE MAYHEM" data-enter="right" data-exit="left">
+                                        <h2>CREATIVE MAYHEM</h2>
+                                    </div>
+                                    <div class="text-wrapper" data-text="EXPERIENCE THE UNCONVENTIONAL" data-enter="bottom" data-exit="top">
+                                        <h2>EXPERIENCE THE UNCONVENTIONAL</h2>
+                                    </div>
                                 </div>
                             </div>
                         </section>
+
+                        <!-- Mouse Effect Container for Image Spawning -->
+                        <div class="mouse-effect-container" id="mouseEffectContainer"></div>
 
                         <!-- Story Section with Mouse-Following Images -->
                         <section class="about-story" data-scroll-section>
@@ -390,6 +399,15 @@
                             </div>
                         </section>
 
+                    </div>
+                    <!-- Hidden image pool for performance -->
+                    <div class="image-pool" style="display: none;">
+                        <img src="https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&q=80" alt="Film camera in action" />
+                        <img src="https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=800&q=80" alt="Director's chair on set" />
+                        <img src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80" alt="Recording studio" />
+                        <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80" alt="Video editing suite" />
+                        <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80" alt="Film crew working" />
+                        <img src="https://images.unsplash.com/photo-1518985250321-7a0d8b57ee8e?w=800&q=80" alt="Studio lighting setup" />
                     </div>
                 </div>
                 <div id="terrell" class="page">

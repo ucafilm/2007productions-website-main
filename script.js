@@ -645,120 +645,275 @@ function initLocomotiveCursor() {
 }
 
 // Original functions (preserved and optimized)
-// Enhanced About Page Functionality (Locomotive-level quality)
-class LocomotiveAboutPage {
-    constructor() {
-        this.imageGallery = document.getElementById('imageGallery');
-        this.galleryImages = [];
-        this.activeImage = null;
-        this.mouse = { x: 0, y: 0 };
-        this.isInitialized = false;
-        this.imageUrls = [
-            { id: "camera", url: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?w=800&q=80" },
-            { id: "director", url: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?w=800&q=80" },
-            { id: "studio", url: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80" },
-            { id: "editing", url: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&q=80" },
-            { id: "crew", url: "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80" },
-            { id: "lights", url: "https://images.unsplash.com/photo-1518985250321-7a0d8b57ee8e?w=800&q=80" }
-        ];
+class KineticTypography {
+    constructor(container) {
+        this.container = container;
+        this.textWrappers = container.querySelectorAll('.text-wrapper');
+        this.currentIndex = 0;
+        this.displayDuration = 4000; // 4 seconds per text
+        this.transitionDuration = 1000; // 1 second transition
+        this.intervalId = null;
         this.init();
     }
 
     init() {
-        if (!this.imageGallery) return;
-        this.setupImageGallery();
+        if (this.textWrappers.length === 0) return;
+        this.start();
+    }
+
+    start() {
+        this.showText(this.currentIndex);
+        this.intervalId = setInterval(() => {
+            this.nextText();
+        }, this.displayDuration + this.transitionDuration);
+    }
+
+    stop() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
+        // Ensure all texts are hidden when stopping
+        this.textWrappers.forEach(wrapper => {
+            wrapper.classList.remove('active', 'exiting');
+            gsap.set(wrapper, { opacity: 0, x: 0, y: 0 }); // Reset GSAP properties
+        });
+    }
+
+    showText(index) {
+        const wrapper = this.textWrappers[index];
+        if (!wrapper) return;
+
+        // Reset any previous exiting state
+        wrapper.classList.remove('exiting');
+        gsap.set(wrapper, { opacity: 0 }); // Ensure it's hidden before animating in
+
+        // Animate in
+        gsap.to(wrapper, {
+            opacity: 1,
+            x: 0,
+            y: 0,
+            duration: 1,
+            ease: 'power3.out',
+            onComplete: () => {
+                wrapper.classList.add('active');
+            }
+        });
+    }
+
+    hideText(index) {
+        const wrapper = this.textWrappers[index];
+        if (!wrapper) return;
+
+        wrapper.classList.remove('active');
+        wrapper.classList.add('exiting');
+
+        // Animate out based on data-exit attribute
+        const exitDirection = wrapper.getAttribute('data-exit');
+        let exitProps = {};
+        if (exitDirection === 'left') exitProps = { x: '-100%' };
+        else if (exitDirection === 'right') exitProps = { x: '100%' };
+        else if (exitDirection === 'top') exitProps = { y: '-100%' };
+        else if (exitDirection === 'bottom') exitProps = { y: '100%' };
+
+        gsap.to(wrapper, {
+            ...exitProps,
+            opacity: 0,
+            duration: 1,
+            ease: 'power3.in',
+            onComplete: () => {
+                // Reset position after animation to prepare for next cycle
+                gsap.set(wrapper, { x: 0, y: 0 });
+            }
+        });
+    }
+
+    nextText() {
+        this.hideText(this.currentIndex);
+        this.currentIndex = (this.currentIndex + 1) % this.textWrappers.length;
+        // Delay showing the next text until the current one has exited
+        setTimeout(() => {
+            this.showText(this.currentIndex);
+        }, this.transitionDuration);
+    }
+
+    destroy() {
+        this.stop();
+    }
+}
+
+// Enhanced About Page Functionality (Locomotive-level quality)
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+class MouseImageEffect {
+    constructor(container, imagePool) {
+        this.container = container;
+        this.imagePool = Array.from(imagePool.querySelectorAll('img'));
+        this.lastMousePosition = { x: 0, y: 0 };
+        this.lastTimestamp = Date.now();
+        this.velocityThreshold = 5; // Minimum velocity to spawn images
+        this.maxImages = 10; // Maximum number of images to spawn
+        this.imageCounter = 0;
+        this.activeImages = [];
+
         this.bindEvents();
-        this.setupTextAnimations();
+    }
+
+    bindEvents() {
+        document.addEventListener('mousemove', throttle((e) => {
+            this.handleMouseMove(e);
+        }, 16)); // Throttle to ~60fps
+    }
+
+    calculateVelocity(currentPos, currentTime) {
+        const deltaX = currentPos.x - this.lastMousePosition.x;
+        const deltaY = currentPos.y - this.lastMousePosition.y;
+        const deltaTime = currentTime - this.lastTimestamp;
+
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const velocity = distance / (deltaTime || 1) * 10; // Scale factor
+
+        return velocity;
+    }
+
+    handleMouseMove(e) {
+        const currentPos = { x: e.clientX, y: e.clientY };
+        const currentTime = Date.now();
+
+        const velocity = this.calculateVelocity(currentPos, currentTime);
+
+        if (velocity > this.velocityThreshold) {
+            this.spawnImages(currentPos, velocity);
+        }
+
+        this.lastMousePosition = currentPos;
+        this.lastTimestamp = currentTime;
+    }
+
+    spawnImages(position, velocity) {
+        const numImages = Math.min(
+            Math.floor(velocity / 3),
+            this.maxImages - this.activeImages.length // Limit based on active images
+        );
+
+        for (let i = 0; i < numImages; i++) {
+            this.createImage(position);
+        }
+    }
+
+    createImage(centerPos) {
+        if (this.imagePool.length === 0) return;
+
+        const img = document.createElement('img');
+        const randomImageSrc = this.imagePool[Math.floor(Math.random() * this.imagePool.length)].src;
+        
+        img.src = randomImageSrc;
+        img.className = 'spawned-image';
+        img.id = `spawned-img-${this.imageCounter++}`;
+
+        // Random positioning around mouse
+        const offsetX = (Math.random() - 0.5) * 120; // -60 to 60
+        const offsetY = (Math.random() - 0.5) * 120; // -60 to 60
+        const rotation = Math.random() * 360;
+        const scale = 0.5 + Math.random() * 0.8; // 0.5 to 1.3
+
+        gsap.set(img, {
+            x: centerPos.x + offsetX,
+            y: centerPos.y + offsetY,
+            rotation: rotation,
+            scale: scale,
+            opacity: 0.8,
+            pointerEvents: 'none', // Ensure it doesn't interfere with mouse events
+            zIndex: 999 // Ensure it's above other content but below cursor
+        });
+
+        this.container.appendChild(img);
+        this.activeImages.push(img);
+
+        // Trigger fade out animation
+        gsap.to(img, {
+            opacity: 0,
+            scale: scale * 0.8, // Shrink slightly
+            y: '-=50', // Float up slightly
+            duration: 1.5,
+            ease: 'power1.out',
+            onComplete: () => {
+                img.remove();
+                this.activeImages = this.activeImages.filter(item => item !== img);
+            }
+        });
+    }
+
+    destroy() {
+        // Remove all active images
+        this.activeImages.forEach(img => img.remove());
+        this.activeImages = [];
+        // Remove event listener if necessary (though throttle handles some of this)
+        document.removeEventListener('mousemove', this.handleMouseMove);
+    }
+}
+
+class LocomotiveAboutPage {
+    constructor() {
+        this.imageGallery = document.getElementById('imageGallery');
+        this.activeImage = null;
+        this.mouse = { x: 0, y: 0 };
+        this.isInitialized = false;
+        this.kineticTypography = null;
+        this.mouseImageEffect = null; // New property for MouseImageEffect
+        this.init();
+    }
+
+    init() {
+        const aboutPage = document.getElementById('about');
+        if (!aboutPage) return; // Only initialize if on the about page
+
+        const kineticContainer = document.querySelector('.kinetic-container');
+        if (kineticContainer) {
+            this.kineticTypography = new KineticTypography(kineticContainer);
+        }
+
+        const mouseEffectContainer = document.getElementById('mouseEffectContainer');
+        const imagePool = document.querySelector('.image-pool');
+        if (mouseEffectContainer && imagePool) {
+            this.mouseImageEffect = new MouseImageEffect(mouseEffectContainer, imagePool);
+        }
+
+        // Remove old image gallery setup as it's replaced by mouseImageEffect
+        if (this.imageGallery) {
+            this.imageGallery.innerHTML = ''; // Clear existing images
+            this.imageGallery.remove(); // Remove the element itself if no longer needed
+            this.imageGallery = null;
+        }
+
         this.setupScrollTriggers();
         this.isInitialized = true;
     }
 
-    setupImageGallery() {
-        this.imageUrls.forEach(imageData => {
-            const imgWrapper = document.createElement('div');
-            imgWrapper.className = 'gallery-image';
-            imgWrapper.dataset.image = imageData.id; // Set the data-image attribute
-            const img = document.createElement('img');
-            img.src = imageData.url;
-            img.alt = "Dynamic gallery image";
-            imgWrapper.appendChild(img);
-            this.imageGallery.appendChild(imgWrapper);
-            this.galleryImages.push(imgWrapper);
-            gsap.set(imgWrapper, { opacity: 0, scale: 0.8, rotation: gsap.utils.random(-10, 10) });
-        });
-    }
-
-    bindEvents() {
-        document.addEventListener('mousemove', (e) => {
-            this.mouse.x = e.clientX;
-            this.mouse.y = e.clientY;
-            // Update the position of the image gallery container
-            gsap.to(this.imageGallery, {
-                x: this.mouse.x,
-                y: this.mouse.y,
-                duration: 0.3, // Adjust for desired smoothness
-                ease: "power2.out"
-            });
-            if (this.activeImage) {
-                gsap.to(this.activeImage, {
-                    x: this.mouse.x,
-                    y: this.mouse.y,
-                    duration: 0.3,
-                    ease: "power2.out"
-                });
-            }
-        });
-
-        document.querySelectorAll('.story-block').forEach(block => {
-            block.addEventListener('mouseenter', () => {
-                const imageId = block.getAttribute('data-trigger-image');
-                this.showImage(imageId);
-            });
-            block.addEventListener('mouseleave', () => {
-                const imageId = block.getAttribute('data-trigger-image');
-                this.hideImage(imageId);
-            });
-        });
-    }
-
-    showImage(imageId) {
-        const targetImage = this.galleryImages.find(img => img.dataset.image === imageId);
-        if (targetImage && targetImage !== this.activeImage) {
-            if (this.activeImage) {
-                gsap.to(this.activeImage, { opacity: 0, scale: 0.8, duration: 0.3 });
-            }
-            this.activeImage = targetImage;
-            gsap.to(this.activeImage, {
-                opacity: 1,
-                scale: 1,
-                duration: 0.5,
-                ease: "back.out(1.7)",
-                x: this.mouse.x,
-                y: this.mouse.y
-            });
-        }
-    }
-
-    hideImage(imageId) {
-        const targetImage = this.galleryImages.find(img => img.dataset.image === imageId);
-        if (targetImage && targetImage === this.activeImage) {
-            gsap.to(targetImage, { opacity: 0, scale: 0.8, duration: 0.3 });
-            this.activeImage = null;
-        }
-    }
+    // Removed setupImageGallery and bindEvents related to old image gallery
+    // showImage and hideImage are also removed as they are no longer needed
 
     setupScrollTriggers() {
-        // Existing scroll triggers for story blocks
+        // Existing scroll triggers for story blocks (will need adjustment if story blocks no longer trigger images)
+        // For now, keep them as they might be used for other text reveals
         document.querySelectorAll('.story-block').forEach((block, index) => {
-            const imageId = block.getAttribute('data-trigger-image');
+            // Removed image triggering logic from here
             ScrollTrigger.create({
                 trigger: block,
                 start: 'top 70%',
                 end: 'bottom 30%',
-                onEnter: () => this.showImage(imageId),
-                onLeave: () => this.hideImage(imageId),
-                onEnterBack: () => this.showImage(imageId),
-                onLeaveBack: () => this.hideImage(imageId)
+                // onEnter, onLeave, onEnterBack, onLeaveBack related to images are removed
             });
         });
 
@@ -788,45 +943,27 @@ class LocomotiveAboutPage {
         });
     }
 
-    setupTextAnimations() {
-        gsap.utils.toArray('[data-reveal="words"]').forEach(element => {
-            const words = element.textContent.split(' ');
-            element.innerHTML = words.map(word => `<span class="word-wrapper"><span class="word">${word}</span></span>`).join(' ');
-            const wordSpans = element.querySelectorAll('.word');
-
-            gsap.set(wordSpans, { yPercent: 110 });
-
-            ScrollTrigger.create({
-                trigger: element,
-                start: 'top 85%',
-                onEnter: () => {
-                    gsap.to(wordSpans, {
-                        yPercent: 0,
-                        duration: 0.8,
-                        stagger: 0.05,
-                        ease: "power3.out"
-                    });
-                }
-            });
-        });
-    }
-
     destroy() {
         if (!this.isInitialized) return;
+        if (this.kineticTypography) {
+            this.kineticTypography.destroy();
+            this.kineticTypography = null;
+        }
+        if (this.mouseImageEffect) {
+            this.mouseImageEffect.destroy();
+            this.mouseImageEffect = null;
+        }
         ScrollTrigger.getAll().forEach(trigger => {
             if (trigger.trigger && trigger.trigger.closest('.about-container')) {
                 trigger.kill();
             }
         });
-        // Hide all gallery images
-        this.galleryImages.forEach(img => {
-            gsap.killTweensOf(img);
-            gsap.set(img, { opacity: 0, scale: 0.8 });
-        });
-        this.activeImage = null;
+        // No need to hide gallery images as the old gallery is removed
         this.isInitialized = false;
     }
 }
+
+// Global instance
 
 // Global instance
 let locomotiveAbout = null;
