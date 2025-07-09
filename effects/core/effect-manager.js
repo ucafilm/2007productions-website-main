@@ -18,19 +18,6 @@ class EffectManager {
                 this.resumeAllEffects();
             }
         });
-
-        // Cleanup on low memory
-        if ('memory' in performance) {
-            setInterval(() => {
-                const memInfo = performance.memory;
-                const usedPercentage = memInfo.usedJSHeapSize / memInfo.jsHeapSizeLimit;
-                
-                if (usedPercentage > 0.8) {
-                    console.warn('High memory usage detected, cleaning up effects');
-                    this.optimizeMemoryUsage();
-                }
-            }, 5000);
-        }
     }
 
     registerEffect(name, effect) {
@@ -65,15 +52,6 @@ class EffectManager {
                 effect.resume();
             }
         });
-    }
-
-    optimizeMemoryUsage() {
-        // Force garbage collection by removing and recreating effects
-        this.pauseAllEffects();
-        
-        setTimeout(() => {
-            this.resumeAllEffects();
-        }, 100);
     }
 }
 

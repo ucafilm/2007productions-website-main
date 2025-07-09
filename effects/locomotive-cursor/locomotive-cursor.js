@@ -14,6 +14,14 @@ class LocomotiveCursor {
         this.isClicking = false;
         this.isDisabled = window.innerWidth <= 768;
         this.isDestroyed = false;
+
+        // Bind event handlers
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.handleMouseDown = this.handleMouseDown.bind(this);
+        this.handleMouseUp = this.handleMouseUp.bind(this);
+        this.handleResize = this.handleResize.bind(this);
+        this.handleMouseLeave = this.handleMouseLeave.bind(this);
+        this.handleMouseEnter = this.handleMouseEnter.bind(this);
         
         this.init();
     }
@@ -144,69 +152,57 @@ class LocomotiveCursor {
         document.head.appendChild(style);
     }
 
+    // Event Handlers
+    handleMouseMove(e) {
+        this.mouseX = e.clientX;
+        this.mouseY = e.clientY;
+    }
+
+    handleMouseDown() {
+        this.isClicking = true;
+        if (this.cursor) this.cursor.classList.add('clicking');
+    }
+
+    handleMouseUp() {
+        this.isClicking = false;
+        if (this.cursor) this.cursor.classList.remove('clicking');
+    }
+
+    handleResize() {
+        this.isDisabled = window.innerWidth <= 768;
+        if (this.isDisabled) {
+            this.destroy();
+        } else if (!this.cursor) {
+            this.init(); // Re-initialize if it was destroyed due to resize
+        }
+    }
+
+    handleMouseLeave() {
+        if (this.cursor) this.cursor.style.opacity = '0';
+    }
+
+    handleMouseEnter() {
+        if (this.cursor) this.cursor.style.opacity = '1';
+    }
+
     bindEvents() {
-        // Mouse move with high precision
-        document.addEventListener('mousemove', (e) => {
-            this.mouseX = e.clientX;
-            this.mouseY = e.clientY;
-        });
-
-        // Mouse down/up
-        document.addEventListener('mousedown', () => {
-            this.isClicking = true;
-            if (this.cursor) this.cursor.classList.add('clicking');
-        });
-
-        document.addEventListener('mouseup', () => {
-            this.isClicking = false;
-            if (this.cursor) this.cursor.classList.remove('clicking');
-        });
-
-        // Hover effects for different elements
+        document.addEventListener('mousemove', this.handleMouseMove);
+        document.addEventListener('mousedown', this.handleMouseDown);
+        document.addEventListener('mouseup', this.handleMouseUp);
+        window.addEventListener('resize', this.handleResize);
+        document.addEventListener('mouseleave', this.handleMouseLeave);
+        document.addEventListener('mouseenter', this.handleMouseEnter);
         this.bindHoverEffects();
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            this.isDisabled = window.innerWidth <= 768;
-            if (this.isDisabled) {
-                this.destroy();
-            } else if (!this.cursor) {
-                this.init(); // Re-initialize if it was destroyed due to resize
-            }
-        });
-
-        // Hide cursor when leaving window
-        document.addEventListener('mouseleave', () => {
-            if (this.cursor) this.cursor.style.opacity = '0';
-        });
-
-        document.addEventListener('mouseenter', () => {
-            if (this.cursor) this.cursor.style.opacity = '1';
-        });
     }
 
     bindHoverEffects() {
-        // Interactive elements
         const interactiveSelectors = [
-            'button', 
-            '.ai-button',
-            '.mode-button',
-            '.nav-link',
-            '.contact-link',
-            '.skill-tag',
-            '[data-magnetic]'
+            'button', '.ai-button', '.mode-button', '.nav-link',
+            '.contact-link', '.skill-tag', '[data-magnetic]'
         ];
+        const videoSelectors = ['.member-visual', '.play-button', '[data-video]'];
 
-        const videoSelectors = [
-            '.member-visual',
-            '.play-button',
-            '[data-video]'
-        ];
-
-        // Button hover effects
         this.addHoverEffect(interactiveSelectors, 'button-hover');
-        
-        // Video hover effects
         this.addHoverEffect(videoSelectors, 'video-hover');
     }
 
@@ -231,48 +227,51 @@ class LocomotiveCursor {
     render() {
         if (this.isDisabled || !this.cursor || this.isDestroyed) return;
 
-        // Smooth animation using different easing for inner and outer
-        this.innerX += (this.mouseX - this.innerX) * 0.9; // Fast and precise for inner
+        this.innerX += (this.mouseX - this.innerX) * 0.9;
         this.innerY += (this.mouseY - this.innerY) * 0.9;
-        
-        this.outerX += (this.mouseX - this.outerX) * 0.15; // Slower for outer (trail effect)
+        this.outerX += (this.mouseX - this.outerX) * 0.15;
         this.outerY += (this.mouseY - this.outerY) * 0.15;
 
-        // Apply transforms with sub-pixel precision
         this.cursorInner.style.transform = `translate(${this.innerX}px, ${this.innerY}px) translate(-50%, -50%)`;
         this.cursorOuter.style.transform = `translate(${this.outerX}px, ${this.outerY}px) translate(-50%, -50%)`;
 
-        // Continue animation
         requestAnimationFrame(() => this.render());
     }
 
     destroy() {
+        if (this.isDestroyed) return;
         this.isDestroyed = true;
+
         if (this.cursor) {
             this.cursor.remove();
-            document.body.style.cursor = 'auto';
-            document.documentElement.style.cursor = 'auto';
-            
-            // Remove styles
-            const styles = document.querySelector('#locomotive-cursor-styles');
-            if (styles) styles.remove();
+            this.cursor = null;
         }
-        // Remove event listeners to prevent memory leaks
+
+        document.body.style.cursor = 'auto';
+        document.documentElement.style.cursor = 'auto';
+        
+        const styles = document.getElementById('locomotive-cursor-styles');
+        if (styles) styles.remove();
+
+        // Remove event listeners
         document.removeEventListener('mousemove', this.handleMouseMove);
         document.removeEventListener('mousedown', this.handleMouseDown);
         document.removeEventListener('mouseup', this.handleMouseUp);
         window.removeEventListener('resize', this.handleResize);
         document.removeEventListener('mouseleave', this.handleMouseLeave);
         document.removeEventListener('mouseenter', this.handleMouseEnter);
+        
+        // Note: Hover effects from addHoverEffect are not removed, which is a potential memory leak.
+        // This would require a more complex implementation to track and remove those listeners.
+        // For this fix, we focus on the main listeners.
     }
 
     // Public API methods for EffectManager
-    pause() {
-        // No specific pause logic needed for cursor, as it's always tracking mouse
-    }
+    pause() {}
 
     resume() {
-        if (!this.isDestroyed && !this.cursor) {
+        if (this.isDestroyed) {
+            this.isDestroyed = false;
             this.init();
         }
     }

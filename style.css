@@ -30,6 +30,13 @@ html {
     overflow-x: hidden;
 }
 
+body {
+    font-family: var(--font-body);
+    background: var(--primary-bg);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
 body.enhanced-effects {
     cursor: none;
 }

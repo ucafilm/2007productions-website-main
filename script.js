@@ -13,6 +13,9 @@ function initializeApp() {
     
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
+    // Initialize EffectManager
+    window.effectManager = new EffectManager();
+
     // Initialize smooth scrolling
     ScrollSmoother.create({
         wrapper: "#smooth-wrapper",
@@ -21,7 +24,7 @@ function initializeApp() {
         effects: true
     });
     
-    // Handle loading overlay
+    """    // Handle loading overlay
     gsap.to("#loadingOverlay", { 
         opacity: 0, 
         duration: 0.8, 
@@ -32,9 +35,10 @@ function initializeApp() {
         }
     });
     
-    // Initialize core functionality
-    initializeCore();
-}
+    // Core functionality is initialized once the loading overlay is complete.
+}"""""
+
+
 
 function initializeCore() {
     // Basic animations that don't depend on effects
@@ -60,10 +64,6 @@ function initializeCore() {
     // Assuming advancedAI, toggleAI, handleAIInput, sendAIMessage, addAIMessage, showTypingIndicator are defined elsewhere or will be moved
 }
 
-// Core functions (navigation, page switching, etc.)
-// These functions remain mostly the same, but their calls to effects are updated
-
-// Effect-specific initialization moved to effect modules
 function initializeAboutPageEffects() {
     // This function is called by the progressive loader
     // when the about page is accessed and effects are ready
@@ -87,20 +87,16 @@ function initializeAboutPageEffects() {
         const mouseEffect = new MouseImageEffect(mouseEffectContainer, imagePool, settings);
         window.effectManager.registerEffect('mouseEffect', mouseEffect);
     }
-
-    // if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) { // Moved to initializeCore
-    //     window.locomotiveCursor = new LocomotiveCursor(); // Moved to initializeCore
-    //     window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor); // Moved to initializeCore
-    // }
 }
 
 // Updated showPage function with effect management
 function showPage(pageId) {
-    // Cleanup previous page effects using EffectManager
+    // Selectively destroy effects not present on the new page
     if (window.effectManager) {
-        window.effectManager.destroyEffect('kinetic');
-        window.effectManager.destroyEffect('mouseEffect');
-        window.effectManager.destroyEffect('locomotiveCursor');
+        if (pageId !== 'about') {
+            window.effectManager.destroyEffect('kinetic');
+            window.effectManager.destroyEffect('mouseEffect');
+        }
     }
     
     // Standard page switching logic
