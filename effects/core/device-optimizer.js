@@ -64,19 +64,36 @@ class DeviceOptimizer {
         );
     }
 
-    shouldEnableEffect(effectType) {
+    shouldEnableEffect(effectName) {
         if (this.deviceInfo.hasReducedMotion) return false;
         
-        switch (effectType) {
-            case 'kinetic':
-                return true; // Always enable, but with optimized settings
-            case 'mouse':
-                return this.performanceLevel !== 'low';
-            case 'cursor':
-                return !this.deviceInfo.isMobile;
-            default:
-                return true;
+        const settings = this.getOptimizedSettings(effectName);
+        if (settings && settings.enabled === false) {
+            return false;
         }
+        
+        // Example of a more specific rule
+        if (effectName === 'locomotiveCursor' && this.deviceInfo.isMobile) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    supportsEnhancedFeatures() {
+        return (
+            'requestAnimationFrame' in window &&
+            'IntersectionObserver' in window &&
+            navigator.hardwareConcurrency > 2
+        );
+    }
+
+    supportsAdvancedFeatures() {
+        return (
+            this.performanceLevel === 'high' &&
+            !this.deviceInfo.isMobile &&
+            !this.deviceInfo.hasReducedMotion
+        );
     }
 }
 
