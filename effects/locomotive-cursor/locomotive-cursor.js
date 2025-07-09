@@ -1,0 +1,286 @@
+// Enhanced Locomotive-Style Cursor System
+class LocomotiveCursor {
+    constructor() {
+        this.cursor = null;
+        this.cursorInner = null;
+        this.cursorOuter = null;
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.outerX = 0;
+        this.outerY = 0;
+        this.innerX = 0;
+        this.innerY = 0;
+        this.isHovered = false;
+        this.isClicking = false;
+        this.isDisabled = window.innerWidth <= 768;
+        this.isDestroyed = false;
+        
+        this.init();
+    }
+
+    init() {
+        if (this.isDisabled || this.isDestroyed) return;
+        
+        this.createCursor();
+        this.bindEvents();
+        this.render();
+    }
+
+    createCursor() {
+        // Remove existing cursors
+        const existingCursors = document.querySelectorAll('.cursor, .cursor-trail, .locomotive-cursor');
+        existingCursors.forEach(cursor => cursor.remove());
+
+        // Create cursor container
+        this.cursor = document.createElement('div');
+        this.cursor.className = 'locomotive-cursor';
+        this.cursor.innerHTML = `
+            <div class="cursor-inner"></div>
+            <div class="cursor-outer"></div>
+        `;
+        
+        document.body.appendChild(this.cursor);
+        
+        this.cursorInner = this.cursor.querySelector('.cursor-inner');
+        this.cursorOuter = this.cursor.querySelector('.cursor-outer');
+
+        // Add CSS styles
+        this.addStyles();
+        
+        // Hide default cursor
+        document.body.style.cursor = 'none';
+        document.documentElement.style.cursor = 'none';
+    }
+
+    addStyles() {
+        const style = document.createElement('style');
+        style.id = 'locomotive-cursor-styles';
+        style.textContent = `
+            .locomotive-cursor {
+                position: fixed;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 9999;
+                mix-blend-mode: difference;
+            }
+
+            .cursor-inner {
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: #fff;
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                transition: transform 0.1s ease-out;
+            }
+
+            .cursor-outer {
+                position: absolute;
+                width: 32px;
+                height: 32px;
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+
+            /* Button hover */
+            .locomotive-cursor.button-hover .cursor-inner {
+                transform: translate(-50%, -50%) scale(0);
+            }
+
+            .locomotive-cursor.button-hover .cursor-outer {
+                transform: translate(-50%, -50%) scale(1.5);
+                background: rgba(255, 107, 53, 0.2);
+                border-color: var(--accent-electric, #ff6b35);
+                border-width: 2px;
+            }
+
+            /* Video hover */
+            .locomotive-cursor.video-hover .cursor-inner {
+                width: 16px;
+                height: 16px;
+                background: transparent;
+                border: 2px solid #fff;
+            }
+
+            .locomotive-cursor.video-hover .cursor-inner::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 16px;
+                height: 16px;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
+                background-size: contain;
+            }
+
+            .locomotive-cursor.video-hover .cursor-outer {
+                transform: translate(-50%, -50%) scale(2.5);
+                border-color: #fff;
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            /* Hide on mobile */
+            @media (max-width: 768px) {
+                .locomotive-cursor {
+                    display: none !important;
+                }
+            }
+
+            /* Disable cursor on specific elements */
+            *, *::before, *::after {
+                cursor: none !important;
+            }
+
+            /* Re-enable on inputs */
+            input, textarea, select {
+                cursor: text !important;
+            }
+        `;
+        
+        document.head.appendChild(style);
+    }
+
+    bindEvents() {
+        // Mouse move with high precision
+        document.addEventListener('mousemove', (e) => {
+            this.mouseX = e.clientX;
+            this.mouseY = e.clientY;
+        });
+
+        // Mouse down/up
+        document.addEventListener('mousedown', () => {
+            this.isClicking = true;
+            if (this.cursor) this.cursor.classList.add('clicking');
+        });
+
+        document.addEventListener('mouseup', () => {
+            this.isClicking = false;
+            if (this.cursor) this.cursor.classList.remove('clicking');
+        });
+
+        // Hover effects for different elements
+        this.bindHoverEffects();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.isDisabled = window.innerWidth <= 768;
+            if (this.isDisabled) {
+                this.destroy();
+            } else if (!this.cursor) {
+                this.init(); // Re-initialize if it was destroyed due to resize
+            }
+        });
+
+        // Hide cursor when leaving window
+        document.addEventListener('mouseleave', () => {
+            if (this.cursor) this.cursor.style.opacity = '0';
+        });
+
+        document.addEventListener('mouseenter', () => {
+            if (this.cursor) this.cursor.style.opacity = '1';
+        });
+    }
+
+    bindHoverEffects() {
+        // Interactive elements
+        const interactiveSelectors = [
+            'button', 
+            '.ai-button',
+            '.mode-button',
+            '.nav-link',
+            '.contact-link',
+            '.skill-tag',
+            '[data-magnetic]'
+        ];
+
+        const videoSelectors = [
+            '.member-visual',
+            '.play-button',
+            '[data-video]'
+        ];
+
+        // Button hover effects
+        this.addHoverEffect(interactiveSelectors, 'button-hover');
+        
+        // Video hover effects
+        this.addHoverEffect(videoSelectors, 'video-hover');
+    }
+
+    addHoverEffect(selectors, className) {
+        selectors.forEach(selector => {
+            document.addEventListener('mouseover', (e) => {
+                if (e.target.matches(selector) || e.target.closest(selector)) {
+                    if (this.cursor) this.cursor.classList.add(className);
+                    this.isHovered = true;
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                if (e.target.matches(selector) || e.target.closest(selector)) {
+                    if (this.cursor) this.cursor.classList.remove(className);
+                    this.isHovered = false;
+                }
+            });
+        });
+    }
+
+    render() {
+        if (this.isDisabled || !this.cursor || this.isDestroyed) return;
+
+        // Smooth animation using different easing for inner and outer
+        this.innerX += (this.mouseX - this.innerX) * 0.9; // Fast and precise for inner
+        this.innerY += (this.mouseY - this.innerY) * 0.9;
+        
+        this.outerX += (this.mouseX - this.outerX) * 0.15; // Slower for outer (trail effect)
+        this.outerY += (this.mouseY - this.outerY) * 0.15;
+
+        // Apply transforms with sub-pixel precision
+        this.cursorInner.style.transform = `translate(${this.innerX}px, ${this.innerY}px) translate(-50%, -50%)`;
+        this.cursorOuter.style.transform = `translate(${this.outerX}px, ${this.outerY}px) translate(-50%, -50%)`;
+
+        // Continue animation
+        requestAnimationFrame(() => this.render());
+    }
+
+    destroy() {
+        this.isDestroyed = true;
+        if (this.cursor) {
+            this.cursor.remove();
+            document.body.style.cursor = 'auto';
+            document.documentElement.style.cursor = 'auto';
+            
+            // Remove styles
+            const styles = document.querySelector('#locomotive-cursor-styles');
+            if (styles) styles.remove();
+        }
+        // Remove event listeners to prevent memory leaks
+        document.removeEventListener('mousemove', this.handleMouseMove);
+        document.removeEventListener('mousedown', this.handleMouseDown);
+        document.removeEventListener('mouseup', this.handleMouseUp);
+        window.removeEventListener('resize', this.handleResize);
+        document.removeEventListener('mouseleave', this.handleMouseLeave);
+        document.removeEventListener('mouseenter', this.handleMouseEnter);
+    }
+
+    // Public API methods for EffectManager
+    pause() {
+        // No specific pause logic needed for cursor, as it's always tracking mouse
+    }
+
+    resume() {
+        if (!this.isDestroyed && !this.cursor) {
+            this.init();
+        }
+    }
+}
+
+// Module export
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = LocomotiveCursor;
+} else {
+    window.LocomotiveCursor = LocomotiveCursor;
+}

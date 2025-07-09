@@ -1,0 +1,95 @@
+/**
+ * Kinetic Typography Styles
+ * Locomotive.ca inspired animations
+ */
+
+.kinetic-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 300px;
+}
+
+.text-wrapper {
+    position: absolute;
+    font-family: var(--font-primary, 'Space Grotesk', sans-serif);
+    font-size: clamp(4rem, 12vw, 12rem);
+    font-weight: 700;
+    line-height: 0.8;
+    color: var(--text-primary, #ffffff);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, opacity;
+}
+
+.text-wrapper h2 {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    margin: 0;
+    background: linear-gradient(135deg, #fff, #ff6b35, #4a9eff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 8s ease-in-out infinite;
+    background-size: 300% 300%;
+}
+
+/* Entrance positions */
+.text-wrapper[data-enter="left"] { transform: translateX(-100%); }
+.text-wrapper[data-enter="right"] { transform: translateX(100%); }
+.text-wrapper[data-enter="top"] { transform: translateY(-100%); }
+.text-wrapper[data-enter="bottom"] { transform: translateY(100%); }
+
+/* Active state */
+.text-wrapper.active {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+/* Exit animations */
+.text-wrapper.exiting[data-exit="left"] { 
+    transform: translateX(-100%); 
+    opacity: 0; 
+}
+.text-wrapper.exiting[data-exit="right"] { 
+    transform: translateX(100%); 
+    opacity: 0; 
+}
+.text-wrapper.exiting[data-exit="top"] { 
+    transform: translateY(-100%); 
+    opacity: 0; 
+}
+.text-wrapper.exiting[data-exit="bottom"] { 
+    transform: translateY(100%); 
+    opacity: 0; 
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .text-wrapper {
+        font-size: clamp(2rem, 8vw, 4rem);
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .text-wrapper {
+        transition: opacity 0.3s ease;
+    }
+    
+    .text-wrapper h2 {
+        animation: none;
+    }
+}

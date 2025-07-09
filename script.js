@@ -1,10 +1,11 @@
-// Enhanced JavaScript for 2007 Productions - Locomotive.ca Inspired
+// Main application script
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });
 
 function initializeApp() {
+    // Core GSAP setup
     if (typeof gsap === 'undefined') { 
         console.error("GSAP not loaded!"); 
         return; 
@@ -12,6 +13,7 @@ function initializeApp() {
     
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
+    // Initialize smooth scrolling
     ScrollSmoother.create({
         wrapper: "#smooth-wrapper",
         content: "#smooth-content",
@@ -19,977 +21,96 @@ function initializeApp() {
         effects: true
     });
     
+    // Handle loading overlay
     gsap.to("#loadingOverlay", { 
         opacity: 0, 
         duration: 0.8, 
         delay: 0.5, 
         onComplete: () => {
             document.getElementById('loadingOverlay').style.display = 'none';
-            initializeAnimations();
-            // Initialize enhanced interactions after loading
-            new EnhancedInteractions();
-            // Initialize new locomotive cursor
-            initLocomotiveCursor();
+            initializeCore();
         }
     });
     
+    // Initialize core functionality
+    initializeCore();
+}
+
+function initializeCore() {
+    // Basic animations that don't depend on effects
+    initializeAnimations(); // Existing function for hero animations
+    createBokeh(); // Existing function
+    setInterval(createChaosElement, 5000); // Existing function
+
+    // Navigation and UI
+    initializeInteractions(); // Existing function for magnetic effects, etc.
+    initializeMobileMenu(); // Existing function
+    initializeEasterEggs(); // Existing function
+    
+    // Page management
     showPage('home');
-    initializeInteractions();
-    initializeMobileMenu();
-    initializeEasterEggs();
-    setInterval(createChaosElement, 5000);
+    
+    // AI assistant
+    // Assuming advancedAI, toggleAI, handleAIInput, sendAIMessage, addAIMessage, showTypingIndicator are defined elsewhere or will be moved
 }
 
-// Enhanced Locomotive-Style Cursor System
-class LocomotiveCursor {
-    constructor() {
-        this.cursor = null;
-        this.cursorInner = null;
-        this.cursorOuter = null;
-        this.mouseX = 0;
-        this.mouseY = 0;
-        this.outerX = 0;
-        this.outerY = 0;
-        this.innerX = 0;
-        this.innerY = 0;
-        this.isHovered = false;
-        this.isClicking = false;
-        this.isDisabled = window.innerWidth <= 768;
+// Core functions (navigation, page switching, etc.)
+// These functions remain mostly the same, but their calls to effects are updated
+
+// Effect-specific initialization moved to effect modules
+function initializeAboutPageEffects() {
+    // This function is called by the progressive loader
+    // when the about page is accessed and effects are ready
+    
+    const kineticContainer = document.querySelector('.kinetic-container');
+    const mouseEffectContainer = document.getElementById('mouseEffectContainer');
+    const imagePool = document.querySelector('.image-pool');
+    
+    if (kineticContainer && window.KineticTypography) {
+        const optimizer = window.deviceOptimizer; // Use global optimizer
+        const settings = optimizer.getOptimizedSettings('kinetic');
         
-        this.init();
-    }
-
-    init() {
-        if (this.isDisabled) return;
-        
-        this.createCursor();
-        this.bindEvents();
-        this.render();
-    }
-
-    createCursor() {
-        // Remove existing cursors
-        const existingCursors = document.querySelectorAll('.cursor, .cursor-trail, .locomotive-cursor');
-        existingCursors.forEach(cursor => cursor.remove());
-
-        // Create cursor container
-        this.cursor = document.createElement('div');
-        this.cursor.className = 'locomotive-cursor';
-        this.cursor.innerHTML = `
-            <div class="cursor-inner"></div>
-            <div class="cursor-outer"></div>
-        `;
-        
-        document.body.appendChild(this.cursor);
-        
-        this.cursorInner = this.cursor.querySelector('.cursor-inner');
-        this.cursorOuter = this.cursor.querySelector('.cursor-outer');
-
-        // Add CSS styles
-        this.addStyles();
-        
-        // Hide default cursor
-        document.body.style.cursor = 'none';
-        document.documentElement.style.cursor = 'none';
-    }
-
-    addStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            .locomotive-cursor {
-                position: fixed;
-                top: 0;
-                left: 0;
-                pointer-events: none;
-                z-index: 9999;
-                mix-blend-mode: difference;
-            }
-
-            .cursor-inner {
-                position: absolute;
-                width: 8px;
-                height: 8px;
-                background: #fff;
-                border-radius: 50%;
-                transform: translate(-50%, -50%);
-                transition: transform 0.1s ease-out;
-            }
-
-            .cursor-outer {
-                position: absolute;
-                width: 32px;
-                height: 32px;
-                border: 1px solid rgba(255, 255, 255, 0.5);
-                border-radius: 50%;
-                transform: translate(-50%, -50%);
-                transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            }
-
-            /* Button hover */
-            .locomotive-cursor.button-hover .cursor-inner {
-                transform: translate(-50%, -50%) scale(0);
-            }
-
-            .locomotive-cursor.button-hover .cursor-outer {
-                transform: translate(-50%, -50%) scale(1.5);
-                background: rgba(255, 107, 53, 0.2);
-                border-color: var(--accent-electric, #ff6b35);
-                border-width: 2px;
-            }
-
-            /* Video hover */
-            .locomotive-cursor.video-hover .cursor-inner {
-                width: 16px;
-                height: 16px;
-                background: transparent;
-                border: 2px solid #fff;
-            }
-
-            .locomotive-cursor.video-hover .cursor-inner::after {
-                content: '';
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 16px;
-                height: 16px;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
-                background-size: contain;
-            }
-
-            .locomotive-cursor.video-hover .cursor-outer {
-                transform: translate(-50%, -50%) scale(2.5);
-                border-color: #fff;
-                background: rgba(255, 255, 255, 0.1);
-            }
-
-            /* Hide on mobile */
-            @media (max-width: 768px) {
-                .locomotive-cursor {
-                    display: none !important;
-                }
-            }
-
-            /* Disable cursor on specific elements */
-            *, *::before, *::after {
-                cursor: none !important;
-            }
-
-            /* Re-enable on inputs */
-            input, textarea, select {
-                cursor: text !important;
-            }
-        `;
-        
-        if (!document.querySelector('#locomotive-cursor-styles')) {
-            style.id = 'locomotive-cursor-styles';
-            document.head.appendChild(style);
-        }
-    }
-
-    bindEvents() {
-        // Mouse move with high precision
-        document.addEventListener('mousemove', (e) => {
-            this.mouseX = e.clientX;
-            this.mouseY = e.clientY;
-        });
-
-        // Mouse down/up
-        document.addEventListener('mousedown', () => {
-            this.isClicking = true;
-            if (this.cursor) this.cursor.classList.add('clicking');
-        });
-
-        document.addEventListener('mouseup', () => {
-            this.isClicking = false;
-            if (this.cursor) this.cursor.classList.remove('clicking');
-        });
-
-        // Hover effects for different elements
-        this.bindHoverEffects();
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            this.isDisabled = window.innerWidth <= 768;
-            if (this.isDisabled) {
-                this.destroy();
-            }
-        });
-
-        // Hide cursor when leaving window
-        document.addEventListener('mouseleave', () => {
-            if (this.cursor) this.cursor.style.opacity = '0';
-        });
-
-        document.addEventListener('mouseenter', () => {
-            if (this.cursor) this.cursor.style.opacity = '1';
-        });
-    }
-
-    bindHoverEffects() {
-        // Interactive elements
-        const interactiveSelectors = [
-            'button', 
-            '.ai-button',
-            '.mode-button',
-            '.nav-link',
-            '.contact-link',
-            '.skill-tag',
-            '[data-magnetic]'
-        ];
-
-        const videoSelectors = [
-            '.member-visual',
-            '.play-button',
-            '[data-video]'
-        ];
-
-        // Button hover effects
-        this.addHoverEffect(interactiveSelectors, 'button-hover');
-        
-        // Video hover effects
-        this.addHoverEffect(videoSelectors, 'video-hover');
-    }
-
-    addHoverEffect(selectors, className) {
-        selectors.forEach(selector => {
-            document.addEventListener('mouseover', (e) => {
-                if (e.target.matches(selector) || e.target.closest(selector)) {
-                    if (this.cursor) this.cursor.classList.add(className);
-                    this.isHovered = true;
-                }
-            });
-
-            document.addEventListener('mouseout', (e) => {
-                if (e.target.matches(selector) || e.target.closest(selector)) {
-                    if (this.cursor) this.cursor.classList.remove(className);
-                    this.isHovered = false;
-                }
-            });
-        });
-    }
-
-    render() {
-        if (this.isDisabled || !this.cursor) return;
-
-        // Smooth animation using different easing for inner and outer
-        this.innerX += (this.mouseX - this.innerX) * 0.9; // Fast and precise for inner
-        this.innerY += (this.mouseY - this.innerY) * 0.9;
-        
-        this.outerX += (this.mouseX - this.outerX) * 0.15; // Slower for outer (trail effect)
-        this.outerY += (this.mouseY - this.outerY) * 0.15;
-
-        // Apply transforms with sub-pixel precision
-        this.cursorInner.style.transform = `translate(${this.innerX}px, ${this.innerY}px) translate(-50%, -50%)`;
-        this.cursorOuter.style.transform = `translate(${this.outerX}px, ${this.outerY}px) translate(-50%, -50%)`;
-
-        // Continue animation
-        requestAnimationFrame(() => this.render());
-    }
-
-    destroy() {
-        if (this.cursor) {
-            this.cursor.remove();
-            document.body.style.cursor = 'auto';
-            document.documentElement.style.cursor = 'auto';
-            
-            // Remove styles
-            const styles = document.querySelector('#locomotive-cursor-styles');
-            if (styles) styles.remove();
-        }
-    }
-}
-
-// Enhanced Interactions Class
-class EnhancedInteractions {
-    constructor() {
-        this.magneticElements = document.querySelectorAll('[data-magnetic]');
-        this.pixelatedElements = document.querySelectorAll('.member-visual');
-        
-        this.init();
-    }
-
-    init() {
-        this.initMagneticEffects();
-        this.initPixelatedHovers();
-        this.initTextMorphing();
-        this.initAdvancedScrollEffects();
-    }
-
-    // Magnetic effect for special elements
-    initMagneticEffects() {
-        this.magneticElements.forEach(element => {
-            element.addEventListener('mousemove', (e) => {
-                const rect = element.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                const deltaX = (e.clientX - centerX) * 0.2;
-                const deltaY = (e.clientY - centerY) * 0.2;
-                
-                gsap.to(element, {
-                    x: deltaX,
-                    y: deltaY,
-                    duration: 0.3,
-                    ease: "power2.out"
-                });
-            });
-
-            element.addEventListener('mouseleave', () => {
-                gsap.to(element, {
-                    x: 0,
-                    y: 0,
-                    duration: 0.5,
-                    ease: "elastic.out(1, 0.3)"
-                });
-            });
-        });
-    }
-
-    // Pixelated Image Reveal (Baillat Studio style)
-    initPixelatedHovers() {
-        this.pixelatedElements.forEach((element, index) => {
-            const memberName = element.getAttribute('data-member');
-            const imageSrc = element.dataset.image; // Assumes you add a data-image attribute to your .member-visual elements
-
-            if (!imageSrc) return;
-
-            const overlay = document.createElement('div');
-            overlay.className = 'pixel-overlay';
-            const canvas = document.createElement('canvas');
-            canvas.className = 'pixel-canvas';
-            overlay.appendChild(canvas);
-            element.appendChild(overlay);
-
-            const ctx = canvas.getContext('2d');
-            const image = new Image();
-            image.src = imageSrc;
-            image.crossOrigin = "Anonymous"; // Required for Unsplash images
-
-            image.onload = () => {
-                canvas.width = image.naturalWidth;
-                canvas.height = image.naturalHeight;
-                ctx.drawImage(image, 0, 0);
-            };
-
-            // Click handler for video modal
-            element.addEventListener('click', () => {
-                this.showVideoModal(memberName || 'member');
-            });
-
-            // Scroll-triggered reveal
-            ScrollTrigger.create({
-                trigger: element,
-                start: "top 80%",
-                onEnter: () => {
-                    gsap.to(canvas, { 
-                        opacity: 1, 
-                        filter: 'blur(0px) saturate(1)', 
-                        scale: 1, 
-                        duration: 0.8, 
-                        ease: 'power2.out' 
-                    });
-                },
-                onLeaveBack: () => {
-                    gsap.to(canvas, { 
-                        opacity: 0, 
-                        filter: 'blur(10px) saturate(0)', 
-                        scale: 1.1, 
-                        duration: 0.8, 
-                        ease: 'power2.in' 
-                    });
-                }
-            });
-        });
-    }
-
-    // Text Morphing Animation
-    initTextMorphing() {
-        const morphTexts = document.querySelectorAll('[data-morph]');
-        
-        morphTexts.forEach(element => {
-            const originalText = element.textContent;
-            const morphText = element.getAttribute('data-morph');
-            
-            // Split text into spans
-            element.innerHTML = originalText.split('').map(char => 
-                `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`
-            ).join('');
-            
-            const chars = element.querySelectorAll('.char');
-            
-            element.addEventListener('mouseenter', () => {
-                chars.forEach((char, i) => {
-                    gsap.to(char, {
-                        y: -30,
-                        opacity: 0,
-                        duration: 0.3,
-                        delay: i * 0.02,
-                        ease: "power2.in",
-                        onComplete: () => {
-                            if (i < morphText.length) {
-                                char.textContent = morphText[i];
-                            }
-                            gsap.to(char, {
-                                y: 0,
-                                opacity: 1,
-                                duration: 0.3,
-                                ease: "power2.out"
-                            });
-                        }
-                    });
-                });
-            });
-
-            element.addEventListener('mouseleave', () => {
-                chars.forEach((char, i) => {
-                    gsap.to(char, {
-                        y: -30,
-                        opacity: 0,
-                        duration: 0.3,
-                        delay: i * 0.02,
-                        ease: "power2.in",
-                        onComplete: () => {
-                            char.textContent = originalText[i] || '';
-                            gsap.to(char, {
-                                y: 0,
-                                opacity: 1,
-                                duration: 0.3,
-                                ease: "power2.out"
-                            });
-                        }
-                    });
-                });
-            });
-        });
-    }
-
-    // Advanced Scroll Effects
-    initAdvancedScrollEffects() {
-        // General parallax for background elements
-        gsap.utils.toArray('.parallax-bg').forEach(bg => {
-            gsap.to(bg, {
-                yPercent: -50,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: bg.closest('.parallax-section'),
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: true
-                }
-            });
-        });
-
-        // Enhanced parallax for member pages
-        gsap.utils.toArray('.member-layout.parallax-section').forEach(section => {
-            const visual = section.querySelector('.member-visual');
-
-            if (visual) {
-                gsap.to(visual, {
-                    yPercent: -25, // Adjust this value for more/less parallax
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top bottom",
-                        end: "bottom top",
-                        scrub: 0.5 // A bit of smoothing
-                    }
-                });
-            }
-        });
-
-        // Text reveal on scroll (chars, words, lines)
-        gsap.utils.toArray('[data-reveal]').forEach(element => {
-            const revealType = element.getAttribute('data-reveal') || 'words';
-            let split;
-
-            if (revealType === 'chars') {
-                const text = element.textContent;
-                element.innerHTML = text.split('').map(char => 
-                    `<span class="char">${char === ' ' ? '&nbsp;' : char}</span>`
-                ).join('');
-                split = element.querySelectorAll('.char');
-            } else { // Default to words
-                const text = element.textContent;
-                element.innerHTML = text.split(' ').map(word => 
-                    `<span class="word-wrapper"><span class="word">${word}</span></span>`
-                ).join(' ');
-                split = element.querySelectorAll('.word');
-            }
-            
-            gsap.set(split, { y: 100, opacity: 0 });
-            
-            gsap.to(split, {
-                y: 0,
-                opacity: 1,
-                duration: 0.8,
-                stagger: revealType === 'chars' ? 0.02 : 0.1,
-                ease: "power3.out",
-                scrollTrigger: {
-                    trigger: element,
-                    start: "top 85%"
-                }
-            });
-        });
-    }
-
-    // Video Modal Function
-    showVideoModal(memberName) {
-        const memberData = {
-            collin: { title: "Collin's Director Showcase", description: "Narrative-driven pieces showcasing directorial vision and storytelling mastery" },
-            corey: { title: "Corey's Cinematography Portfolio", description: "Dynamic visual storytelling through expert cinematography and precision editing" },
-            levi: { title: "Levi's Production Archives", description: "Production excellence and immersive soundscapes across diverse projects" },
-            tim: { title: "Tim's Creative Collection", description: "Strategic creative solutions and innovative brand experiences" },
-            terrell: { title: "Terrell's Musical Repertoire", description: "Original compositions and production work spanning multiple genres and moods" }
-        };
-        
-        const data = memberData[memberName] || { 
-            title: "Demo Reel", 
-            description: "A showcase of creative work and technical expertise" 
-        };
-        
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.9); 
-            z-index: 10000; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            backdrop-filter: blur(10px);
-        `;
-        
-        modal.innerHTML = `
-            <div style="
-                background: var(--surface, #1a1a1a); 
-                border: 1px solid var(--border, #333); 
-                border-radius: 20px; 
-                padding: 40px; 
-                max-width: 90%; 
-                width: 600px; 
-                text-align: center; 
-                position: relative;
-            ">
-                <h3 style="
-                    font-family: 'Space Grotesk', sans-serif; 
-                    font-size: 2rem; 
-                    color: #ff6b35; 
-                    margin-bottom: 20px;
-                ">${data.title}</h3>
-                <p style="
-                    font-family: 'Inter', sans-serif; 
-                    color: #a0a0a0; 
-                    margin-bottom: 30px; 
-                    line-height: 1.6;
-                ">${data.description}</p>
-                <div style="
-                    width: 100%; 
-                    padding-top: 56.25%; 
-                    background: linear-gradient(135deg, #ff6b35, #4a9eff); 
-                    border-radius: 10px; 
-                    margin: 0 auto 30px; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    font-size: 3rem; 
-                    color: white; 
-                    position: relative;
-                ">
-                    <div style="
-                        position: absolute; 
-                        top: 50%; 
-                        left: 50%; 
-                        transform: translate(-50%, -50%);
-                    ">📹</div>
-                </div>
-                <button style="
-                    background: #ff6b35; 
-                    border: none; 
-                    color: white; 
-                    padding: 12px 24px; 
-                    border-radius: 25px; 
-                    font-family: 'Space Grotesk', sans-serif; 
-                    font-weight: 600; 
-                    cursor: pointer; 
-                    letter-spacing: 1px;
-                    transition: all 0.3s ease;
-                "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use xlink:href="#icon-close"/></svg></button>
-            </div>
-        `;
-        
-        modal.querySelector('button').onclick = () => {
-            gsap.to(modal, { 
-                opacity: 0, 
-                duration: 0.3, 
-                onComplete: () => modal.remove() 
-            });
-        };
-        
-        document.body.appendChild(modal);
-        
-        gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
-        gsap.fromTo(modal.querySelector('div > div'), 
-            { scale: 0.8, y: 50 }, 
-            { scale: 1, y: 0, duration: 0.4, delay: 0.1, ease: 'back.out(1.7)' }
-        );
-    }
-}
-
-// Initialize locomotive cursor
-function initLocomotiveCursor() {
-    window.locomotiveCursor = new LocomotiveCursor();
-}
-
-// Original functions (preserved and optimized)
-class KineticTypography {
-    constructor(container) {
-        this.container = container;
-        this.textWrappers = container.querySelectorAll('.text-wrapper');
-        this.currentIndex = 0;
-        this.displayDuration = 4000; // 4 seconds per text
-        this.transitionDuration = 1000; // 1 second transition
-        this.intervalId = null;
-        this.init();
-    }
-
-    init() {
-        if (this.textWrappers.length === 0) return;
-        this.start();
-    }
-
-    start() {
-        this.showText(this.currentIndex);
-        this.intervalId = setInterval(() => {
-            this.nextText();
-        }, this.displayDuration + this.transitionDuration);
-    }
-
-    stop() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-        }
-        // Ensure all texts are hidden when stopping
-        this.textWrappers.forEach(wrapper => {
-            wrapper.classList.remove('active', 'exiting');
-            gsap.set(wrapper, { opacity: 0, x: 0, y: 0 }); // Reset GSAP properties
-        });
-    }
-
-    showText(index) {
-        const wrapper = this.textWrappers[index];
-        if (!wrapper) return;
-
-        // Reset any previous exiting state
-        wrapper.classList.remove('exiting');
-        gsap.set(wrapper, { opacity: 0 }); // Ensure it's hidden before animating in
-
-        // Animate in
-        gsap.to(wrapper, {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            duration: 1,
-            ease: 'power3.out',
-            onComplete: () => {
-                wrapper.classList.add('active');
-            }
-        });
-    }
-
-    hideText(index) {
-        const wrapper = this.textWrappers[index];
-        if (!wrapper) return;
-
-        wrapper.classList.remove('active');
-        wrapper.classList.add('exiting');
-
-        // Animate out based on data-exit attribute
-        const exitDirection = wrapper.getAttribute('data-exit');
-        let exitProps = {};
-        if (exitDirection === 'left') exitProps = { x: '-100%' };
-        else if (exitDirection === 'right') exitProps = { x: '100%' };
-        else if (exitDirection === 'top') exitProps = { y: '-100%' };
-        else if (exitDirection === 'bottom') exitProps = { y: '100%' };
-
-        gsap.to(wrapper, {
-            ...exitProps,
-            opacity: 0,
-            duration: 1,
-            ease: 'power3.in',
-            onComplete: () => {
-                // Reset position after animation to prepare for next cycle
-                gsap.set(wrapper, { x: 0, y: 0 });
-            }
-        });
-    }
-
-    nextText() {
-        this.hideText(this.currentIndex);
-        this.currentIndex = (this.currentIndex + 1) % this.textWrappers.length;
-        // Delay showing the next text until the current one has exited
-        setTimeout(() => {
-            this.showText(this.currentIndex);
-        }, this.transitionDuration);
-    }
-
-    destroy() {
-        this.stop();
-    }
-}
-
-// Enhanced About Page Functionality (Locomotive-level quality)
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    };
-}
-
-class MouseImageEffect {
-    constructor(container, imagePool) {
-        this.container = container;
-        this.imagePool = Array.from(imagePool.querySelectorAll('img'));
-        this.lastMousePosition = { x: 0, y: 0 };
-        this.lastTimestamp = Date.now();
-        this.velocityThreshold = 5; // Minimum velocity to spawn images
-        this.maxImages = 10; // Maximum number of images to spawn
-        this.imageCounter = 0;
-        this.activeImages = [];
-
-        this.bindEvents();
-    }
-
-    bindEvents() {
-        document.addEventListener('mousemove', throttle((e) => {
-            this.handleMouseMove(e);
-        }, 16)); // Throttle to ~60fps
-    }
-
-    calculateVelocity(currentPos, currentTime) {
-        const deltaX = currentPos.x - this.lastMousePosition.x;
-        const deltaY = currentPos.y - this.lastMousePosition.y;
-        const deltaTime = currentTime - this.lastTimestamp;
-
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        const velocity = distance / (deltaTime || 1) * 10; // Scale factor
-
-        return velocity;
-    }
-
-    handleMouseMove(e) {
-        const currentPos = { x: e.clientX, y: e.clientY };
-        const currentTime = Date.now();
-
-        const velocity = this.calculateVelocity(currentPos, currentTime);
-
-        if (velocity > this.velocityThreshold) {
-            this.spawnImages(currentPos, velocity);
-        }
-
-        this.lastMousePosition = currentPos;
-        this.lastTimestamp = currentTime;
-    }
-
-    spawnImages(position, velocity) {
-        const numImages = Math.min(
-            Math.floor(velocity / 3),
-            this.maxImages - this.activeImages.length // Limit based on active images
-        );
-
-        for (let i = 0; i < numImages; i++) {
-            this.createImage(position);
-        }
-    }
-
-    createImage(centerPos) {
-        if (this.imagePool.length === 0) return;
-
-        const img = document.createElement('img');
-        const randomImageSrc = this.imagePool[Math.floor(Math.random() * this.imagePool.length)].src;
-        
-        img.src = randomImageSrc;
-        img.className = 'spawned-image';
-        img.id = `spawned-img-${this.imageCounter++}`;
-
-        // Random positioning around mouse
-        const offsetX = (Math.random() - 0.5) * 120; // -60 to 60
-        const offsetY = (Math.random() - 0.5) * 120; // -60 to 60
-        const rotation = Math.random() * 360;
-        const scale = 0.5 + Math.random() * 0.8; // 0.5 to 1.3
-
-        gsap.set(img, {
-            x: centerPos.x + offsetX,
-            y: centerPos.y + offsetY,
-            rotation: rotation,
-            scale: scale,
-            opacity: 0.8,
-            pointerEvents: 'none', // Ensure it doesn't interfere with mouse events
-            zIndex: 999 // Ensure it's above other content but below cursor
-        });
-
-        this.container.appendChild(img);
-        this.activeImages.push(img);
-
-        // Trigger fade out animation
-        gsap.to(img, {
-            opacity: 0,
-            scale: scale * 0.8, // Shrink slightly
-            y: '-=50', // Float up slightly
-            duration: 1.5,
-            ease: 'power1.out',
-            onComplete: () => {
-                img.remove();
-                this.activeImages = this.activeImages.filter(item => item !== img);
-            }
-        });
-    }
-
-    destroy() {
-        // Remove all active images
-        this.activeImages.forEach(img => img.remove());
-        this.activeImages = [];
-        // Remove event listener if necessary (though throttle handles some of this)
-        document.removeEventListener('mousemove', this.handleMouseMove);
-    }
-}
-
-class LocomotiveAboutPage {
-    constructor() {
-        this.imageGallery = document.getElementById('imageGallery');
-        this.activeImage = null;
-        this.mouse = { x: 0, y: 0 };
-        this.isInitialized = false;
-        this.kineticTypography = null;
-        this.mouseImageEffect = null; // New property for MouseImageEffect
-        this.init();
-    }
-
-    init() {
-        const aboutPage = document.getElementById('about');
-        if (!aboutPage) return; // Only initialize if on the about page
-
-        const kineticContainer = document.querySelector('.kinetic-container');
-        if (kineticContainer) {
-            this.kineticTypography = new KineticTypography(kineticContainer);
-        }
-
-        const mouseEffectContainer = document.getElementById('mouseEffectContainer');
-        const imagePool = document.querySelector('.image-pool');
-        if (mouseEffectContainer && imagePool) {
-            this.mouseImageEffect = new MouseImageEffect(mouseEffectContainer, imagePool);
-        }
-
-        // Remove old image gallery setup as it's replaced by mouseImageEffect
-        if (this.imageGallery) {
-            this.imageGallery.innerHTML = ''; // Clear existing images
-            this.imageGallery.remove(); // Remove the element itself if no longer needed
-            this.imageGallery = null;
-        }
-
-        this.setupScrollTriggers();
-        this.isInitialized = true;
-    }
-
-    // Removed setupImageGallery and bindEvents related to old image gallery
-    // showImage and hideImage are also removed as they are no longer needed
-
-    setupScrollTriggers() {
-        // Existing scroll triggers for story blocks (will need adjustment if story blocks no longer trigger images)
-        // For now, keep them as they might be used for other text reveals
-        document.querySelectorAll('.story-block').forEach((block, index) => {
-            // Removed image triggering logic from here
-            ScrollTrigger.create({
-                trigger: block,
-                start: 'top 70%',
-                end: 'bottom 30%',
-                // onEnter, onLeave, onEnterBack, onLeaveBack related to images are removed
-            });
-        });
-
-        // Pixel fade for video section
-        ScrollTrigger.create({
-            trigger: ".about-video-section",
-            start: "top bottom",
-            end: "center center",
-            scrub: true,
-            onUpdate: (self) => {
-                gsap.to("#pixelOverlay", { opacity: 1 - self.progress, ease: "none" });
-            }
-        });
-
-        // Scrolling text animation
-        gsap.utils.toArray(".scrolling-text").forEach((textElement, i) => {
-            const direction = i % 2 === 0 ? 1 : -1; // Alternate direction
-            gsap.to(textElement, {
-                xPercent: -100 * direction,
-                repeat: -1,
-                duration: 20, // Adjust speed as needed
-                ease: "none",
-                modifiers: {
-                    xPercent: gsap.utils.wrap(-100, 100)
-                }
-            });
-        });
-    }
-
-    destroy() {
-        if (!this.isInitialized) return;
-        if (this.kineticTypography) {
-            this.kineticTypography.destroy();
-            this.kineticTypography = null;
-        }
-        if (this.mouseImageEffect) {
-            this.mouseImageEffect.destroy();
-            this.mouseImageEffect = null;
-        }
-        ScrollTrigger.getAll().forEach(trigger => {
-            if (trigger.trigger && trigger.trigger.closest('.about-container')) {
-                trigger.kill();
-            }
-        });
-        // No need to hide gallery images as the old gallery is removed
-        this.isInitialized = false;
-    }
-}
-
-// Global instance
-
-// Global instance
-let locomotiveAbout = null;
-
-// Updated showPage function
-
-function showPage(pageId) {
-    // Cleanup previous about animations if switching away from about
-    if (locomotiveAbout && pageId !== 'about') {
-        locomotiveAbout.destroy();
-        locomotiveAbout = null;
+        const kinetic = new KineticTypography(kineticContainer, settings);
+        window.effectManager.registerEffect('kinetic', kinetic);
     }
     
+    if (mouseEffectContainer && imagePool && window.MouseImageEffect) {
+        const optimizer = window.deviceOptimizer; // Use global optimizer
+        const settings = optimizer.getOptimizedSettings('mouse');
+        
+        const mouseEffect = new MouseImageEffect(mouseEffectContainer, imagePool, settings);
+        window.effectManager.registerEffect('mouseEffect', mouseEffect);
+    }
+
+    if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) {
+        window.locomotiveCursor = new LocomotiveCursor();
+        window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
+    }
+}
+
+// Updated showPage function with effect management
+function showPage(pageId) {
+    // Cleanup previous page effects using EffectManager
+    if (window.effectManager) {
+        window.effectManager.destroyEffect('kinetic');
+        window.effectManager.destroyEffect('mouseEffect');
+        window.effectManager.destroyEffect('locomotiveCursor');
+    }
+    
+    // Standard page switching logic
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(pageId)?.classList.add('active');
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.querySelector(`.nav-link[href="#${pageId}"]`)?.classList.add('active');
     
-    // Initialize About page animations
+    // Initialize page-specific effects
     if (pageId === 'about') {
         setTimeout(() => {
-            locomotiveAbout = new LocomotiveAboutPage();
+            initializeAboutPageEffects();
         }, 100);
     }
     
-    // Trigger page animations for other pages
+    // Trigger page animations for other pages (existing logic)
     const targetPage = document.getElementById(pageId);
     if (targetPage && pageId !== 'home' && pageId !== 'about') {
         // Reset animations
@@ -1007,6 +128,7 @@ function showPage(pageId) {
     }
 }
 
+// Existing functions that are still part of script.js
 function initializeAnimations() {
     document.querySelectorAll('.anim-chars').forEach(el => {
         el.innerHTML = el.textContent.trim().split('').map(char => `<span>${char === ' ' ? '&nbsp;' : char}</span>`).join('');
@@ -1016,8 +138,6 @@ function initializeAnimations() {
     tl.from(".hero-year > span", { yPercent: 110, stagger: 0.05, duration: 1, ease: "power3.out" });
     tl.from(".hero-company > span", { yPercent: 110, stagger: 0.03, duration: 0.8, ease: "power3.out" }, "-=0.8");
     tl.from(".hero-descriptor", { opacity: 0, y: 20, duration: 1, ease: "power3.out" }, "-=0.5");
-
-    createBokeh();
 }
 
 function createBokeh() {
