@@ -47,6 +47,12 @@ function initializeCore() {
     initializeMobileMenu(); // Existing function
     initializeEasterEggs(); // Existing function
     
+    // Initialize LocomotiveCursor globally if enabled by DeviceOptimizer
+    if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) {
+        window.locomotiveCursor = new LocomotiveCursor();
+        window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
+    }
+
     // Page management
     showPage('home');
     
@@ -82,10 +88,10 @@ function initializeAboutPageEffects() {
         window.effectManager.registerEffect('mouseEffect', mouseEffect);
     }
 
-    if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) {
-        window.locomotiveCursor = new LocomotiveCursor();
-        window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
-    }
+    // if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) { // Moved to initializeCore
+    //     window.locomotiveCursor = new LocomotiveCursor(); // Moved to initializeCore
+    //     window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor); // Moved to initializeCore
+    // }
 }
 
 // Updated showPage function with effect management
