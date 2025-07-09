@@ -51,6 +51,10 @@ class ProgressiveEffectLoader {
         // Load kinetic typography
         await this.loadScript('effects/kinetic-typography/kinetic-typography.js');
         // CSS is linked in index.html conditionally
+
+        // Load cursor effects
+        await this.loadScript('effects/locomotive-cursor/locomotive-cursor.js');
+        // CSS is linked in index.html conditionally
         
         // Initialize with basic settings
         const container = document.querySelector('.kinetic-container');
@@ -58,6 +62,11 @@ class ProgressiveEffectLoader {
             const settings = window.deviceOptimizer.getOptimizedSettings('kinetic');
             const kinetic = new KineticTypography(container, settings);
             window.effectManager.registerEffect('kinetic', kinetic);
+        }
+
+        if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) {
+            window.locomotiveCursor = new LocomotiveCursor();
+            window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
         }
     }
 
@@ -68,10 +77,6 @@ class ProgressiveEffectLoader {
         await this.loadScript('effects/mouse-effects/mouse-image-effect.js');
         // CSS is linked in index.html conditionally
         
-        // Load cursor effects
-        await this.loadScript('effects/locomotive-cursor/locomotive-cursor.js');
-        // CSS is linked in index.html conditionally
-        
         // Initialize advanced effects
         const mouseEffectContainer = document.getElementById('mouseEffectContainer');
         const imagePool = document.querySelector('.image-pool');
@@ -79,11 +84,6 @@ class ProgressiveEffectLoader {
             const settings = window.deviceOptimizer.getOptimizedSettings('mouse');
             const mouseEffect = new MouseImageEffect(mouseEffectContainer, imagePool, settings);
             window.effectManager.registerEffect('mouseEffect', mouseEffect);
-        }
-
-        if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) {
-            window.locomotiveCursor = new LocomotiveCursor();
-            window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
         }
     }
 
