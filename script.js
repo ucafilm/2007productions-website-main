@@ -24,21 +24,11 @@ function initializeApp() {
         effects: true
     });
     
-    """    // Handle loading overlay
-    gsap.to("#loadingOverlay", { 
-        opacity: 0, 
-        duration: 0.8, 
-        delay: 0.5, 
-        onComplete: () => {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            initializeCore();
-        }
-    });
     
-    // Core functionality is initialized once the loading overlay is complete.
-}"""""
 
 
+
+});
 
 function initializeCore() {
     // Basic animations that don't depend on effects
