@@ -5,13 +5,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
+    console.log('Initializing 2007 Productions app...');
+    
     // Core GSAP setup
     if (typeof gsap === 'undefined') { 
         console.error("GSAP not loaded!"); 
+        // Even without GSAP, try to show the page
+        fallbackInitialization();
         return; 
     }
     
-    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+    try {
+        gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+    } catch (e) {
+        console.warn('GSAP plugins failed to register:', e);
+    }
 
     // Initialize EffectManager (if available)
     if (typeof EffectManager !== 'undefined') {
@@ -30,39 +38,85 @@ function initializeApp() {
     });
     
     // Hide loading overlay after setup
-    gsap.to("#loadingOverlay", { 
-        opacity: 0, 
-        duration: 0.8, 
-        delay: 0.5, 
-        onComplete: () => {
-            document.getElementById('loadingOverlay').style.display = 'none';
+    try {
+        gsap.to("#loadingOverlay", { 
+            opacity: 0, 
+            duration: 0.8, 
+            delay: 0.5, 
+            onComplete: () => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                initializeCore();
+            }
+        });
+    } catch (error) {
+        console.error('GSAP animation failed, using fallback:', error);
+        // Fallback without animation
+        setTimeout(() => {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
             initializeCore();
+        }, 1000);
+    }
+}
+
+// Fallback initialization if GSAP fails to load
+function fallbackInitialization() {
+    console.log('Using fallback initialization...');
+    
+    // Hide loading overlay without animation
+    setTimeout(() => {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.opacity = '0';
+            loadingOverlay.style.display = 'none';
         }
-    });
-});
+        
+        // Initialize basic functionality
+        try {
+            showPage('home');
+            initializeMobileMenu();
+            console.log('Fallback initialization complete');
+        } catch (error) {
+            console.error('Even fallback initialization failed:', error);
+        }
+    }, 500);
+}
 
 function initializeCore() {
-    // Basic animations that don't depend on effects
-    initializeAnimations(); // Existing function for hero animations
-    createBokeh(); // Existing function
-    setInterval(createChaosElement, 5000); // Existing function
+    try {
+        // Basic animations that don't depend on effects
+        initializeAnimations();
+        createBokeh();
+        setInterval(createChaosElement, 5000);
 
-    // Navigation and UI
-    initializeInteractions(); // Existing function for magnetic effects, etc.
-    initializeMobileMenu(); // Existing function
-    initializeEasterEggs(); // Existing function
-    
-    // Initialize LocomotiveCursor globally if enabled by DeviceOptimizer
-    if (window.LocomotiveCursor && window.deviceOptimizer && window.deviceOptimizer.shouldEnableEffect('cursor')) {
-        window.locomotiveCursor = new LocomotiveCursor();
-        window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
+        // Navigation and UI
+        initializeInteractions();
+        initializeMobileMenu();
+        initializeEasterEggs();
+        
+        // Initialize LocomotiveCursor globally if enabled by DeviceOptimizer
+        if (window.LocomotiveCursor && window.deviceOptimizer && window.deviceOptimizer.shouldEnableEffect) {
+            try {
+                if (window.deviceOptimizer.shouldEnableEffect('cursor')) {
+                    window.locomotiveCursor = new LocomotiveCursor();
+                    window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
+                }
+            } catch (e) {
+                console.warn('LocomotiveCursor initialization failed:', e);
+            }
+        }
+
+        // Page management
+        showPage('home');
+        
+        console.log('Core initialization complete');
+    } catch (error) {
+        console.error('Core initialization error:', error);
+        // Still try to show the home page even if other things fail
+        showPage('home');
     }
-
-    // Page management
-    showPage('home');
-    
-    // AI assistant
-    // Assuming advancedAI, toggleAI, handleAIInput, sendAIMessage, addAIMessage, showTypingIndicator are defined elsewhere or will be moved
 }
 
 function initializeAboutPageEffects() {
