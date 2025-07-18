@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2007 Productions - Test</title>
+    <style>
+        :root {
+            --primary-bg: #0a0a0a;
+            --accent-electric: #ff6b35;
+            --text-primary: #ffffff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--primary-bg); 
+            color: var(--text-primary); 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .hero-year { 
+            font-size: 8rem; 
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, var(--accent-electric));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        .hero-company { 
+            font-size: 2rem; 
+            letter-spacing: 12px;
+            margin-bottom: 40px;
+        }
+        .test-button {
+            background: var(--accent-electric);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .loading-text {
+            font-size: 18px;
+            color: var(--accent-electric);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-text">INITIALIZING...</div>
+    </div>
+
+    <div id="content" style="display: none;">
+        <h1 class="hero-year">2007</h1>
+        <h2 class="hero-company">PRODUCTIONS</h2>
+        <p>Where Stories Get Weird</p>
+        <button class="test-button" onclick="alert('JavaScript is working!')">Test JavaScript</button>
+        <button class="test-button" onclick="testGSAP()">Test GSAP</button>
+    </div>
+
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <script>
+        function testGSAP() {
+            if (typeof gsap !== 'undefined') {
+                gsap.to('.hero-year', { rotation: 360, duration: 1 });
+                alert('GSAP is working!');
+            } else {
+                alert('GSAP is not loaded!');
+            }
+        }
+
+        // Simple initialization
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('GSAP loaded:', typeof gsap);
+                
+                // Hide loading overlay
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                const content = document.getElementById('content');
+                
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
+                if (content) {
+                    content.style.display = 'block';
+                }
+                
+                // Simple animation if GSAP is available
+                if (typeof gsap !== 'undefined') {
+                    gsap.fromTo('.hero-year', 
+                        { opacity: 0, y: 50 }, 
+                        { opacity: 1, y: 0, duration: 1 }
+                    );
+                    gsap.fromTo('.hero-company', 
+                        { opacity: 0, y: 30 }, 
+                        { opacity: 1, y: 0, duration: 1, delay: 0.3 }
+                    );
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -13,8 +13,13 @@ function initializeApp() {
     
     gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
-    // Initialize EffectManager
-    window.effectManager = new EffectManager();
+    // Initialize EffectManager (if available)
+    if (typeof EffectManager !== 'undefined') {
+        window.effectManager = new EffectManager();
+    } else {
+        console.warn('EffectManager not available, continuing without effects');
+        window.effectManager = { registerEffect: () => {}, destroyEffect: () => {} };
+    }
 
     // Initialize smooth scrolling
     ScrollSmoother.create({
@@ -24,10 +29,16 @@ function initializeApp() {
         effects: true
     });
     
-    
-
-
-
+    // Hide loading overlay after setup
+    gsap.to("#loadingOverlay", { 
+        opacity: 0, 
+        duration: 0.8, 
+        delay: 0.5, 
+        onComplete: () => {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            initializeCore();
+        }
+    });
 });
 
 function initializeCore() {
@@ -42,7 +53,7 @@ function initializeCore() {
     initializeEasterEggs(); // Existing function
     
     // Initialize LocomotiveCursor globally if enabled by DeviceOptimizer
-    if (window.LocomotiveCursor && window.deviceOptimizer.shouldEnableEffect('cursor')) {
+    if (window.LocomotiveCursor && window.deviceOptimizer && window.deviceOptimizer.shouldEnableEffect('cursor')) {
         window.locomotiveCursor = new LocomotiveCursor();
         window.effectManager.registerEffect('locomotiveCursor', window.locomotiveCursor);
     }

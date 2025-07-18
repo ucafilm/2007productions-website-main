@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Preload critical assets -->
-    <link rel="preload" href="2007_productions_reel_1.mp4" as="video" type="video/mp4">
+    <link rel="preload" href="2007_productions_reel_1.mp4" as="video">
 </head>
 <body>
     <svg style="display: none;">
@@ -55,6 +55,47 @@
 
     <div id="smooth-wrapper">
         <div id="smooth-content">
+            <!-- Navigation -->
+            <nav class="nav">
+                <div class="nav-container">
+                    <div class="logo-container" data-magnetic>
+                        <div class="logo-symbol">
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                                        <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <polygon points="50,15 85,75 15,75" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+                                <circle cx="35" cy="60" r="4" fill="url(#logoGrad)"/>
+                                <circle cx="50" cy="60" r="4" fill="url(#logoGrad)"/>
+                                <circle cx="65" cy="60" r="4" fill="url(#logoGrad)"/>
+                                <polygon points="45,35 55,35 50,45" fill="url(#logoGrad)"/>
+                            </svg>
+                        </div>
+                        <div class="logo-text" data-morph="WEIRD">2007</div>
+                    </div>
+                    <div class="nav-mode-switch">
+                        <button class="mode-button active" data-magnetic onclick="switchMode('work', event)">WORK</button>
+                        <button class="mode-button" data-magnetic onclick="switchMode('agency', event)">AGENCY</button>
+                    </div>
+                    <ul class="nav-links">
+                        <li><a href="#home" data-magnetic onclick="showPage('home')" class="nav-link active">Home</a></li>
+                        <li><a href="#collin" data-magnetic onclick="showPage('collin')" class="nav-link">Collin</a></li>
+                        <li><a href="#corey" data-magnetic onclick="showPage('corey')" class="nav-link">Corey</a></li>
+                        <li><a href="#levi" data-magnetic onclick="showPage('levi')" class="nav-link">Levi</a></li>
+                        <li><a href="#tim" data-magnetic onclick="showPage('tim')" class="nav-link">Tim</a></li>
+                        <li><a href="#terrell" data-magnetic onclick="showPage('terrell')" class="nav-link">Terrell</a></li>
+                    </ul>
+                    <div class="mobile-menu" id="mobileMenu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </nav>
 
             <div class="cursor" id="cursor"></div>
             <div class="cursor-trail" id="cursorTrail"></div>
@@ -461,52 +502,9 @@
     </div>
 
     <!-- Navigation - Outside smooth scroll container for proper fixed positioning -->
-    <nav class="nav">
-        <div class="nav-container">
-            <div class="logo-container" data-magnetic>
-                <div class="logo-symbol">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <polygon points="50,15 85,75 15,75" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
-                        <circle cx="35" cy="60" r="4" fill="url(#logoGrad)"/>
-                        <circle cx="50" cy="60" r="4" fill="url(#logoGrad)"/>
-                        <circle cx="65" cy="60" r="4" fill="url(#logoGrad)"/>
-                        <polygon points="45,35 55,35 50,45" fill="url(#logoGrad)"/>
-                    </svg>
-                </div>
-                <div class="logo-text" data-morph="WEIRD">2007</div>
-            </div>
-            <div class="nav-mode-switch">
-                <button class="mode-button active" data-magnetic onclick="switchMode('work', event)">WORK</button>
-                <button class="mode-button" data-magnetic onclick="switchMode('agency', event)">AGENCY</button>
-            </div>
-            <ul class="nav-links">
-                <li><a href="#home" data-magnetic onclick="showPage('home')" class="nav-link active">Home</a></li>
-                <li><a href="#about" data-magnetic onclick="showPage('about')" class="nav-link">About</a></li>
-                <li><a href="#collin" data-magnetic onclick="showPage('collin')" class="nav-link">Collin</a></li>
-                <li><a href="#corey" data-magnetic onclick="showPage('corey')" class="nav-link">Corey</a></li>
-                <li><a href="#levi" data-magnetic onclick="showPage('levi')" class="nav-link">Levi</a></li>
-                <li><a href="#tim" data-magnetic onclick="showPage('tim')" class="nav-link">Tim</a></li>
-                <li><a href="#terrell" data-magnetic onclick="showPage('terrell')" class="nav-link">Terrell</a></li>
-            </ul>
-            <div class="mobile-menu" id="mobileMenu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </nav>
-
     <div class="mobile-nav-overlay" id="mobileNavOverlay">
         <div class="mobile-nav-links">
             <a href="#home" onclick="showPage('home'); closeMobileMenu();" class="mobile-nav-link">Home</a>
-            <a href="#about" onclick="showPage('about'); closeMobileMenu();" class="mobile-nav-link">About</a>
             <a href="#collin" onclick="showPage('collin'); closeMobileMenu();" class="mobile-nav-link">Collin</a>
             <a href="#corey" onclick="showPage('corey'); closeMobileMenu();" class="mobile-nav-link">Corey</a>
             <a href="#levi" onclick="showPage('levi'); closeMobileMenu();" class="mobile-nav-link">Levi</a>
@@ -552,40 +550,43 @@
     <!-- Main application script -->
     <script src="script.js"></script>
     
-    <!-- Initialize effects -->
+    <!-- Initialize effects after main app loads -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Ensure all modules are loaded before initialization
+        // Wait for the main application to initialize first
+        window.addEventListener('load', () => {
             setTimeout(() => {
                 try {
                     console.log('Checking dependencies...');
-                    console.log('DeviceOptimizer:', typeof window.deviceOptimizer);
-                    console.log('EffectManager:', typeof window.effectManager);
+                    console.log('DeviceOptimizer:', typeof DeviceOptimizer);
+                    console.log('EffectManager:', typeof EffectManager);
                     console.log('GSAP:', typeof gsap);
                     
+                    // Initialize device optimizer if available
+                    if (typeof DeviceOptimizer !== 'undefined') {
+                        window.deviceOptimizer = new DeviceOptimizer();
+                    }
+                    
                     if (typeof ProgressiveEffectLoader !== 'undefined') {
-                        const loader = new ProgressiveEffectLoader();
-                        loader.loadEffects().then(() => {
-                            console.log('✅ Effects loaded successfully');
-                            if (typeof PerformanceMonitor !== 'undefined') {
-                                window.performanceMonitor = new PerformanceMonitor();
-                            }
-                        }).catch(error => {
-                            console.error('❌ Effects failed to load:', error);
-                            if (window.effectErrorHandler) {
-                                window.effectErrorHandler.handleEffectError('initialization', error);
-                            }
-                        });
+                        try {
+                            const loader = new ProgressiveEffectLoader();
+                            loader.loadEffects().then(() => {
+                                console.log('✅ Effects loaded successfully');
+                                if (typeof PerformanceMonitor !== 'undefined') {
+                                    window.performanceMonitor = new PerformanceMonitor();
+                                }
+                            }).catch(error => {
+                                console.warn('Effects failed to load (non-critical):', error);
+                            });
+                        } catch (e) {
+                            console.warn('ProgressiveEffectLoader initialization failed:', e);
+                        }
                     } else {
-                        console.error('❌ ProgressiveEffectLoader not available');
+                        console.warn('ProgressiveEffectLoader not available (non-critical)');
                     }
                 } catch (error) {
-                    console.error('❌ Initialization error:', error);
-                    if (window.effectErrorHandler) {
-                        window.effectErrorHandler.handleEffectError('initialization', error);
-                    }
+                    console.warn('Effects initialization error (non-critical):', error);
                 }
-            }, 200); // Increased delay to ensure all scripts are parsed
+            }, 1000); // Longer delay to ensure main app loads completely
         });
     </script>
 </html>
