@@ -83,6 +83,7 @@
                     </div>
                     <ul class="nav-links">
                         <li><a href="#home" data-magnetic onclick="showPage('home')" class="nav-link active">Home</a></li>
+                        <li><a href="#directors" data-magnetic onclick="showDirectorsPage()" class="nav-link">Directors</a></li>
                         <li><a href="#collin" data-magnetic onclick="showPage('collin')" class="nav-link">Collin</a></li>
                         <li><a href="#corey" data-magnetic onclick="showPage('corey')" class="nav-link">Corey</a></li>
                         <li><a href="#levi" data-magnetic onclick="showPage('levi')" class="nav-link">Levi</a></li>
@@ -102,7 +103,36 @@
 
             <main>
                 <div id="home" class="page home-page active">
-                    <section class="hero parallax-section">
+                    <!-- Robot-Style Kinetic Typography Hero -->
+                    <section class="kinetic-hero" id="kineticHero">
+                        <div class="kinetic-bg-gradient"></div>
+                        
+                        <div class="kinetic-container">
+                            <!-- Kinetic Typography Sequence -->
+                            <div class="kinetic-text year-text" id="kinetic1">2007</div>
+                            <div class="kinetic-text company-text" id="kinetic2">PRODUCTIONS</div>
+                            <div class="kinetic-text tagline-text" id="kinetic3">WHERE STORIES</div>
+                            <div class="kinetic-text tagline-text" id="kinetic4">GET WEIRD</div>
+                            <div class="kinetic-text creative-text" id="kinetic5">CREATIVE</div>
+                            <div class="kinetic-text powerhouse-text" id="kinetic6">POWERHOUSE</div>
+                            <div class="kinetic-text vision-text" id="kinetic7">FEARLESS</div>
+                            <div class="kinetic-text vision-text" id="kinetic8">INNOVATION</div>
+                            <div class="kinetic-text final-text" id="kinetic9">WELCOME</div>
+                        </div>
+                        
+                        <div class="kinetic-progress">
+                            <div class="progress-dot active"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-dot"></div>
+                        </div>
+                        
+                        <button class="kinetic-skip" onclick="skipKineticIntro()">SKIP INTRO</button>
+                    </section>
+                    
+                    <!-- Original Hero (Hidden Initially) -->
+                    <section class="hero parallax-section" id="originalHero" style="display: none;">
                         <div class="hero-video-background parallax-bg">
                             <div class="video-overlay"></div>
                             <video playsinline autoplay muted loop>
@@ -505,6 +535,7 @@
     <div class="mobile-nav-overlay" id="mobileNavOverlay">
         <div class="mobile-nav-links">
             <a href="#home" onclick="showPage('home'); closeMobileMenu();" class="mobile-nav-link">Home</a>
+            <a href="#directors" onclick="showDirectorsPage(); closeMobileMenu();" class="mobile-nav-link">Directors</a>
             <a href="#collin" onclick="showPage('collin'); closeMobileMenu();" class="mobile-nav-link">Collin</a>
             <a href="#corey" onclick="showPage('corey'); closeMobileMenu();" class="mobile-nav-link">Corey</a>
             <a href="#levi" onclick="showPage('levi'); closeMobileMenu();" class="mobile-nav-link">Levi</a>

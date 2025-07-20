@@ -1,3 +1,142 @@
+// Robot-Style Kinetic Typography Functions
+function initializeKineticHero() {
+    const kineticSequence = [
+        { id: 'kinetic1', delay: 500, duration: 2000 },   // 2007
+        { id: 'kinetic2', delay: 2800, duration: 2200 },  // PRODUCTIONS
+        { id: 'kinetic3', delay: 5300, duration: 1800 },  // WHERE STORIES
+        { id: 'kinetic4', delay: 7400, duration: 2000 },  // GET WEIRD
+        { id: 'kinetic5', delay: 9700, duration: 1800 },  // CREATIVE
+        { id: 'kinetic6', delay: 11800, duration: 2000 }, // POWERHOUSE
+        { id: 'kinetic7', delay: 14100, duration: 1500 }, // FEARLESS
+        { id: 'kinetic8', delay: 15900, duration: 1800 }, // INNOVATION
+        { id: 'kinetic9', delay: 18000, duration: 3000 }  // WELCOME (final)
+    ];
+
+    let kineticTimeouts = [];
+    let kineticStep = 0;
+
+    function showKineticText(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.classList.add('visible');
+        }
+    }
+
+    function hideKineticText(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.classList.add('exit');
+            setTimeout(() => {
+                element.classList.remove('visible', 'exit');
+            }, 800);
+        }
+    }
+
+    function updateKineticProgress(step) {
+        const dots = document.querySelectorAll('.kinetic-progress .progress-dot');
+        dots.forEach((dot, index) => {
+            if (index <= Math.floor(step / 2)) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    function startKineticSequence() {
+        kineticSequence.forEach((item, index) => {
+            // Show text
+            const showTimeout = setTimeout(() => {
+                showKineticText(item.id);
+                updateKineticProgress(index);
+                kineticStep = index;
+            }, item.delay);
+            kineticTimeouts.push(showTimeout);
+
+            // Hide text (except the last one)
+            if (index < kineticSequence.length - 1) {
+                const hideTimeout = setTimeout(() => {
+                    hideKineticText(item.id);
+                }, item.delay + item.duration);
+                kineticTimeouts.push(hideTimeout);
+            }
+        });
+
+        // Final transition to main site
+        const finalTimeout = setTimeout(() => {
+            transitionToMainSite();
+        }, 21500);
+        kineticTimeouts.push(finalTimeout);
+    }
+
+    function transitionToMainSite() {
+        const kineticHero = document.getElementById('kineticHero');
+        const originalHero = document.getElementById('originalHero');
+        const nav = document.querySelector('.nav');
+
+        if (kineticHero && originalHero) {
+            // Fade out kinetic hero
+            kineticHero.style.transition = 'opacity 1s ease';
+            kineticHero.style.opacity = '0';
+
+            setTimeout(() => {
+                kineticHero.style.display = 'none';
+                originalHero.style.display = 'block';
+                
+                // Show navigation
+                if (nav) {
+                    nav.style.opacity = '1';
+                    nav.style.pointerEvents = 'auto';
+                }
+                
+                // Initialize original hero animations if GSAP is available
+                if (typeof gsap !== 'undefined') {
+                    gsap.fromTo('.hero-year > span', 
+                        { yPercent: 110 }, 
+                        { yPercent: 0, stagger: 0.05, duration: 1, ease: 'power3.out' }
+                    );
+                }
+                
+                console.log('Transitioned to main 2007 Productions site');
+            }, 1000);
+        }
+    }
+
+    // Global skip function
+    window.skipKineticIntro = function() {
+        // Clear all timeouts
+        kineticTimeouts.forEach(timeout => clearTimeout(timeout));
+        
+        // Hide all text
+        kineticSequence.forEach(item => {
+            const element = document.getElementById(item.id);
+            if (element) {
+                element.classList.remove('visible');
+                element.classList.add('exit');
+            }
+        });
+
+        // Transition immediately
+        setTimeout(transitionToMainSite, 500);
+    };
+
+    // Click anywhere to advance
+    document.addEventListener('click', (e) => {
+        // Don't trigger on skip button clicks
+        if (e.target.classList.contains('kinetic-skip')) return;
+        
+        if (kineticStep < kineticSequence.length - 1) {
+            // Skip to next text immediately
+            kineticStep++;
+        } else {
+            window.skipKineticIntro();
+        }
+    });
+
+    // Start the kinetic sequence
+    startKineticSequence();
+}
+
 // Main application script
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -110,6 +249,21 @@ function initializeCore() {
 
         // Page management
         showPage('home');
+        
+        // Initialize Robot-style kinetic hero
+        if (document.getElementById('kineticHero')) {
+            // Hide navigation initially during kinetic intro
+            const nav = document.querySelector('.nav');
+            if (nav) {
+                nav.style.opacity = '0';
+                nav.style.pointerEvents = 'none';
+            }
+            
+            // Start kinetic sequence
+            setTimeout(() => {
+                initializeKineticHero();
+            }, 500);
+        }
         
         console.log('Core initialization complete');
     } catch (error) {

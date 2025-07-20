@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stryd Stories | 2007 Productions</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Stryd Stories">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    
+    <!-- Fonts - Same as main site -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="app.js" as="script">
+</head>
+<body>
+    <!-- PWA Install Prompt -->
+    <div class="install-prompt" id="installPrompt">
+        <div class="install-content">
+            <div class="install-icon">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="strydGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="20,80 50,20 80,80" fill="none" stroke="url(#strydGrad)" stroke-width="3"/>
+                    <circle cx="50" cy="60" r="4" fill="url(#strydGrad)"/>
+                    <text x="50" y="45" font-family="Space Grotesk" font-size="12" font-weight="700" text-anchor="middle" fill="url(#strydGrad)">S</text>
+                </svg>
+            </div>
+            <div class="install-text">
+                <h3>Install Stryd Stories</h3>
+                <p>Access your running story creator anytime</p>
+            </div>
+            <button class="install-button" id="installButton">Install App</button>
+            <button class="install-dismiss" id="installDismiss">×</button>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-symbol">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="loadingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <polygon points="20,80 50,20 80,80" fill="none" stroke="url(#loadingGrad)" stroke-width="3">
+                        <animateTransform attributeName="transform" type="rotate" values="0 50 50;360 50 50" dur="2s" repeatCount="indefinite"/>
+                    </polygon>
+                    <circle cx="50" cy="50" r="8" fill="url(#loadingGrad)"/>
+                </svg>
+            </div>
+            <div class="loading-text">INITIALIZING STRYD STORIES...</div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header with 2007 Productions branding -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="brand-section">
+                    <a href="/" class="back-link" title="Back to 2007 Productions">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <polygon points="50,15 85,75 15,75" fill="none" stroke="url(#logoGrad)" stroke-width="3"/>
+                            <circle cx="35" cy="60" r="4" fill="url(#logoGrad)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGrad)"/>
+                            <circle cx="65" cy="60" r="4" fill="url(#logoGrad)"/>
+                            <polygon points="45,35 55,35 50,45" fill="url(#logoGrad)"/>
+                        </svg>
+                    </a>
+                    <div class="brand-text">
+                        <h1>Stryd Stories</h1>
+                        <p>by 2007 Productions</p>
+                    </div>
+                </div>
+                <div class="stryd-logo">
+                    <span class="stryd-text">STRYD</span>
+                    <span class="stryd-subtitle">Story Creator</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main App Content -->
+        <main class="app-main" id="appMain">
+            <!-- React App will mount here -->
+            <div id="react-root"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span>Powered by</span>
+                    <strong>STRYD</strong>
+                    <span>&</span>
+                    <strong>2007 Productions</strong>
+                </div>
+                <div class="footer-links">
+                    <a href="/" class="footer-link">Back to Portfolio</a>
+                    <a href="mailto:hello@2007productions.com" class="footer-link">Contact</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js" type="module"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Stryd PWA redirects
+[[redirects]]
+  from = "/stryd/*"
+  to = "/stryd/index.html"
+  status = 200
+
+# Main site redirects
 [[redirects]]
   from = "/*"
   to = "/index.html"
