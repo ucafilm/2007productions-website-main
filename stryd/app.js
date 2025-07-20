@@ -741,19 +741,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Mount React app
   const reactRoot = document.getElementById('react-root');
-  if (reactRoot) {
+  if (reactRoot && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
     ReactDOM.render(React.createElement(StrydStoriesApp), reactRoot);
+  } else {
+    console.error('React not loaded properly');
+    // Show fallback message
+    const reactRoot = document.getElementById('react-root');
+    if (reactRoot) {
+      reactRoot.innerHTML = `
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 400px;
+          text-align: center;
+          color: #fff;
+          font-family: 'Space Grotesk', sans-serif;
+        ">
+          <h2 style="margin-bottom: 1rem; color: #ff6b35;">Loading Stryd Stories...</h2>
+          <p style="color: #888; margin-bottom: 2rem;">If this persists, please refresh the page.</p>
+          <button onclick="location.reload()" style="
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #ff6b35, #4a9eff);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+          ">Refresh Page</button>
+        </div>
+      `;
+    }
   }
 });
-
-// Add React CDN scripts dynamically if not available
-if (typeof React === 'undefined') {
-  const reactScript = document.createElement('script');
-  reactScript.src = 'https://unpkg.com/react@18/umd/react.production.min.js';
-  reactScript.onload = () => {
-    const reactDomScript = document.createElement('script');
-    reactDomScript.src = 'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js';
-    document.head.appendChild(reactDomScript);
-  };
-  document.head.appendChild(reactScript);
-}
