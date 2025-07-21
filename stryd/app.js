@@ -1377,27 +1377,7 @@ function showReactError(reactRoot) {
       </div>
     `;
   }
-}, 'Click to change image')
-            )
-          ] : [
-            React.createElement('div', { key: 'upload', className: 'upload-placeholder' },
-              React.createElement('div', { className: 'upload-icon' }, '📤'),
-              React.createElement('p', null, `Click to upload your ${imageType === 'map' ? 'Stryd run map' : 'personal photo'}`),
-              React.createElement('small', null, 'Supports PNG, JPG files (max 10MB)')
-            )
-          ]
-        )
-      ),
 
-      React.createElement('input', {
-        ref: fileInputRef,
-        type: 'file',
-        accept: 'image/*',
-        onChange: handleImageUpload,
-        style: { display: 'none' }
-      }),
-
-      uploadedImage && React.createElement('div', { className: 'step-navigation' },
         React.createElement('button', {
           onClick: nextStep,
           className: 'next-btn'
