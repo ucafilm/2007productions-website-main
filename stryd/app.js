@@ -139,6 +139,11 @@ const StrydStoriesApp = () => {
   const [routeColorMode, setRouteColorMode] = useState('none');
   const [mockRouteData, setMockRouteData] = useState(null);
   
+  // Additional state for modern UI
+  const [previewZoom, setPreviewZoom] = useState(0.7);
+  const [showDataEditor, setShowDataEditor] = useState(false);
+  const [showOverlaySettings, setShowOverlaySettings] = useState(false);
+  const liveCanvasRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -275,6 +280,61 @@ const StrydStoriesApp = () => {
       }
     }
   }, []);
+  
+  // Helper functions for modern UI
+  const applyQuickStyle = useCallback((preset) => {
+    setColorTheme(preset.theme);
+    setFontStyle(preset.font);
+    setOverlayStyle(preset.overlay);
+    showNotification(`Applied ${preset.name} style!`, 'success');
+  }, []);
+  
+  const isCurrentStyle = useCallback((preset) => {
+    return colorTheme === preset.theme && 
+           fontStyle === preset.font && 
+           overlayStyle === preset.overlay;
+  }, [colorTheme, fontStyle, overlayStyle]);
+  
+  const drawRouteStylePreview = useCallback((canvas, style) => {
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const routeStyle = ROUTE_STYLES[style] || ROUTE_STYLES.gradient;
+    
+    ctx.clearRect(0, 0, 60, 40);
+    
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    
+    if (typeof routeStyle.strokeStyle === 'function') {
+      ctx.strokeStyle = routeStyle.strokeStyle(ctx, 60, 40);
+    } else {
+      ctx.strokeStyle = routeStyle.strokeStyle;
+    }
+    
+    ctx.beginPath();
+    ctx.moveTo(10, 30);
+    ctx.quadraticCurveTo(30, 10, 50, 30);
+    ctx.stroke();
+  }, [ROUTE_STYLES]);
+  
+  // Live preview canvas effect
+  useEffect(() => {
+    if (liveCanvasRef.current && uploadedImage) {
+      const timer = setTimeout(() => {
+        const liveCanvas = liveCanvasRef.current;
+        const liveCtx = liveCanvas.getContext('2d');
+        
+        // Copy the main canvas content to live preview
+        if (canvasRef.current) {
+          liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+          liveCtx.drawImage(canvasRef.current, 0, 0);
+        }
+      }, 50);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [uploadedImage, colorTheme, fontStyle, overlayStyle, overlayPosition, runData, showOverlay, showRouteOverlay, mockRouteData, routeStyle, routeOpacity]);
   
   // Route overlay system
   const ROUTE_STYLES = {
@@ -848,197 +908,289 @@ const StrydStoriesApp = () => {
       )
     ),
 
-    // Customize Step
-    currentStep === 'customize' && React.createElement('div', { className: 'customize-section' },
-      React.createElement('div', { className: 'section-header' },
-        React.createElement('h2', null, 'Customize Your Story'),
-        React.createElement('p', null, 'Adjust the style and data for your Instagram Story')
-      ),
-
-      React.createElement('div', { className: 'customize-grid' },
-        // Run data editor
-        React.createElement('div', { className: 'customize-card' },
-          React.createElement('h3', null, 'Run Statistics'),
-          React.createElement('div', { className: 'data-inputs' },
-            React.createElement('div', { className: 'input-row' },
-              React.createElement('label', null, 'Distance'),
-              React.createElement('input', {
-                type: 'text',
-                value: runData.distance,
-                onChange: (e) => setRunData(prev => ({...prev, distance: e.target.value}))
-              })
-            ),
-            React.createElement('div', { className: 'input-row' },
-              React.createElement('label', null, 'Time'),
-              React.createElement('input', {
-                type: 'text',
-                value: runData.time,
-                onChange: (e) => setRunData(prev => ({...prev, time: e.target.value}))
-              })
-            ),
-            React.createElement('div', { className: 'input-row' },
-              React.createElement('label', null, 'Pace'),
-              React.createElement('input', {
-                type: 'text',
-                value: runData.pace,
-                onChange: (e) => setRunData(prev => ({...prev, pace: e.target.value}))
-              })
-            ),
-            React.createElement('div', { className: 'input-row' },
-              React.createElement('label', null, 'Power'),
-              React.createElement('input', {
-                type: 'text',
-                value: runData.power,
-                onChange: (e) => setRunData(prev => ({...prev, power: e.target.value}))
-              })
+    // Modern Customize Step with Split-Screen Layout
+    currentStep === 'customize' && React.createElement('div', { className: 'modern-customize-section' },
+      React.createElement('div', { className: 'customize-split-container' },
+        
+        // LEFT PANEL - Live Preview
+        React.createElement('div', { className: 'customize-preview-panel' },
+          React.createElement('div', { className: 'preview-header' },
+            React.createElement('h3', null, 'Live Preview'),
+            React.createElement('div', { className: 'preview-controls' },
+              React.createElement('button', { 
+                className: 'preview-zoom-btn',
+                onClick: () => setPreviewZoom(prev => prev === 1 ? 0.7 : 1)
+              }, previewZoom === 1 ? 'Fit to Screen' : 'Actual Size')
             )
-          )
-        ),
-
-        // Theme selector
-        React.createElement('div', { className: 'customize-card' },
-          React.createElement('h3', null, 'Color Theme'),
-          React.createElement('div', { className: 'theme-grid' },
-            Object.keys(THEMES).map(themeKey => 
-              React.createElement('button', {
-                key: themeKey,
-                onClick: () => setColorTheme(themeKey),
-                className: `theme-btn ${colorTheme === themeKey ? 'active' : ''}`,
-                style: { '--theme-color': THEMES[themeKey].primary }
-              },
-                React.createElement('div', { 
-                  className: 'theme-color',
-                  style: { backgroundColor: THEMES[themeKey].primary }
+          ),
+          
+          React.createElement('div', { className: 'live-preview-container' },
+            React.createElement('div', { 
+              className: 'phone-mockup-live',
+              style: { transform: `scale(${previewZoom})` }
+            },
+              React.createElement('div', { className: 'phone-screen-live' },
+                React.createElement('div', { className: 'instagram-header' },
+                  React.createElement('div', { className: 'story-progress-live' },
+                    React.createElement('div', { className: 'progress-line active' })
+                  ),
+                  React.createElement('div', { className: 'story-time' }, 'now')
+                ),
+                
+                React.createElement('canvas', {
+                  ref: liveCanvasRef,
+                  width: 1080,
+                  height: 1920,
+                  className: 'live-story-canvas'
                 }),
-                React.createElement('span', null, THEMES[themeKey].name)
+                
+                React.createElement('div', { className: 'preview-indicators' },
+                  React.createElement('div', { className: 'safe-zone-indicator' }, 'Safe Zone'),
+                  React.createElement('div', { className: 'text-zone-indicator' }, 'Text Area')
+                )
               )
             )
           )
         ),
-
-        // Font selector
-        React.createElement('div', { className: 'customize-card' },
-          React.createElement('h3', null, 'Font Style'),
-          React.createElement('div', { className: 'font-grid' },
-            Object.keys(FONTS).map(fontKey => 
-              React.createElement('button', {
-                key: fontKey,
-                onClick: () => setFontStyle(fontKey),
-                className: `font-btn ${fontStyle === fontKey ? 'active' : ''}`,
-                style: { fontFamily: FONTS[fontKey].primary }
-              }, FONTS[fontKey].name)
-            )
-          )
-        ),
-
-        // Route overlay controls
-        React.createElement('div', { className: 'customize-card' },
-          React.createElement('h3', null, 'Route Overlay'),
-          React.createElement('div', { className: 'route-controls' },
-            React.createElement('div', { className: 'control-group' },
-              React.createElement('label', null, 'Show Route'),
-              React.createElement('div', { className: 'toggle-group' },
-                React.createElement('input', {
-                  type: 'checkbox',
-                  id: 'route-toggle',
-                  checked: showRouteOverlay,
-                  onChange: (e) => setShowRouteOverlay(e.target.checked)
-                }),
-                React.createElement('label', { htmlFor: 'route-toggle', className: 'toggle-label' }, 'Enable Route')
+        
+        // RIGHT PANEL - Modern Controls
+        React.createElement('div', { className: 'customize-controls-panel' },
+          React.createElement('div', { className: 'controls-header' },
+            React.createElement('h3', null, 'Customize'),
+            React.createElement('p', null, 'Changes apply instantly')
+          ),
+          
+          React.createElement('div', { className: 'controls-scroll-area' },
+            
+            // Quick Style Presets
+            React.createElement('div', { className: 'control-section priority' },
+              React.createElement('h4', null, '⚡ Quick Style'),
+              React.createElement('div', { className: 'quick-style-grid' },
+                [
+                  { theme: 'stryd-orange', font: 'space-grotesk', overlay: 'gradient', name: 'Stryd Classic' },
+                  { theme: 'nike-volt', font: 'athletic', overlay: 'solid', name: 'Athletic Bold' },
+                  { theme: 'midnight', font: 'inter', overlay: 'blur', name: 'Night Mode' },
+                  { theme: 'sunset', font: 'space-grotesk', overlay: 'branded', name: 'Sunset Vibes' }
+                ].map(preset => 
+                  React.createElement('button', {
+                    key: preset.name,
+                    className: `quick-style-btn ${isCurrentStyle(preset) ? 'active' : ''}`,
+                    onClick: () => applyQuickStyle(preset)
+                  },
+                    React.createElement('div', { 
+                      className: 'quick-style-preview',
+                      style: { backgroundColor: THEMES[preset.theme].primary }
+                    }),
+                    React.createElement('span', null, preset.name)
+                  )
+                )
               )
             ),
             
-            showRouteOverlay && [
-              React.createElement('div', { key: 'style', className: 'control-group' },
-                React.createElement('label', null, 'Route Style'),
-                React.createElement('div', { className: 'style-buttons' },
+            // Modern Theme Selector
+            React.createElement('div', { className: 'control-section' },
+              React.createElement('h4', null, '🎨 Color Theme'),
+              React.createElement('div', { className: 'theme-grid-modern' },
+                Object.keys(THEMES).map(themeKey => 
+                  React.createElement('button', {
+                    key: themeKey,
+                    onClick: () => setColorTheme(themeKey),
+                    className: `theme-btn-modern ${colorTheme === themeKey ? 'active' : ''}`
+                  },
+                    React.createElement('div', { className: 'theme-preview-circle' },
+                      React.createElement('div', { 
+                        className: 'theme-color-main',
+                        style: { backgroundColor: THEMES[themeKey].primary }
+                      }),
+                      React.createElement('div', { 
+                        className: 'theme-color-accent',
+                        style: { backgroundColor: THEMES[themeKey].secondary }
+                      })
+                    ),
+                    React.createElement('span', { className: 'theme-name' }, THEMES[themeKey].name)
+                  )
+                )
+              )
+            ),
+            
+            // Modern Font Selector
+            React.createElement('div', { className: 'control-section' },
+              React.createElement('h4', null, '✏️ Typography'),
+              React.createElement('div', { className: 'font-grid-modern' },
+                Object.keys(FONTS).map(fontKey => 
+                  React.createElement('button', {
+                    key: fontKey,
+                    onClick: () => setFontStyle(fontKey),
+                    className: `font-btn-modern ${fontStyle === fontKey ? 'active' : ''}`,
+                    style: { fontFamily: FONTS[fontKey].primary }
+                  },
+                    React.createElement('div', { className: 'font-preview' },
+                      React.createElement('span', { 
+                        className: 'font-demo-large',
+                        style: { 
+                          fontFamily: FONTS[fontKey].primary,
+                          fontWeight: FONTS[fontKey].weight 
+                        }
+                      }, '11.63'),
+                      React.createElement('span', { 
+                        className: 'font-demo-small',
+                        style: { fontFamily: FONTS[fontKey].primary }
+                      }, 'km • 7:47 /km')
+                    ),
+                    React.createElement('span', { className: 'font-name' }, FONTS[fontKey].name)
+                  )
+                )
+              )
+            ),
+            
+            // Modern Route Overlay
+            React.createElement('div', { className: 'control-section' },
+              React.createElement('h4', null, '🗺️ Route Overlay'),
+              React.createElement('div', { className: 'route-toggle-modern' },
+                React.createElement('label', { className: 'modern-switch' },
+                  React.createElement('input', {
+                    type: 'checkbox',
+                    checked: showRouteOverlay,
+                    onChange: (e) => setShowRouteOverlay(e.target.checked)
+                  }),
+                  React.createElement('span', { className: 'switch-slider' }),
+                  React.createElement('span', { className: 'switch-label' }, 'Show Route')
+                )
+              ),
+              
+              showRouteOverlay && React.createElement('div', { className: 'route-controls-modern' },
+                React.createElement('div', { className: 'route-style-grid' },
                   ['gradient', 'solid', 'neon', 'minimal'].map(style =>
                     React.createElement('button', {
                       key: style,
                       onClick: () => setRouteStyle(style),
-                      className: `style-btn ${routeStyle === style ? 'active' : ''}`
-                    }, style.charAt(0).toUpperCase() + style.slice(1))
-                  )
-                )
-              ),
-              
-                React.createElement('div', { key: 'type', className: 'control-group' },
-                  React.createElement('label', null, 'Route Type'),
-                  React.createElement('div', { className: 'type-buttons' },
-                    [{ key: 'loop', label: 'Loop' }, { key: 'outback', label: 'Out & Back' }, { key: 'zigzag', label: 'Zigzag' }].map(type =>
-                      React.createElement('button', {
-                        key: type.key,
-                        onClick: () => setRouteType(type.key),
-                        className: `type-btn ${routeType === type.key ? 'active' : ''}`
-                      }, type.label)
+                      className: `route-style-btn ${routeStyle === style ? 'active' : ''}`
+                    },
+                      React.createElement('canvas', {
+                        className: 'route-style-preview',
+                        width: 60,
+                        height: 40,
+                        ref: (canvas) => drawRouteStylePreview(canvas, style)
+                      }),
+                      React.createElement('span', null, style.charAt(0).toUpperCase() + style.slice(1))
                     )
                   )
                 ),
-              
-              React.createElement('div', { key: 'opacity', className: 'control-group' },
-                React.createElement('label', null, `Route Opacity (${Math.round(routeOpacity * 100)}%)`),
-                React.createElement('input', {
-                  type: 'range',
-                  min: '0.1',
-                  max: '1',
-                  step: '0.1',
-                  value: routeOpacity,
-                  onChange: (e) => setRouteOpacity(parseFloat(e.target.value)),
-                  className: 'opacity-slider'
-                })
-              ),
-              
-              React.createElement('div', { key: 'generate', className: 'control-group' },
+                
+                React.createElement('div', { className: 'route-type-modern' },
+                  React.createElement('label', null, 'Route Type'),
+                  React.createElement('div', { className: 'route-type-selector' },
+                    [
+                      { key: 'loop', icon: '🔄', name: 'Loop' },
+                      { key: 'outback', icon: '↔️', name: 'Out & Back' },
+                      { key: 'zigzag', icon: '⚡', name: 'Zigzag' }
+                    ].map(type =>
+                      React.createElement('button', {
+                        key: type.key,
+                        onClick: () => setRouteType(type.key),
+                        className: `route-type-btn ${routeType === type.key ? 'active' : ''}`
+                      }, 
+                        React.createElement('span', { className: 'route-icon' }, type.icon),
+                        React.createElement('span', null, type.name)
+                      )
+                    )
+                  )
+                ),
+                
+                React.createElement('div', { className: 'opacity-control-modern' },
+                  React.createElement('label', null, `Opacity ${Math.round(routeOpacity * 100)}%`),
+                  React.createElement('input', {
+                    type: 'range',
+                    min: '0.1',
+                    max: '1',
+                    step: '0.1',
+                    value: routeOpacity,
+                    onChange: (e) => setRouteOpacity(parseFloat(e.target.value)),
+                    className: 'modern-slider'
+                  })
+                ),
+                
                 React.createElement('button', {
                   onClick: generateRoute,
-                  className: 'generate-route-btn'
-                }, 'Generate New Route')
+                  className: 'generate-route-btn-modern'
+                }, '🎲 Generate New Route')
               )
-            ]
-          )
-        ),
-
-        // Overlay settings
-        React.createElement('div', { className: 'customize-card' },
-          React.createElement('h3', null, 'Overlay Settings'),
-          React.createElement('div', { className: 'overlay-controls' },
-            React.createElement('div', { className: 'control-group' },
-              React.createElement('label', null, 'Style'),
-              React.createElement('div', { className: 'style-buttons' },
-                ['gradient', 'solid', 'blur', 'branded'].map(style =>
-                  React.createElement('button', {
-                    key: style,
-                    onClick: () => setOverlayStyle(style),
-                    className: `style-btn ${overlayStyle === style ? 'active' : ''}`
-                  }, style.charAt(0).toUpperCase() + style.slice(1))
+            ),
+            
+            // Collapsible Data Editor
+            React.createElement('div', { className: 'control-section collapsible' },
+              React.createElement('button', { 
+                className: 'section-toggle',
+                onClick: () => setShowDataEditor(!showDataEditor)
+              },
+                React.createElement('h4', null, '📊 Run Data'),
+                React.createElement('span', { className: `toggle-arrow ${showDataEditor ? 'open' : ''}` }, '▼')
+              ),
+              
+              showDataEditor && React.createElement('div', { className: 'data-inputs-modern' },
+                Object.entries(runData).map(([key, value]) =>
+                  React.createElement('div', { key, className: 'input-group-modern' },
+                    React.createElement('label', null, key.charAt(0).toUpperCase() + key.slice(1)),
+                    React.createElement('input', {
+                      type: 'text',
+                      value: value,
+                      onChange: (e) => setRunData(prev => ({...prev, [key]: e.target.value})),
+                      className: 'modern-input'
+                    })
+                  )
                 )
               )
             ),
-            imageType === 'personal' && React.createElement('div', { className: 'control-group' },
-              React.createElement('label', null, 'Position'),
-              React.createElement('div', { className: 'position-buttons' },
-                ['top', 'center', 'bottom'].map(position =>
-                  React.createElement('button', {
-                    key: position,
-                    onClick: () => setOverlayPosition(position),
-                    className: `position-btn ${overlayPosition === position ? 'active' : ''}`
-                  }, position.charAt(0).toUpperCase() + position.slice(1))
+            
+            // Collapsible Overlay Settings
+            React.createElement('div', { className: 'control-section collapsible' },
+              React.createElement('button', { 
+                className: 'section-toggle',
+                onClick: () => setShowOverlaySettings(!showOverlaySettings)
+              },
+                React.createElement('h4', null, '🎭 Text Overlay'),
+                React.createElement('span', { className: `toggle-arrow ${showOverlaySettings ? 'open' : ''}` }, '▼')
+              ),
+              
+              showOverlaySettings && React.createElement('div', { className: 'overlay-controls-modern' },
+                React.createElement('div', { className: 'overlay-style-grid' },
+                  ['gradient', 'solid', 'blur', 'branded'].map(style =>
+                    React.createElement('button', {
+                      key: style,
+                      onClick: () => setOverlayStyle(style),
+                      className: `overlay-style-btn ${overlayStyle === style ? 'active' : ''}`
+                    }, style.charAt(0).toUpperCase() + style.slice(1))
+                  )
+                ),
+                
+                imageType === 'personal' && React.createElement('div', { className: 'position-controls' },
+                  React.createElement('label', null, 'Position'),
+                  React.createElement('div', { className: 'position-grid' },
+                    ['top', 'center', 'bottom'].map(position =>
+                      React.createElement('button', {
+                        key: position,
+                        onClick: () => setOverlayPosition(position),
+                        className: `position-btn ${overlayPosition === position ? 'active' : ''}`
+                      }, position.charAt(0).toUpperCase() + position.slice(1))
+                    )
+                  )
                 )
               )
             )
+          ),
+          
+          // Action Buttons
+          React.createElement('div', { className: 'customize-actions' },
+            React.createElement('button', {
+              onClick: prevStep,
+              className: 'action-btn secondary'
+            }, '← Upload Different Image'),
+            React.createElement('button', {
+              onClick: nextStep,
+              className: 'action-btn primary'
+            }, 'Download Story →')
           )
         )
-      ),
-
-      React.createElement('div', { className: 'step-navigation' },
-        React.createElement('button', {
-          onClick: prevStep,
-          className: 'prev-btn'
-        }, '← Back to Upload'),
-        React.createElement('button', {
-          onClick: nextStep,
-          className: 'next-btn'
-        }, 'Preview Story →')
       )
     ),
 
