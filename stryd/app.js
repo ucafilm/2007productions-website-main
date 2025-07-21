@@ -131,6 +131,14 @@ const StrydStoriesApp = () => {
   const [isLoadingStrydData, setIsLoadingStrydData] = useState(false);
   const [currentStep, setCurrentStep] = useState('upload');
   
+  // Route overlay state
+  const [showRouteOverlay, setShowRouteOverlay] = useState(false);
+  const [routeStyle, setRouteStyle] = useState('gradient');
+  const [routeType, setRouteType] = useState('loop');
+  const [routeOpacity, setRouteOpacity] = useState(0.9);
+  const [routeColorMode, setRouteColorMode] = useState('none');
+  const [mockRouteData, setMockRouteData] = useState(null);
+  
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -164,33 +172,352 @@ const StrydStoriesApp = () => {
     }
   }, [strydUrl]);
 
-  // Image upload handler
-  const handleImageUpload = useCallback((event) => {
+  // Enhanced image processing
+  const [dragOver, setDragOver] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const validateFile = (file) => {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    
+    if (!file) {
+      throw new Error('No file selected');
+    }
+    
+    if (!validTypes.includes(file.type)) {
+      throw new Error('Invalid file type. Please select a JPEG, PNG, WebP, or GIF image.');
+    }
+    
+    if (file.size > maxSize) {
+      throw new Error('Image too large. Maximum size is 10MB.');
+    }
+    
+    return true;
+  };
+  
+  const processImageFile = async (file) => {
+    return new Promise((resolve, reject) => {
+      try {
+        validateFile(file);
+        
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          const img = new Image();
+          
+          img.onload = () => {
+            console.log('Image loaded successfully:', {
+              width: img.width,
+              height: img.height,
+              size: file.size,
+              type: file.type
+            });
+            
+            resolve({
+              image: img,
+              file: file,
+              dataUrl: e.target.result,
+              metadata: {
+                width: img.width,
+                height: img.height,
+                size: file.size,
+                type: file.type,
+                name: file.name
+              }
+            });
+          };
+          
+          img.onerror = () => {
+            reject(new Error('Failed to load image. The file may be corrupted.'));
+          };
+          
+          // Add timeout for large files
+          setTimeout(() => {
+            if (!img.complete) {
+              reject(new Error('Image loading timed out. Please try a smaller file.'));
+            }
+          }, 10000);
+          
+          img.src = e.target.result;
+        };
+        
+        reader.onerror = () => {
+          reject(new Error('Failed to read file. Please try again.'));
+        };
+        
+        reader.readAsDataURL(file);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
+  // Enhanced upload handler
+  const handleImageUpload = useCallback(async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      showNotification('Image too large. Please select an image under 10MB.', 'error');
+    
+    try {
+      setIsProcessing(true);
+      const result = await processImageFile(file);
+      
+      setUploadedImage(result.image);
+      setCurrentStep('customize');
+      showNotification('✅ Image uploaded successfully!', 'success');
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      showNotification(error.message, 'error');
+    } finally {
+      setIsProcessing(false);
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
+  }, []);
+  
+  // Route overlay system
+  const ROUTE_STYLES = {
+    'gradient': {
+      strokeStyle: (ctx, width, height) => {
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#ff6b35');
+        gradient.addColorStop(0.5, '#4a9eff');
+        gradient.addColorStop(1, '#c84fff');
+        return gradient;
+      },
+      lineWidth: 8,
+      lineCap: 'round',
+      lineJoin: 'round',
+      shadowBlur: 6,
+      shadowColor: 'rgba(0, 0, 0, 0.3)'
+    },
+    'solid': {
+      strokeStyle: '#ff6b35',
+      lineWidth: 6,
+      lineCap: 'round',
+      lineJoin: 'round',
+      shadowBlur: 4,
+      shadowColor: 'rgba(0, 0, 0, 0.2)'
+    },
+    'neon': {
+      strokeStyle: '#4a9eff',
+      lineWidth: 4,
+      lineCap: 'round',
+      lineJoin: 'round',
+      shadowBlur: 12,
+      shadowColor: '#4a9eff',
+      glowEffect: true
+    },
+    'minimal': {
+      strokeStyle: '#ffffff',
+      lineWidth: 3,
+      lineCap: 'round',
+      lineJoin: 'round',
+      shadowBlur: 2,
+      shadowColor: 'rgba(0, 0, 0, 0.5)'
+    }
+  };
+  
+  const generateMockRouteData = useCallback((routeType = 'loop') => {
+    const basePoints = [];
+    const numPoints = 50;
+    
+    if (routeType === 'loop') {
+      for (let i = 0; i < numPoints; i++) {
+        const angle = (i / numPoints) * 2 * Math.PI;
+        const radius = 0.3 + Math.random() * 0.1;
+        const x = 0.5 + Math.cos(angle) * radius;
+        const y = 0.5 + Math.sin(angle) * radius;
+        
+        basePoints.push({
+          x: Math.max(0.1, Math.min(0.9, x)),
+          y: Math.max(0.1, Math.min(0.9, y)),
+          elevation: 100 + Math.sin(angle * 3) * 20,
+          pace: 300 + Math.random() * 60,
+          power: 180 + Math.random() * 40
+        });
+      }
+    } else if (routeType === 'outback') {
+      for (let i = 0; i < numPoints; i++) {
+        const progress = i / (numPoints - 1);
+        let x, y;
+        
+        if (progress <= 0.5) {
+          const t = progress * 2;
+          x = 0.2 + t * 0.6;
+          y = 0.5 + Math.sin(t * Math.PI * 2) * 0.1;
+        } else {
+          const t = (progress - 0.5) * 2;
+          x = 0.8 - t * 0.6;
+          y = 0.5 + Math.sin((1 - t) * Math.PI * 2) * 0.1;
+        }
+        
+        basePoints.push({
+          x: Math.max(0.1, Math.min(0.9, x)),
+          y: Math.max(0.1, Math.min(0.9, y)),
+          elevation: 100 + Math.sin(progress * Math.PI * 4) * 30,
+          pace: 280 + Math.random() * 80,
+          power: 170 + Math.random() * 50
+        });
+      }
+    } else {
+      let x = 0.2;
+      let y = 0.5;
+      
+      for (let i = 0; i < numPoints; i++) {
+        x += (Math.random() - 0.5) * 0.1;
+        y += (Math.random() - 0.5) * 0.1;
+        
+        x = Math.max(0.1, Math.min(0.9, x));
+        y = Math.max(0.1, Math.min(0.9, y));
+        
+        basePoints.push({
+          x,
+          y,
+          elevation: 100 + Math.random() * 100,
+          pace: 250 + Math.random() * 100,
+          power: 150 + Math.random() * 80
+        });
+      }
+    }
+    
+    return basePoints;
+  }, []);
+  
+  const generateRoute = useCallback(() => {
+    const routeData = generateMockRouteData(routeType);
+    setMockRouteData(routeData);
+    showNotification('🗺️ Route generated successfully!', 'success');
+  }, [routeType, generateMockRouteData]);
+  
+  const drawRoute = useCallback((canvas, ctx, routeData, style, options = {}) => {
+    const {
+      opacity = 0.9,
+      showStartEnd = true,
+      showDirectionArrows = true
+    } = options;
+    
+    if (!routeData || routeData.length < 2) return;
+    
+    const routeStyle = ROUTE_STYLES[style] || ROUTE_STYLES.gradient;
+    
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    
+    const points = routeData.map(point => ({
+      x: point.x * canvas.width,
+      y: point.y * canvas.height,
+      ...point
+    }));
+    
+    // Set line style
+    ctx.lineWidth = routeStyle.lineWidth;
+    ctx.lineCap = routeStyle.lineCap;
+    ctx.lineJoin = routeStyle.lineJoin;
+    
+    if (routeStyle.shadowBlur) {
+      ctx.shadowBlur = routeStyle.shadowBlur;
+      ctx.shadowColor = routeStyle.shadowColor;
+    }
+    
+    // Draw glow effect for neon style
+    if (routeStyle.glowEffect) {
+      ctx.save();
+      ctx.lineWidth = routeStyle.lineWidth + 4;
+      ctx.strokeStyle = routeStyle.shadowColor;
+      ctx.globalAlpha = 0.3;
+      
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+    
+    // Set stroke style
+    if (typeof routeStyle.strokeStyle === 'function') {
+      ctx.strokeStyle = routeStyle.strokeStyle(ctx, canvas.width, canvas.height);
+    } else {
+      ctx.strokeStyle = routeStyle.strokeStyle;
+    }
+    
+    // Draw the path
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.stroke();
+    
+    // Draw start marker
+    if (showStartEnd) {
+      const startPoint = points[0];
+      
+      ctx.fillStyle = '#2ECC71';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      
+      ctx.beginPath();
+      ctx.arc(startPoint.x, startPoint.y, 12, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px Arial';
+      ctx.textAlign = 'center';
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillText('S', startPoint.x, startPoint.y + 6);
+    }
+    
+    ctx.restore();
+  }, [ROUTE_STYLES]);
+  
+  // Drag and drop handlers
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  }, []);
+  
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+  }, []);
+  
+  const handleDrop = useCallback(async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    const imageFile = files.find(file => file.type.startsWith('image/'));
+    
+    if (!imageFile) {
+      showNotification('Please drop an image file.', 'error');
       return;
     }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        setUploadedImage(img);
-        setCurrentStep('customize');
-        showNotification('Image uploaded successfully!', 'success');
-      };
-      img.onerror = () => {
-        showNotification('Error loading image. Please try a different file.', 'error');
-      };
-      img.src = e.target.result;
-    };
-    reader.onerror = () => {
-      showNotification('Error reading file. Please try again.', 'error');
-    };
-    reader.readAsDataURL(file);
+    
+    try {
+      setIsProcessing(true);
+      const result = await processImageFile(imageFile);
+      
+      setUploadedImage(result.image);
+      setCurrentStep('customize');
+      showNotification('✅ Image uploaded successfully!', 'success');
+      
+    } catch (error) {
+      console.error('Drop error:', error);
+      showNotification(error.message, 'error');
+    } finally {
+      setIsProcessing(false);
+    }
   }, []);
 
   // Canvas story generation
@@ -231,6 +558,15 @@ const StrydStoriesApp = () => {
     } catch (error) {
       console.error('Error drawing image:', error);
       return;
+    }
+    
+    // Draw route overlay if enabled and route data exists
+    if (showRouteOverlay && mockRouteData && mockRouteData.length > 0) {
+      drawRoute(canvas, ctx, mockRouteData, routeStyle, {
+        opacity: routeOpacity,
+        showStartEnd: true,
+        showDirectionArrows: true
+      });
     }
 
     if (showOverlay) {
@@ -335,7 +671,7 @@ const StrydStoriesApp = () => {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
       ctx.fillText('powered by', storyWidth - 60, storyHeight - 115);
     }
-  }, [uploadedImage, imageType, overlayStyle, overlayPosition, colorTheme, fontStyle, runData, showOverlay]);
+  }, [uploadedImage, imageType, overlayStyle, overlayPosition, colorTheme, fontStyle, runData, showOverlay, showRouteOverlay, mockRouteData, routeStyle, routeOpacity]);
 
   // Download functionality
   const downloadImage = useCallback(() => {
@@ -370,6 +706,12 @@ const StrydStoriesApp = () => {
     
     return () => clearTimeout(timer);
   }, [generateStoryImage]);
+  
+  // Initialize with a demo route
+  useEffect(() => {
+    const demoRoute = generateMockRouteData('loop');
+    setMockRouteData(demoRoute);
+  }, [generateMockRouteData]);
 
   // Step navigation
   const nextStep = () => {
@@ -445,23 +787,45 @@ const StrydStoriesApp = () => {
         )
       ),
 
-      // Upload area
+      // Enhanced upload area with drag & drop
       React.createElement('div', { 
-        className: 'upload-area',
-        onClick: () => fileInputRef.current?.click()
+        className: `upload-area ${
+          dragOver ? 'drag-over' : ''
+        } ${
+          isProcessing ? 'processing' : ''
+        } ${
+          uploadedImage ? 'has-image' : ''
+        }`.trim(),
+        onClick: () => !isProcessing && fileInputRef.current?.click(),
+        onDragOver: handleDragOver,
+        onDragLeave: handleDragLeave,
+        onDrop: handleDrop,
+        style: {
+          cursor: isProcessing ? 'wait' : 'pointer',
+          opacity: isProcessing ? 0.7 : 1
+        }
       },
         React.createElement('div', { className: 'upload-content' },
-          uploadedImage ? [
+          isProcessing ? [
+            React.createElement('div', { key: 'processing', className: 'upload-processing' },
+              React.createElement('div', { className: 'processing-spinner' }, '⏳'),
+              React.createElement('p', null, 'Processing image...'),
+              React.createElement('small', null, 'Please wait while we load your image')
+            )
+          ] : uploadedImage ? [
             React.createElement('div', { key: 'success', className: 'upload-success' },
               React.createElement('div', { className: 'success-icon' }, '✅'),
               React.createElement('p', null, `${imageType === 'map' ? 'Map' : 'Photo'} uploaded successfully!`),
-              React.createElement('small', null, 'Click to change image')
+              React.createElement('small', null, 'Click to change image or drag a new one here')
             )
           ] : [
             React.createElement('div', { key: 'upload', className: 'upload-placeholder' },
-              React.createElement('div', { className: 'upload-icon' }, '📤'),
-              React.createElement('p', null, `Click to upload your ${imageType === 'map' ? 'Stryd run map' : 'personal photo'}`),
-              React.createElement('small', null, 'Supports PNG, JPG files (max 10MB)')
+              React.createElement('div', { className: 'upload-icon' }, dragOver ? '🎯' : '📤'),
+              React.createElement('p', null, dragOver 
+                ? 'Drop your image here!'
+                : `Click to upload or drag & drop your ${imageType === 'map' ? 'Stryd run map' : 'personal photo'}`
+              ),
+              React.createElement('small', null, 'Supports PNG, JPG, WebP files (max 10MB)')
             )
           ]
         )
@@ -472,7 +836,8 @@ const StrydStoriesApp = () => {
         type: 'file',
         accept: 'image/*',
         onChange: handleImageUpload,
-        style: { display: 'none' }
+        style: { display: 'none' },
+        disabled: isProcessing
       }),
 
       uploadedImage && React.createElement('div', { className: 'step-navigation' },
@@ -563,6 +928,73 @@ const StrydStoriesApp = () => {
                 style: { fontFamily: FONTS[fontKey].primary }
               }, FONTS[fontKey].name)
             )
+          )
+        ),
+
+        // Route overlay controls
+        React.createElement('div', { className: 'customize-card' },
+          React.createElement('h3', null, 'Route Overlay'),
+          React.createElement('div', { className: 'route-controls' },
+            React.createElement('div', { className: 'control-group' },
+              React.createElement('label', null, 'Show Route'),
+              React.createElement('div', { className: 'toggle-group' },
+                React.createElement('input', {
+                  type: 'checkbox',
+                  id: 'route-toggle',
+                  checked: showRouteOverlay,
+                  onChange: (e) => setShowRouteOverlay(e.target.checked)
+                }),
+                React.createElement('label', { htmlFor: 'route-toggle', className: 'toggle-label' }, 'Enable Route')
+              )
+            ),
+            
+            showRouteOverlay && [
+              React.createElement('div', { key: 'style', className: 'control-group' },
+                React.createElement('label', null, 'Route Style'),
+                React.createElement('div', { className: 'style-buttons' },
+                  ['gradient', 'solid', 'neon', 'minimal'].map(style =>
+                    React.createElement('button', {
+                      key: style,
+                      onClick: () => setRouteStyle(style),
+                      className: `style-btn ${routeStyle === style ? 'active' : ''}`
+                    }, style.charAt(0).toUpperCase() + style.slice(1))
+                  )
+                )
+              ),
+              
+              React.createElement('div', { key: 'type', className: 'control-group' },
+                React.createElement('label', null, 'Route Type'),
+                React.createElement('div', { className: 'type-buttons' },
+                  [{ key: 'loop', label: '🔄 Loop' }, { key: 'outback', label: '↔️ Out & Back' }, { key: 'zigzag', label: '⚡ Zigzag' }].map(type =>
+                    React.createElement('button', {
+                      key: type.key,
+                      onClick: () => setRouteType(type.key),
+                      className: `type-btn ${routeType === type.key ? 'active' : ''}`
+                    }, type.label)
+                  )
+                )
+              ),
+              
+              React.createElement('div', { key: 'opacity', className: 'control-group' },
+                React.createElement('label', null, `Route Opacity (${Math.round(routeOpacity * 100)}%)`),
+                React.createElement('input', {
+                  type: 'range',
+                  min: '0.1',
+                  max: '1',
+                  step: '0.1',
+                  value: routeOpacity,
+                  onChange: (e) => setRouteOpacity(parseFloat(e.target.value)),
+                  className: 'opacity-slider'
+                })
+              ),
+              
+              React.createElement('div', { key: 'generate', className: 'control-group' },
+                React.createElement('button', {
+                  onClick: generateRoute,
+                  className: 'generate-route-btn'
+                }, '🔄 Generate New Route')
+              )
+            ]
           )
         ),
 
