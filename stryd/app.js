@@ -964,7 +964,7 @@ const StrydStoriesApp = () => {
             
             // Quick Style Presets
             React.createElement('div', { className: 'control-section priority' },
-              React.createElement('h4', null, '⚡ Quick Style'),
+              React.createElement('h4', null, 'Quick Style'),
               React.createElement('div', { className: 'quick-style-grid' },
                 [
                   { theme: 'stryd-orange', font: 'space-grotesk', overlay: 'gradient', name: 'Stryd Classic' },
@@ -989,7 +989,7 @@ const StrydStoriesApp = () => {
             
             // Modern Theme Selector
             React.createElement('div', { className: 'control-section' },
-              React.createElement('h4', null, '🎨 Color Theme'),
+              React.createElement('h4', null, 'Color Theme'),
               React.createElement('div', { className: 'theme-grid-modern' },
                 Object.keys(THEMES).map(themeKey => 
                   React.createElement('button', {
@@ -1015,7 +1015,7 @@ const StrydStoriesApp = () => {
             
             // Modern Font Selector
             React.createElement('div', { className: 'control-section' },
-              React.createElement('h4', null, '✏️ Typography'),
+              React.createElement('h4', null, 'Typography'),
               React.createElement('div', { className: 'font-grid-modern' },
                 Object.keys(FONTS).map(fontKey => 
                   React.createElement('button', {
@@ -1045,7 +1045,7 @@ const StrydStoriesApp = () => {
             
             // Modern Route Overlay
             React.createElement('div', { className: 'control-section' },
-              React.createElement('h4', null, '🗺️ Route Overlay'),
+              React.createElement('h4', null, 'Route Overlay'),
               React.createElement('div', { className: 'route-toggle-modern' },
                 React.createElement('label', { className: 'modern-switch' },
                   React.createElement('input', {
@@ -1081,9 +1081,9 @@ const StrydStoriesApp = () => {
                   React.createElement('label', null, 'Route Type'),
                   React.createElement('div', { className: 'route-type-selector' },
                     [
-                      { key: 'loop', icon: '🔄', name: 'Loop' },
-                      { key: 'outback', icon: '↔️', name: 'Out & Back' },
-                      { key: 'zigzag', icon: '⚡', name: 'Zigzag' }
+                      { key: 'loop', icon: 'Loop', name: 'Loop' },
+                      { key: 'outback', icon: 'Out&Back', name: 'Out & Back' },
+                      { key: 'zigzag', icon: 'Zigzag', name: 'Zigzag' }
                     ].map(type =>
                       React.createElement('button', {
                         key: type.key,
@@ -1113,7 +1113,7 @@ const StrydStoriesApp = () => {
                 React.createElement('button', {
                   onClick: generateRoute,
                   className: 'generate-route-btn-modern'
-                }, '🎲 Generate New Route')
+                }, 'Generate New Route')
               )
             ),
             
@@ -1123,7 +1123,7 @@ const StrydStoriesApp = () => {
                 className: 'section-toggle',
                 onClick: () => setShowDataEditor(!showDataEditor)
               },
-                React.createElement('h4', null, '📊 Run Data'),
+                React.createElement('h4', null, 'Run Data'),
                 React.createElement('span', { className: `toggle-arrow ${showDataEditor ? 'open' : ''}` }, '▼')
               ),
               
@@ -1148,7 +1148,7 @@ const StrydStoriesApp = () => {
                 className: 'section-toggle',
                 onClick: () => setShowOverlaySettings(!showOverlaySettings)
               },
-                React.createElement('h4', null, '🎭 Text Overlay'),
+                React.createElement('h4', null, 'Text Overlay'),
                 React.createElement('span', { className: `toggle-arrow ${showOverlaySettings ? 'open' : ''}` }, '▼')
               ),
               
@@ -1184,11 +1184,11 @@ const StrydStoriesApp = () => {
             React.createElement('button', {
               onClick: prevStep,
               className: 'action-btn secondary'
-            }, '← Upload Different Image'),
+            }, 'Upload Different Image'),
             React.createElement('button', {
               onClick: nextStep,
               className: 'action-btn primary'
-            }, 'Download Story →')
+            }, 'Download Story')
           )
         )
       )
