@@ -22,10 +22,6 @@
     <!-- Fonts - Same as main site -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- React CDN - Load before our app -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
     
@@ -137,7 +133,20 @@
         </footer>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts - Load React first, then our app -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Our App Script -->
+    <script>
+        // Verify React is loaded before proceeding
+        if (typeof React === 'undefined') {
+            console.error('React failed to load from CDN');
+            document.getElementById('react-root').innerHTML = '<div style="padding: 2rem; color: red; text-align: center;"><h2>Error: React not loaded</h2><p>Please refresh the page or check your internet connection.</p></div>';
+        } else {
+            console.log('React loaded successfully:', React.version);
+        }
+    </script>
     <script src="app.js"></script>
     
     <!-- Service Worker Registration -->
