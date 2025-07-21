@@ -1035,7 +1035,7 @@ const StrydStoriesApp = () => {
                       React.createElement('span', { 
                         className: 'font-demo-small',
                         style: { fontFamily: FONTS[fontKey].primary }
-                      }, 'km • 7:47 /km')
+                      }, 'km - 7:47 /km')
                     ),
                     React.createElement('span', { className: 'font-name' }, FONTS[fontKey].name)
                   )
@@ -1124,7 +1124,7 @@ const StrydStoriesApp = () => {
                 onClick: () => setShowDataEditor(!showDataEditor)
               },
                 React.createElement('h4', null, 'Run Data'),
-                React.createElement('span', { className: `toggle-arrow ${showDataEditor ? 'open' : ''}` }, '▼')
+                React.createElement('span', { className: `toggle-arrow ${showDataEditor ? 'open' : ''}` }, 'v')
               ),
               
               showDataEditor && React.createElement('div', { className: 'data-inputs-modern' },
@@ -1149,7 +1149,7 @@ const StrydStoriesApp = () => {
                 onClick: () => setShowOverlaySettings(!showOverlaySettings)
               },
                 React.createElement('h4', null, 'Text Overlay'),
-                React.createElement('span', { className: `toggle-arrow ${showOverlaySettings ? 'open' : ''}` }, '▼')
+                React.createElement('span', { className: `toggle-arrow ${showOverlaySettings ? 'open' : ''}` }, 'v')
               ),
               
               showOverlaySettings && React.createElement('div', { className: 'overlay-controls-modern' },
