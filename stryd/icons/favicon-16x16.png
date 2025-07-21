@@ -1,0 +1,28 @@
+<!-- Simple SVG icon for Stryd Stories -->
+<!-- This can be converted to PNG files for the manifest -->
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="strydGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4a9eff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c84fff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#strydGradient)" />
+  
+  <!-- Main triangle (representing mountains/achievement) -->
+  <polygon points="150,350 256,150 362,350" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round"/>
+  
+  <!-- Power indicator dots -->
+  <circle cx="206" cy="300" r="8" fill="white"/>
+  <circle cx="256" cy="300" r="8" fill="white"/>
+  <circle cx="306" cy="300" r="8" fill="white"/>
+  
+  <!-- Speed lines -->
+  <path d="M200,250 L240,250 M200,280 L240,280 M200,310 L240,310" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- "S" for Stryd -->
+  <text x="256" y="220" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" text-anchor="middle" fill="white">S</text>
+</svg>

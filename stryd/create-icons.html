@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stryd Icon Generator</title>
+</head>
+<body>
+    <h2>Generating Stryd Icons...</h2>
+    <div id="output"></div>
+    
+    <script>
+        function createStrydIcon(size) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            const center = size / 2;
+            const radius = size * 0.45;
+            
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#ff6b35');
+            gradient.addColorStop(0.5, '#4a9eff');
+            gradient.addColorStop(1, '#c84fff');
+            
+            // Draw background circle
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw triangle
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = Math.max(2, size / 42);
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            const triangleSize = radius * 0.6;
+            ctx.moveTo(center - triangleSize * 0.6, center + triangleSize * 0.4);
+            ctx.lineTo(center, center - triangleSize * 0.6);
+            ctx.lineTo(center + triangleSize * 0.6, center + triangleSize * 0.4);
+            ctx.stroke();
+            
+            // Draw power dots
+            const dotRadius = Math.max(2, size / 64);
+            const dotY = center + triangleSize * 0.2;
+            ctx.fillStyle = 'white';
+            [-0.3, 0, 0.3].forEach(offset => {
+                ctx.beginPath();
+                ctx.arc(center + offset * triangleSize * 0.4, dotY, dotRadius, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            // Draw speed lines
+            const lineWidth = Math.max(1, size / 85);
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            const lineStartX = center - triangleSize * 0.4;
+            const lineEndX = center - triangleSize * 0.1;
+            [0, 0.2, 0.4].forEach(yOffset => {
+                const y = center - triangleSize * 0.1 + yOffset * triangleSize * 0.3;
+                ctx.beginPath();
+                ctx.moveTo(lineStartX, y);
+                ctx.lineTo(lineEndX, y);
+                ctx.stroke();
+            });
+            
+            // Draw "S" text
+            ctx.fillStyle = 'white';
+            ctx.font = `900 ${Math.floor(size / 10)}px Arial Black, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('S', center, center - triangleSize * 0.2);
+            
+            return canvas;
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generate all required icon sizes
+        const iconSizes = [16, 32, 72, 96, 128, 144, 152, 192, 384, 512];
+        const output = document.getElementById('output');
+        
+        iconSizes.forEach(size => {
+            const canvas = createStrydIcon(size);
+            const container = document.createElement('div');
+            container.innerHTML = `
+                <h3>${size}x${size}</h3>
+                <button onclick="downloadCanvas(arguments[0], 'icon-${size}x${size}.png')" 
+                        data-canvas-id="canvas-${size}">Download icon-${size}x${size}.png</button>
+            `;
+            container.appendChild(canvas);
+            canvas.id = `canvas-${size}`;
+            canvas.style.border = '1px solid #ccc';
+            canvas.style.margin = '10px';
+            output.appendChild(container);
+            
+            // Auto-download (comment this out if too many downloads)
+            // setTimeout(() => downloadCanvas(canvas, `icon-${size}x${size}.png`), size * 10);
+        });
+        
+        // Generate favicons
+        const favicon32 = createStrydIcon(32);
+        const favicon16 = createStrydIcon(16);
+        const appleIcon = createStrydIcon(180);
+        
+        output.innerHTML += `
+            <h3>Additional Icons</h3>
+            <button onclick="downloadCanvas(document.getElementById('favicon32'), 'favicon-32x32.png')">Download favicon-32x32.png</button>
+            <button onclick="downloadCanvas(document.getElementById('favicon16'), 'favicon-16x16.png')">Download favicon-16x16.png</button>
+            <button onclick="downloadCanvas(document.getElementById('apple-icon'), 'apple-touch-icon.png')">Download apple-touch-icon.png</button>
+        `;
+        
+        favicon32.id = 'favicon32';
+        favicon16.id = 'favicon16';
+        appleIcon.id = 'apple-icon';
+        
+        output.appendChild(favicon32);
+        output.appendChild(favicon16);
+        output.appendChild(appleIcon);
+    </script>
+</body>
+</html>
