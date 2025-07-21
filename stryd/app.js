@@ -1129,6 +1129,216 @@ const StrydStoriesApp = () => {
               
               showDataEditor && React.createElement('div', { className: 'data-inputs-modern' },
                 Object.entries(runData).map(([key, value]) =>
+                React.createElement('div', { key, className: 'input-group' },
+                  React.createElement('label', null, key.charAt(0).toUpperCase() + key.slice(1)),
+                  React.createElement('input', {
+                    type: 'text',
+                    value: value,
+                    onChange: (e) => setRunData(prev => ({...prev, [key]: e.target.value}))
+                  })
+                )
+              )
+            )
+          ),
+
+          React.createElement('div', { className: 'customize-actions' },
+            React.createElement('button', {
+              onClick: prevStep,
+              className: 'action-btn secondary'
+            }, '← Back to Upload'),
+            React.createElement('button', {
+              onClick: nextStep,
+              className: 'action-btn primary'
+            }, 'Preview & Download →')
+          )
+        )
+      )
+    ),
+
+    // Preview Step
+    currentStep === 'preview' && React.createElement('div', { className: 'preview-section' },
+      React.createElement('div', { className: 'section-header' },
+        React.createElement('h2', null, 'Preview & Download'),
+        React.createElement('p', null, 'Your Instagram Story is ready!')
+      ),
+
+      React.createElement('div', { className: 'preview-container' },
+        React.createElement('div', { className: 'phone-mockup' },
+          React.createElement('div', { className: 'phone-screen' },
+            React.createElement('div', { className: 'instagram-ui' },
+              React.createElement('div', { className: 'story-progress' },
+                React.createElement('div', { className: 'progress-line active' })
+              ),
+              React.createElement('canvas', {
+                ref: canvasRef,
+                width: 1080,
+                height: 1920,
+                className: 'story-canvas'
+              })
+            )
+          )
+        ),
+
+        React.createElement('div', { className: 'preview-actions' },
+          React.createElement('div', { className: 'action-card' },
+            React.createElement('h3', null, 'Ready to Share'),
+            React.createElement('p', null, 'Your story is optimized for Instagram with perfect dimensions and safe zones.'),
+            React.createElement('div', { className: 'action-buttons' },
+              React.createElement('button', {
+                onClick: downloadImage,
+                className: 'download-btn primary'
+              }, '📥 Download Story'),
+              React.createElement('button', {
+                onClick: prevStep,
+                className: 'edit-btn'
+              }, '✏️ Edit More')
+            )
+          ),
+
+          React.createElement('div', { className: 'specs-card' },
+            React.createElement('h4', null, 'Story Specifications'),
+            React.createElement('div', { className: 'specs-list' },
+              React.createElement('div', { className: 'spec-item' }, '✅ 1080×1920 pixels'),
+              React.createElement('div', { className: 'spec-item' }, '✅ 9:16 aspect ratio'),
+              React.createElement('div', { className: 'spec-item' }, '✅ Safe zone compliant'),
+              React.createElement('div', { className: 'spec-item' }, '✅ STRYD branded')
+            )
+          )
+        )
+      )
+    )
+  );
+};
+
+// PWA functionality
+class PWAManager {
+  constructor() {
+    this.deferredPrompt = null;
+    this.initPWA();
+  }
+
+  initPWA() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      this.showInstallPrompt();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      showNotification('App installed successfully!', 'success');
+      this.hideInstallPrompt();
+    });
+
+    const installButton = document.getElementById('installButton');
+    const installDismiss = document.getElementById('installDismiss');
+
+    if (installButton) {
+      installButton.addEventListener('click', this.installApp.bind(this));
+    }
+
+    if (installDismiss) {
+      installDismiss.addEventListener('click', this.hideInstallPrompt.bind(this));
+    }
+  }
+
+  showInstallPrompt() {
+    const prompt = document.getElementById('installPrompt');
+    if (prompt) {
+      prompt.classList.add('show');
+    }
+  }
+
+  hideInstallPrompt() {
+    const prompt = document.getElementById('installPrompt');
+    if (prompt) {
+      prompt.classList.remove('show');
+    }
+  }
+
+  async installApp() {
+    if (!this.deferredPrompt) return;
+
+    this.deferredPrompt.prompt();
+    const { outcome } = await this.deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      showNotification('Installing app...', 'info');
+    }
+    
+    this.deferredPrompt = null;
+    this.hideInstallPrompt();
+  }
+}
+
+// App initialization
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing app...');
+  
+  setTimeout(() => {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.classList.add('hidden');
+    }
+  }, 1500);
+
+  try {
+    new PWAManager();
+    console.log('PWA Manager initialized');
+  } catch (error) {
+    console.error('PWA Manager failed:', error);
+  }
+
+  const reactRoot = document.getElementById('react-root');
+  if (reactRoot && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+    try {
+      ReactDOM.render(React.createElement(StrydStoriesApp), reactRoot);
+      console.log('React app mounted successfully');
+    } catch (error) {
+      console.error('React mount failed:', error);
+      showReactError(reactRoot);
+    }
+  } else {
+    console.error('React not loaded properly');
+    showReactError(reactRoot);
+  }
+});
+
+// Fallback UI for React errors
+function showReactError(reactRoot) {
+  if (reactRoot) {
+    reactRoot.innerHTML = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        text-align: center;
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+        padding: 2rem;
+      ">
+        <h2 style="margin-bottom: 1rem; color: #ff6b35;">Loading Stryd Stories...</h2>
+        <p style="color: #888; margin-bottom: 2rem; max-width: 400px; line-height: 1.5;">
+          If this message persists, please try refreshing the page or using a different browser.
+        </p>
+        <button onclick="location.reload()" style="
+          padding: 1rem 2rem;
+          background: linear-gradient(135deg, #ff6b35, #4a9eff);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: 'Space Grotesk', sans-serif;
+        ">Refresh Page</button>
+        <p style="color: #666; margin-top: 2rem; font-size: 0.875rem;">
+          For best experience, use Chrome or Safari on mobile.
+        </p>
+      </div>
+    `;
+  }
+}key, value]) =>
                   React.createElement('div', { key, className: 'input-group-modern' },
                     React.createElement('label', null, key.charAt(0).toUpperCase() + key.slice(1)),
                     React.createElement('input', {
@@ -1377,17 +1587,228 @@ function showReactError(reactRoot) {
       </div>
     `;
   }
+}
+                className: 'edit-btn'
+              }, '✏️ Edit More')
+            )
+          ),
 
-        React.createElement('button', {
-          onClick: nextStep,
-          className: 'next-btn'
-        }, 'Continue to Customize →')
+          React.createElement('div', { className: 'specs-card' },
+            React.createElement('h4', null, 'Story Specifications'),
+            React.createElement('div', { className: 'specs-list' },
+              React.createElement('div', { className: 'spec-item' }, '✅ 1080×1920 pixels'),
+              React.createElement('div', { className: 'spec-item' }, '✅ 9:16 aspect ratio'),
+              React.createElement('div', { className: 'spec-item' }, '✅ Safe zone compliant'),
+              React.createElement('div', { className: 'spec-item' }, '✅ STRYD branded')
+            )
+          )
+        )
       )
-    ),storyHeight - overlayHeight) / 2;
-        }
-      } else {
-        overlayHeight = 450;
-        overlayY = storyHeight - overlayHeight;
+    )
+  );
+};
+
+// PWA functionality
+class PWAManager {
+  constructor() {
+    this.deferredPrompt = null;
+    this.hideInstallPrompt();
+  }
+}
+
+// App initialization
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing app...');
+  
+  setTimeout(() => {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.classList.add('hidden');
+    }
+  }, 1500);
+
+  try {
+    new PWAManager();
+    console.log('PWA Manager initialized');
+  } catch (error) {
+    console.error('PWA Manager failed:', error);
+  }
+
+  const reactRoot = document.getElementById('react-root');
+  if (reactRoot && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+    try {
+      ReactDOM.render(React.createElement(StrydStoriesApp), reactRoot);
+      console.log('React app mounted successfully');
+    } catch (error) {
+      console.error('React mount failed:', error);
+      showReactError(reactRoot);
+    }
+  } else {
+    console.error('React not loaded properly');
+    showReactError(reactRoot);
+  }
+});
+
+// Fallback UI for React errors
+function showReactError(reactRoot) {
+  if (reactRoot) {
+    reactRoot.innerHTML = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        text-align: center;
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+        padding: 2rem;
+      ">
+        <h2 style="margin-bottom: 1rem; color: #ff6b35;">Loading Stryd Stories...</h2>
+        <p style="color: #888; margin-bottom: 2rem; max-width: 400px; line-height: 1.5;">
+          If this message persists, please try refreshing the page or using a different browser.
+        </p>
+        <button onclick="location.reload()" style="
+          padding: 1rem 2rem;
+          background: linear-gradient(135deg, #ff6b35, #4a9eff);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: 'Space Grotesk', sans-serif;
+        ">Refresh Page</button>
+        <p style="color: #666; margin-top: 2rem; font-size: 0.875rem;">
+          For best experience, use Chrome or Safari on mobile.
+        </p>
+      </div>
+    `;
+  }
+}.initPWA();
+  }
+
+  initPWA() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      this.showInstallPrompt();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      showNotification('App installed successfully!', 'success');
+      this.hideInstallPrompt();
+    });
+
+    const installButton = document.getElementById('installButton');
+    const installDismiss = document.getElementById('installDismiss');
+
+    if (installButton) {
+      installButton.addEventListener('click', this.installApp.bind(this));
+    }
+
+    if (installDismiss) {
+      installDismiss.addEventListener('click', this.hideInstallPrompt.bind(this));
+    }
+  }
+
+  showInstallPrompt() {
+    const prompt = document.getElementById('installPrompt');
+    if (prompt) {
+      prompt.classList.add('show');
+    }
+  }
+
+  hideInstallPrompt() {
+    const prompt = document.getElementById('installPrompt');
+    if (prompt) {
+      prompt.classList.remove('show');
+    }
+  }
+
+  async installApp() {
+    if (!this.deferredPrompt) return;
+
+    this.deferredPrompt.prompt();
+    const { outcome } = await this.deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      showNotification('Installing app...', 'info');
+    }
+    
+    this.deferredPrompt = null;
+    this.hideInstallPrompt();
+  }
+}
+
+// App initialization
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing app...');
+  
+  setTimeout(() => {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+      loadingOverlay.classList.add('hidden');
+    }
+  }, 1500);
+
+  try {
+    new PWAManager();
+    console.log('PWA Manager initialized');
+  } catch (error) {
+    console.error('PWA Manager failed:', error);
+  }
+
+  const reactRoot = document.getElementById('react-root');
+  if (reactRoot && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+    try {
+      ReactDOM.render(React.createElement(StrydStoriesApp), reactRoot);
+      console.log('React app mounted successfully');
+    } catch (error) {
+      console.error('React mount failed:', error);
+      showReactError(reactRoot);
+    }
+  } else {
+    console.error('React not loaded properly');
+    showReactError(reactRoot);
+  }
+});
+
+// Fallback UI for React errors
+function showReactError(reactRoot) {
+  if (reactRoot) {
+    reactRoot.innerHTML = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        text-align: center;
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+        padding: 2rem;
+      ">
+        <h2 style="margin-bottom: 1rem; color: #ff6b35;">Loading Stryd Stories...</h2>
+        <p style="color: #888; margin-bottom: 2rem; max-width: 400px; line-height: 1.5;">
+          If this message persists, please try refreshing the page or using a different browser.
+        </p>
+        <button onclick="location.reload()" style="
+          padding: 1rem 2rem;
+          background: linear-gradient(135deg, #ff6b35, #4a9eff);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: 'Space Grotesk', sans-serif;
+        ">Refresh Page</button>
+        <p style="color: #666; margin-top: 2rem; font-size: 0.875rem;">
+          For best experience, use Chrome or Safari on mobile.
+        </p>
+      </div>
+    `;
+  }
+});
       }
 
       // Draw overlay background
