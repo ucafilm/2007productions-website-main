@@ -222,9 +222,14 @@ class PWAManager {
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded, initializing Stryd Stories App...');
-  const loadingOverlay = document.getElementById('loadingOverlay');
-  if (loadingOverlay) setTimeout(() => loadingOverlay.classList.add('hidden'), 1000);
   
+  // Hide loading overlay
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  if (loadingOverlay) {
+    setTimeout(() => loadingOverlay.classList.add('hidden'), 1000);
+  }
+
+  // Initialize PWA features
   try {
     new PWAManager();
     console.log('PWA Manager initialized.');
@@ -232,10 +237,18 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('PWA Manager initialization failed:', error);
   }
   
-  const reactRoot = document.getElementById('react-root');
-  if (reactRoot && React && ReactDOM) {
-    ReactDOM.render(React.createElement(StrydStoriesApp), reactRoot);
+  // Mount React App using the new createRoot API
+  const container = document.getElementById('react-root');
+  if (container && typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+    try {
+      const root = ReactDOM.createRoot(container);
+      root.render(React.createElement(StrydStoriesApp));
+      console.log('React app mounted successfully.');
+    } catch (error) {
+       console.error('React mounting failed:', error);
+       container.innerHTML = '<h2>Error: Could not load the application.</h2>';
+    }
   } else {
-    console.error('React or ReactDOM not found.');
+    console.error('React, ReactDOM, or the root container was not found.');
   }
 });
