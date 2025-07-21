@@ -133,34 +133,88 @@ const StrydStoriesApp = () => {
       return points;
   }, []);
 
-  // In stryd/app.js, add this function inside the StrydStoriesApp component
-const handleFileSelect = (files) => {
-  const file = files[0];
-  if (!file) return;
+  const handleFileSelect = useCallback((files) => {
+    const file = files[0];
+    if (!file) return;
 
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  if (!validTypes.includes(file.type)) {
-    showNotification('Please select a valid image file', 'error');
-    return;
-  }
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      showNotification('Please select a valid image file', 'error');
+      return;
+    }
 
-  if (file.size > 10 * 1024 * 1024) {
-    showNotification('Image too large. Max 10MB allowed.', 'error');
-    return;
-  }
+    if (file.size > 10 * 1024 * 1024) {
+      showNotification('Image too large. Max 10MB allowed.', 'error');
+      return;
+    }
 
-  handleImageUpload(file); // Assumes your existing upload handler is named this
-};
+    handleImageUpload(file);
+  }, [handleImageUpload]);
   
   const generateRoute = useCallback(() => {
     setMockRouteData(generateMockRouteData(routeType));
     showNotification('New route generated!', 'success');
   }, [routeType, generateMockRouteData]);
   
-  const drawRoute = useCallback((ctx, canvas, routeData, styleKey, options) => {
-    if (!ctx || !canvas || !routeData) return;
+  const drawRoute = useCallback((ctx, canvas, routeData, styleKey, options = {}) => {
+    if (!ctx || !canvas || !routeData || routeData.length === 0) return;
+    
     const style = ROUTE_STYLES[styleKey] || ROUTE_STYLES.gradient;
-    // Drawing logic remains the same...
+    const { width, height } = canvas;
+    
+    // Apply route styling
+    ctx.save();
+    ctx.globalAlpha = options.opacity || 1;
+    ctx.lineWidth = style.lineWidth || 6;
+    ctx.lineCap = style.lineCap || 'round';
+    ctx.lineJoin = style.lineJoin || 'round';
+    
+    if (style.shadowBlur) {
+      ctx.shadowBlur = style.shadowBlur;
+      ctx.shadowColor = style.shadowColor || 'rgba(0, 0, 0, 0.3)';
+    }
+    
+    // Set stroke style (handle both strings and gradient functions)
+    if (typeof style.strokeStyle === 'function') {
+      ctx.strokeStyle = style.strokeStyle(ctx, width);
+    } else {
+      ctx.strokeStyle = style.strokeStyle || '#ff6b35';
+    }
+    
+    // Draw the route path
+    ctx.beginPath();
+    routeData.forEach((point, index) => {
+      const x = point.x * width;
+      const y = point.y * height;
+      
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    
+    ctx.stroke();
+    
+    // Add start/end markers
+    if (routeData.length > 0) {
+      const start = routeData[0];
+      const end = routeData[routeData.length - 1];
+      
+      // Start marker (green)
+      ctx.fillStyle = '#2ECC71';
+      ctx.beginPath();
+      ctx.arc(start.x * width, start.y * height, 8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // End marker (red)
+      ctx.fillStyle = '#E74C3C';
+      ctx.beginPath();
+      ctx.arc(end.x * width, end.y * height, 8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    ctx.restore();
   }, []);
   
   const generateStoryImage = useCallback(() => {
@@ -193,7 +247,49 @@ const handleFileSelect = (files) => {
     }
 
     // Draw text overlay and branding
-    // ... logic remains the same
+    const theme = THEMES[colorTheme] || THEMES['stryd-orange'];
+    const font = FONTS[fontStyle] || FONTS['space-grotesk'];
+    
+    // Add gradient overlay for text readability
+    const overlayGradient = ctx.createLinearGradient(0, storyHeight * 0.7, 0, storyHeight);
+    overlayGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    overlayGradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+    ctx.fillStyle = overlayGradient;
+    ctx.fillRect(0, storyHeight * 0.7, storyWidth, storyHeight * 0.3);
+    
+    // Draw run data if available
+    if (runData) {
+      ctx.font = `bold ${storyWidth * 0.08}px ${font.primary}`;
+      ctx.fillStyle = theme.secondary;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const dataY = storyHeight * 0.85;
+      
+      // Distance
+      ctx.fillText(runData.distance, storyWidth * 0.2, dataY);
+      
+      // Time
+      ctx.fillText(runData.time, storyWidth * 0.4, dataY);
+      
+      // Pace
+      ctx.fillText(runData.pace, storyWidth * 0.6, dataY);
+      
+      // Power
+      ctx.fillText(runData.power, storyWidth * 0.8, dataY);
+    }
+    
+    // Add Stryd branding
+    ctx.font = `bold ${storyWidth * 0.06}px ${font.primary}`;
+    ctx.fillStyle = theme.primary;
+    ctx.textAlign = 'center';
+    ctx.fillText('POWERED BY STRYD', storyWidth / 2, storyHeight * 0.95);
+    
+    // Add 2007 Productions watermark
+    ctx.font = `${storyWidth * 0.03}px ${font.primary}`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.textAlign = 'right';
+    ctx.fillText('2007productions.com', storyWidth * 0.95, storyHeight * 0.05);
     
   }, [uploadedImage, imageType, overlayPosition, colorTheme, fontStyle, runData, showRouteOverlay, mockRouteData, routeStyle, routeOpacity, drawRoute]);
 
@@ -217,9 +313,183 @@ const handleFileSelect = (files) => {
   const nextStep = () => setCurrentStep(current => (current === 'upload' ? 'customize' : 'preview'));
   const prevStep = () => setCurrentStep(current => (current === 'preview' ? 'customize' : 'upload'));
 
-  // The extensive UI rendering with React.createElement is correct and omitted here for brevity.
-  // I have verified that part of your code.
-  return React.createElement('div', { className: 'stryd-app' }, /* ... UI elements ... */ );
+  // Complete UI Component with proper file handling
+  return React.createElement('div', { className: 'stryd-app' },
+    // Step Progress Indicator
+    React.createElement('div', { className: 'step-progress' },
+      React.createElement('div', { className: 'step-item' + (currentStep === 'upload' ? ' active' : ' completed') }, '1. Upload'),
+      React.createElement('div', { className: 'step-item' + (currentStep === 'customize' ? ' active' : currentStep === 'preview' ? ' completed' : '') }, '2. Customize'),
+      React.createElement('div', { className: 'step-item' + (currentStep === 'preview' ? ' active' : '') }, '3. Preview')
+    ),
+
+    // Upload Step
+    currentStep === 'upload' && React.createElement('div', { className: 'upload-section' },
+      React.createElement('div', { className: 'upload-header' },
+        React.createElement('h2', null, 'Upload Your Image'),
+        React.createElement('p', null, 'Upload a Stryd map screenshot or personal photo to get started')
+      ),
+      
+      // Stryd PowerCenter Integration
+      React.createElement('div', { className: 'stryd-integration' },
+        React.createElement('h3', null, 'Import from Stryd PowerCenter'),
+        React.createElement('div', { className: 'stryd-input-group' },
+          React.createElement('input', { 
+            type: 'url', 
+            placeholder: 'https://www.stryd.com/powercenter/...', 
+            className: 'stryd-url-input' 
+          }),
+          React.createElement('button', { className: 'load-data-btn' }, 'Load Data')
+        )
+      ),
+      
+      // Image Type Selection
+      React.createElement('div', { className: 'image-type-section' },
+        React.createElement('h3', null, 'Image Type'),
+        React.createElement('div', { className: 'type-buttons' },
+          React.createElement('button', {
+            className: 'type-btn' + (imageType === 'map' ? ' active' : ''),
+            onClick: () => setImageType('map')
+          }, '🗺️ Run Map'),
+          React.createElement('button', {
+            className: 'type-btn' + (imageType === 'photo' ? ' active' : ''),
+            onClick: () => setImageType('photo')
+          }, '📸 Personal Photo')
+        )
+      ),
+      
+      // File Upload Area
+      React.createElement('div', { 
+        className: 'file-upload-area' + (dragOver ? ' drag-over' : ''),
+        onDragOver: (e) => { e.preventDefault(); setDragOver(true); },
+        onDragLeave: () => setDragOver(false),
+        onDrop: (e) => {
+          e.preventDefault();
+          setDragOver(false);
+          const files = Array.from(e.dataTransfer.files);
+          if (files.length > 0) handleFileSelect(files);
+        },
+        onClick: () => fileInputRef.current?.click()
+      },
+        React.createElement('div', { className: 'upload-icon' }, '📁'),
+        React.createElement('div', { className: 'upload-text' },
+          React.createElement('p', { className: 'upload-main' }, 
+            imageType === 'map' ? 'Click to upload your Stryd run map' : 'Click to upload your personal photo'
+          ),
+          React.createElement('p', { className: 'upload-sub' }, 'Supports PNG, JPG files (max 10MB)')
+        ),
+        React.createElement('input', {
+          type: 'file',
+          ref: fileInputRef,
+          accept: 'image/*',
+          style: { display: 'none' },
+          onChange: (e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length > 0) handleFileSelect(files);
+          }
+        })
+      ),
+      
+      isProcessing && React.createElement('div', { className: 'processing-indicator' },
+        React.createElement('div', { className: 'spinner' }),
+        React.createElement('p', null, 'Processing image...')
+      )
+    ),
+
+    // Customize Step
+    currentStep === 'customize' && React.createElement('div', { className: 'customize-section' },
+      React.createElement('div', { className: 'customize-header' },
+        React.createElement('h2', null, 'Customize Your Story'),
+        React.createElement('button', { 
+          className: 'back-btn',
+          onClick: prevStep
+        }, '← Back')
+      ),
+      
+      // Image Preview
+      React.createElement('div', { className: 'image-preview' },
+        uploadedImage && React.createElement('canvas', {
+          ref: liveCanvasRef,
+          width: 405,
+          height: 720,
+          className: 'preview-canvas'
+        })
+      ),
+      
+      // Customization Controls
+      React.createElement('div', { className: 'controls-panel' },
+        // Theme Selection
+        React.createElement('div', { className: 'control-group' },
+          React.createElement('h3', null, 'Color Theme'),
+          React.createElement('div', { className: 'theme-buttons' },
+            Object.entries(THEMES).map(([key, theme]) =>
+              React.createElement('button', {
+                key: key,
+                className: 'theme-btn' + (colorTheme === key ? ' active' : ''),
+                style: { backgroundColor: theme.primary },
+                onClick: () => setColorTheme(key)
+              }, theme.name)
+            )
+          )
+        ),
+        
+        // Route Overlay Toggle
+        showRouteOverlay && React.createElement('div', { className: 'control-group' },
+          React.createElement('h3', null, 'Route Style'),
+          React.createElement('div', { className: 'route-style-buttons' },
+            Object.keys(ROUTE_STYLES).map(style =>
+              React.createElement('button', {
+                key: style,
+                className: 'route-style-btn' + (routeStyle === style ? ' active' : ''),
+                onClick: () => setRouteStyle(style)
+              }, style.charAt(0).toUpperCase() + style.slice(1))
+            )
+          )
+        )
+      ),
+      
+      React.createElement('button', {
+        className: 'next-btn',
+        onClick: nextStep,
+        disabled: !uploadedImage
+      }, 'Next: Preview →')
+    ),
+
+    // Preview Step
+    currentStep === 'preview' && React.createElement('div', { className: 'preview-section' },
+      React.createElement('div', { className: 'preview-header' },
+        React.createElement('h2', null, 'Preview & Download'),
+        React.createElement('button', { 
+          className: 'back-btn',
+          onClick: prevStep
+        }, '← Back')
+      ),
+      
+      // Final Preview
+      React.createElement('div', { className: 'final-preview' },
+        React.createElement('canvas', {
+          ref: canvasRef,
+          width: 405,
+          height: 720,
+          className: 'final-canvas'
+        })
+      ),
+      
+      // Download Button
+      React.createElement('button', {
+        className: 'download-btn',
+        onClick: () => {
+          const canvas = canvasRef.current;
+          if (canvas) {
+            const link = document.createElement('a');
+            link.download = 'stryd-story.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showNotification('Story downloaded!', 'success');
+          }
+        }
+      }, '📥 Download Instagram Story')
+    )
+  );
 };
 
 // --- PWA & APP INITIALIZATION --- //
