@@ -164,7 +164,7 @@ const StrydStoriesApp = () => {
       };
       
       setRunData(mockData);
-      showNotification('✅ Run data loaded successfully!', 'success');
+      showNotification('Run data loaded successfully!', 'success');
     } catch (error) {
       showNotification('Failed to fetch Stryd data. Please check your URL and try again.', 'error');
     } finally {
@@ -263,7 +263,7 @@ const StrydStoriesApp = () => {
       
       setUploadedImage(result.image);
       setCurrentStep('customize');
-      showNotification('✅ Image uploaded successfully!', 'success');
+      showNotification('Image uploaded successfully!', 'success');
       
     } catch (error) {
       console.error('Upload error:', error);
@@ -388,7 +388,7 @@ const StrydStoriesApp = () => {
   const generateRoute = useCallback(() => {
     const routeData = generateMockRouteData(routeType);
     setMockRouteData(routeData);
-    showNotification('🗺️ Route generated successfully!', 'success');
+    showNotification('Route generated successfully!', 'success');
   }, [routeType, generateMockRouteData]);
   
   const drawRoute = useCallback((canvas, ctx, routeData, style, options = {}) => {
@@ -510,7 +510,7 @@ const StrydStoriesApp = () => {
       
       setUploadedImage(result.image);
       setCurrentStep('customize');
-      showNotification('✅ Image uploaded successfully!', 'success');
+      showNotification('Image uploaded successfully!', 'success');
       
     } catch (error) {
       console.error('Drop error:', error);
@@ -962,18 +962,18 @@ const StrydStoriesApp = () => {
                 )
               ),
               
-              React.createElement('div', { key: 'type', className: 'control-group' },
-                React.createElement('label', null, 'Route Type'),
-                React.createElement('div', { className: 'type-buttons' },
-                  [{ key: 'loop', label: '🔄 Loop' }, { key: 'outback', label: '↔️ Out & Back' }, { key: 'zigzag', label: '⚡ Zigzag' }].map(type =>
-                    React.createElement('button', {
-                      key: type.key,
-                      onClick: () => setRouteType(type.key),
-                      className: `type-btn ${routeType === type.key ? 'active' : ''}`
-                    }, type.label)
+                React.createElement('div', { key: 'type', className: 'control-group' },
+                  React.createElement('label', null, 'Route Type'),
+                  React.createElement('div', { className: 'type-buttons' },
+                    [{ key: 'loop', label: 'Loop' }, { key: 'outback', label: 'Out & Back' }, { key: 'zigzag', label: 'Zigzag' }].map(type =>
+                      React.createElement('button', {
+                        key: type.key,
+                        onClick: () => setRouteType(type.key),
+                        className: `type-btn ${routeType === type.key ? 'active' : ''}`
+                      }, type.label)
+                    )
                   )
-                )
-              ),
+                ),
               
               React.createElement('div', { key: 'opacity', className: 'control-group' },
                 React.createElement('label', null, `Route Opacity (${Math.round(routeOpacity * 100)}%)`),
@@ -992,7 +992,7 @@ const StrydStoriesApp = () => {
                 React.createElement('button', {
                   onClick: generateRoute,
                   className: 'generate-route-btn'
-                }, '🔄 Generate New Route')
+                }, 'Generate New Route')
               )
             ]
           )
