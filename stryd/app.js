@@ -132,6 +132,25 @@ const StrydStoriesApp = () => {
       }
       return points;
   }, []);
+
+  // In stryd/app.js, add this function inside the StrydStoriesApp component
+const handleFileSelect = (files) => {
+  const file = files[0];
+  if (!file) return;
+
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    showNotification('Please select a valid image file', 'error');
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    showNotification('Image too large. Max 10MB allowed.', 'error');
+    return;
+  }
+
+  handleImageUpload(file); // Assumes your existing upload handler is named this
+};
   
   const generateRoute = useCallback(() => {
     setMockRouteData(generateMockRouteData(routeType));
