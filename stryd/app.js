@@ -1,5 +1,9 @@
 // Stryd Stories PWA - Main Application
 // Built for 2007productions.com/stryd
+// Version 2.0.0 - Updated with full React UI and debugging
+// Last modified: 2025-07-21
+
+console.log('🚀 Stryd Stories App.js loaded - Version 2.0.0');
 
 // Import React (CDN version for simplicity)
 const { useState, useRef, useCallback, useEffect } = React;
