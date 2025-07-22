@@ -218,13 +218,19 @@ const StrydStoriesApp = () => {
   }, []);
   
   const generateStoryImage = useCallback(() => {
-    if (!uploadedImage || !canvasRef.current) return;
+    console.log('generateStoryImage called', { uploadedImage: !!uploadedImage, canvasRef: !!canvasRef.current });
+    if (!uploadedImage || !canvasRef.current) {
+      console.log('generateStoryImage early return - missing uploadedImage or canvasRef');
+      return;
+    }
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const { width: storyWidth, height: storyHeight } = canvas;
+    console.log('Canvas dimensions:', storyWidth, 'x', storyHeight);
     ctx.clearRect(0, 0, storyWidth, storyHeight);
 
     // Draw background image
+    console.log('Drawing background image:', uploadedImage.width, 'x', uploadedImage.height);
     const imgAspect = uploadedImage.width / uploadedImage.height;
     const canvasAspect = storyWidth / storyHeight;
     let sx, sy, sWidth, sHeight;
@@ -239,10 +245,12 @@ const StrydStoriesApp = () => {
         sx = 0;
         sy = (uploadedImage.height - sHeight) / 2;
     }
+    console.log('Drawing image with params:', { sx, sy, sWidth, sHeight, destWidth: storyWidth, destHeight: storyHeight });
     ctx.drawImage(uploadedImage, sx, sy, sWidth, sHeight, 0, 0, storyWidth, storyHeight);
     
     // Draw route overlay
     if (showRouteOverlay && mockRouteData) {
+      console.log('Drawing route overlay with', mockRouteData.length, 'points');
       drawRoute(ctx, canvas, mockRouteData, routeStyle, { opacity: routeOpacity });
     }
 
@@ -259,6 +267,7 @@ const StrydStoriesApp = () => {
     
     // Draw run data if available
     if (runData) {
+      console.log('Drawing run data:', runData);
       ctx.font = `bold ${storyWidth * 0.08}px ${font.primary}`;
       ctx.fillStyle = theme.secondary;
       ctx.textAlign = 'center';
@@ -291,20 +300,39 @@ const StrydStoriesApp = () => {
     ctx.textAlign = 'right';
     ctx.fillText('2007productions.com', storyWidth * 0.95, storyHeight * 0.05);
     
+    console.log('generateStoryImage completed');
   }, [uploadedImage, imageType, overlayPosition, colorTheme, fontStyle, runData, showRouteOverlay, mockRouteData, routeStyle, routeOpacity, drawRoute]);
 
   // Effects
   useEffect(() => {
+    console.log('generateStoryImage useEffect triggered', { uploadedImage: !!uploadedImage, canvasRef: !!canvasRef.current });
     generateStoryImage();
   }, [generateStoryImage]);
 
   useEffect(() => {
+    console.log('liveCanvas useEffect triggered', { liveCanvasRef: !!liveCanvasRef.current, canvasRef: !!canvasRef.current });
     if (liveCanvasRef.current && canvasRef.current) {
       const liveCtx = liveCanvasRef.current.getContext('2d');
       liveCtx.clearRect(0, 0, liveCanvasRef.current.width, liveCanvasRef.current.height);
       liveCtx.drawImage(canvasRef.current, 0, 0);
+      console.log('Live canvas updated');
     }
-  }, [generateStoryImage]); // This effect now correctly depends on the result of the main canvas generation
+  }, [uploadedImage, colorTheme, routeStyle, mockRouteData]); // More specific dependencies
+  
+  // Initialize canvas dimensions when component mounts
+  useEffect(() => {
+    console.log('Canvas initialization useEffect');
+    if (canvasRef.current) {
+      canvasRef.current.width = 405;
+      canvasRef.current.height = 720;
+      console.log('Main canvas dimensions set:', canvasRef.current.width, 'x', canvasRef.current.height);
+    }
+    if (liveCanvasRef.current) {
+      liveCanvasRef.current.width = 405;
+      liveCanvasRef.current.height = 720;
+      console.log('Live canvas dimensions set:', liveCanvasRef.current.width, 'x', liveCanvasRef.current.height);
+    }
+  }, []);
   
   useEffect(() => {
     setMockRouteData(generateMockRouteData('loop'));
