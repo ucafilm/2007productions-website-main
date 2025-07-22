@@ -62,6 +62,172 @@ const ROUTE_STYLES = {
   }
 };
 
+// --- STRYD POWERCENTER INTEGRATION --- //
+const extractStrydRunId = (url) => {
+  const match = url.match(/\/runs\/(\d+)/);
+  return match ? match[1] : null;
+};
+
+const fetchStrydGPSData = async (url) => {
+  try {
+    const runId = extractStrydRunId(url);
+    if (!runId) {
+      throw new Error('Invalid Stryd PowerCenter URL format');
+    }
+    
+    // Attempt to fetch the page and extract GPS data
+    // Note: This might be blocked by CORS, so we'll need to handle that
+    const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Unable to access Stryd PowerCenter data. The run may be private or require authentication.');
+    }
+    
+    const html = await response.text();
+    
+    // Look for GPS data in the HTML
+    // Stryd PowerCenter typically embeds GPS data in script tags or data attributes
+    const gpsDataMatch = html.match(/"gps_data"\s*:\s*(\[.*?\])/s) || 
+                         html.match(/gpsData\s*=\s*(\[.*?\])/s) ||
+                         html.match(/"trackpoints"\s*:\s*(\[.*?\])/s);
+    
+    if (gpsDataMatch) {
+      const gpsData = JSON.parse(gpsDataMatch[1]);
+      return parseStrydGPSPoints(gpsData);
+    }
+    
+    // If no GPS data found in the obvious places, return null
+    return null;
+    
+  } catch (error) {
+    console.error('Error fetching Stryd data:', error);
+    throw new Error('Unable to extract GPS data from Stryd PowerCenter. This could be due to privacy settings or network restrictions.');
+  }
+};
+
+const parseStrydGPSPoints = (gpsData) => {
+  if (!Array.isArray(gpsData) || gpsData.length === 0) {
+    return null;
+  }
+  
+  const points = [];
+  
+  gpsData.forEach(point => {
+    // Handle different possible GPS data formats from Stryd
+    let lat, lon;
+    
+    if (point.latitude && point.longitude) {
+      lat = parseFloat(point.latitude);
+      lon = parseFloat(point.longitude);
+    } else if (point.lat && point.lng) {
+      lat = parseFloat(point.lat);
+      lon = parseFloat(point.lng);
+    } else if (point.lat && point.lon) {
+      lat = parseFloat(point.lat);
+      lon = parseFloat(point.lon);
+    } else if (Array.isArray(point) && point.length >= 2) {
+      lat = parseFloat(point[0]);
+      lon = parseFloat(point[1]);
+    }
+    
+    if (!isNaN(lat) && !isNaN(lon)) {
+      points.push({ lat, lon });
+    }
+  });
+  
+  if (points.length === 0) {
+    return null;
+  }
+  
+  // Convert GPS coordinates to normalized canvas coordinates
+  const minLat = Math.min(...points.map(p => p.lat));
+  const maxLat = Math.max(...points.map(p => p.lat));
+  const minLon = Math.min(...points.map(p => p.lon));
+  const maxLon = Math.max(...points.map(p => p.lon));
+  
+  const latRange = maxLat - minLat;
+  const lonRange = maxLon - minLon;
+  
+  // Add padding and maintain aspect ratio
+  const padding = 0.1;
+  
+  return points.map(point => ({
+    x: padding + ((point.lon - minLon) / lonRange) * (1 - 2 * padding),
+    y: padding + ((maxLat - point.lat) / latRange) * (1 - 2 * padding) // Flip Y axis
+  }));
+};
+
+// --- GPX/TCX PARSING FUNCTIONS --- //
+const parseGPXData = (xmlString) => {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlString, 'text/xml');
+    
+    // Check for parsing errors
+    const parseError = doc.querySelector('parsererror');
+    if (parseError) {
+      throw new Error('Invalid XML format');
+    }
+    
+    const points = [];
+    
+    // Try GPX format first
+    const trkpts = doc.querySelectorAll('trkpt');
+    if (trkpts.length > 0) {
+      // GPX track points
+      trkpts.forEach(point => {
+        const lat = parseFloat(point.getAttribute('lat'));
+        const lon = parseFloat(point.getAttribute('lon'));
+        if (!isNaN(lat) && !isNaN(lon)) {
+          points.push({ lat, lon });
+        }
+      });
+    } else {
+      // Try TCX format
+      const tcxPoints = doc.querySelectorAll('Position');
+      tcxPoints.forEach(position => {
+        const latElement = position.querySelector('LatitudeDegrees');
+        const lonElement = position.querySelector('LongitudeDegrees');
+        if (latElement && lonElement) {
+          const lat = parseFloat(latElement.textContent);
+          const lon = parseFloat(lonElement.textContent);
+          if (!isNaN(lat) && !isNaN(lon)) {
+            points.push({ lat, lon });
+          }
+        }
+      });
+    }
+    
+    if (points.length === 0) {
+      return null;
+    }
+    
+    // Convert GPS coordinates to normalized canvas coordinates
+    const minLat = Math.min(...points.map(p => p.lat));
+    const maxLat = Math.max(...points.map(p => p.lat));
+    const minLon = Math.min(...points.map(p => p.lon));
+    const maxLon = Math.max(...points.map(p => p.lon));
+    
+    const latRange = maxLat - minLat;
+    const lonRange = maxLon - minLon;
+    
+    // Add padding and maintain aspect ratio
+    const padding = 0.1;
+    
+    return points.map(point => ({
+      x: padding + ((point.lon - minLon) / lonRange) * (1 - 2 * padding),
+      y: padding + ((maxLat - point.lat) / latRange) * (1 - 2 * padding) // Flip Y axis
+    }));
+    
+  } catch (error) {
+    console.error('Error parsing GPS data:', error);
+    return null;
+  }
+};
+
 // --- UTILITY FUNCTIONS --- //
 const showNotification = (message, type = 'info') => {
   const notification = document.createElement('div');
@@ -128,14 +294,29 @@ const StrydStoriesApp = () => {
     });
   }, []);
 
+  // File upload with GPX/TCX parsing
   const handleImageUpload = useCallback(async (file) => {
     if (!file) return;
     setIsProcessing(true);
     try {
-      const image = await processImageFile(file);
-      setUploadedImage(image);
-      setCurrentStep('customize');
-      showNotification('Image uploaded!', 'success');
+      if (file.type.includes('xml') || file.name.toLowerCase().endsWith('.gpx') || file.name.toLowerCase().endsWith('.tcx')) {
+        // Handle GPX/TCX route files
+        const text = await file.text();
+        const routeData = parseGPXData(text);
+        if (routeData && routeData.length > 0) {
+          setMockRouteData(routeData);
+          setCurrentStep('customize');
+          showNotification('Route file loaded!', 'success');
+        } else {
+          showNotification('No valid route data found in file', 'error');
+        }
+      } else {
+        // Handle image files
+        const image = await processImageFile(file);
+        setUploadedImage(image);
+        setCurrentStep('customize');
+        showNotification('Image uploaded!', 'success');
+      }
     } catch (error) {
       showNotification(error.message, 'error');
     } finally {
@@ -211,10 +392,37 @@ const StrydStoriesApp = () => {
     handleImageUpload(file);
   }, [handleImageUpload]);
   
-  const generateRoute = useCallback(() => {
-    setMockRouteData(generateMockRouteData(routeType));
-    showNotification('New route generated!', 'success');
-  }, [routeType, generateMockRouteData]);
+  // Handle Stryd PowerCenter URL loading
+  const handleStrydUrlLoad = useCallback(async () => {
+    const urlInput = document.querySelector('.stryd-url-input');
+    if (!urlInput || !urlInput.value.trim()) {
+      showNotification('Please enter a Stryd PowerCenter URL', 'error');
+      return;
+    }
+    
+    const url = urlInput.value.trim();
+    
+    if (!url.includes('stryd.com/powercenter/runs/')) {
+      showNotification('Please enter a valid Stryd PowerCenter run URL', 'error');
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
+      const routeData = await fetchStrydGPSData(url);
+      if (routeData && routeData.length > 0) {
+        setMockRouteData(routeData);
+        setCurrentStep('customize');
+        showNotification('Stryd GPS data loaded successfully!', 'success');
+      } else {
+        showNotification('No GPS data found in this Stryd run. It may not have location tracking.', 'error');
+      }
+    } catch (error) {
+      showNotification(error.message, 'error');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, []);
   
   const drawRoute = useCallback((ctx, canvas, routeData, styleKey, options = {}) => {
     if (!ctx || !canvas || !routeData || routeData.length === 0) return;
@@ -356,77 +564,77 @@ const StrydStoriesApp = () => {
     ctx.fillStyle = overlayGradient;
     ctx.fillRect(0, storyHeight * 0.7, storyWidth, storyHeight * 0.3);
     
-    // Draw run data with better Nike-style layout
+    // Draw run data with professional Nike-style layout (no overlapping)
     if (runData) {
       console.log('Drawing run data:', runData);
       
-      // Create a semi-transparent background for stats
-      const statsHeight = storyHeight * 0.25;
+      // Create a more compact stats area at the bottom
+      const statsHeight = storyHeight * 0.20; // Reduced from 0.25
       const statsY = storyHeight - statsHeight;
       
+      // Professional gradient background
       const statsGradient = ctx.createLinearGradient(0, statsY, 0, storyHeight);
       statsGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      statsGradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.4)');
-      statsGradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+      statsGradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.3)');
+      statsGradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
       ctx.fillStyle = statsGradient;
       ctx.fillRect(0, statsY, storyWidth, statsHeight);
       
-      // Main stat (distance) - large and prominent
-      ctx.font = `900 ${storyWidth * 0.12}px ${font.primary}`;
+      // Main stat (distance) - prominent but not huge
+      ctx.font = `900 ${storyWidth * 0.10}px ${font.primary}`;
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(runData.distance, storyWidth * 0.08, storyHeight * 0.88);
+      ctx.fillText(runData.distance, storyWidth * 0.06, storyHeight * 0.87);
       
       // Distance label
-      ctx.font = `600 ${storyWidth * 0.04}px ${font.primary}`;
+      ctx.font = `600 ${storyWidth * 0.035}px ${font.primary}`;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.fillText('DISTANCE', storyWidth * 0.08, storyHeight * 0.90);
+      ctx.fillText('DISTANCE', storyWidth * 0.06, storyHeight * 0.89);
       
-      // Secondary stats in a row
-      const statsRowY = storyHeight * 0.96;
-      const statSpacing = storyWidth * 0.28;
+      // Secondary stats in a clean row
+      const statsRowY = storyHeight * 0.95;
       
       // Time
-      ctx.font = `700 ${storyWidth * 0.055}px ${font.primary}`;
+      ctx.font = `700 ${storyWidth * 0.045}px ${font.primary}`;
       ctx.fillStyle = theme.primary;
       ctx.textAlign = 'left';
-      ctx.fillText(runData.time, storyWidth * 0.08, statsRowY);
+      ctx.fillText(runData.time, storyWidth * 0.06, statsRowY);
       
-      ctx.font = `500 ${storyWidth * 0.025}px ${font.primary}`;
+      ctx.font = `500 ${storyWidth * 0.022}px ${font.primary}`;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText('TIME', storyWidth * 0.08, statsRowY + storyWidth * 0.035);
+      ctx.fillText('TIME', storyWidth * 0.06, statsRowY + storyWidth * 0.025);
       
       // Pace
-      ctx.font = `700 ${storyWidth * 0.055}px ${font.primary}`;
+      ctx.font = `700 ${storyWidth * 0.045}px ${font.primary}`;
       ctx.fillStyle = theme.primary;
-      ctx.fillText(runData.pace, storyWidth * 0.36, statsRowY);
+      ctx.fillText(runData.pace, storyWidth * 0.32, statsRowY);
       
-      ctx.font = `500 ${storyWidth * 0.025}px ${font.primary}`;
+      ctx.font = `500 ${storyWidth * 0.022}px ${font.primary}`;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText('AVG PACE', storyWidth * 0.36, statsRowY + storyWidth * 0.035);
+      ctx.fillText('PACE', storyWidth * 0.32, statsRowY + storyWidth * 0.025);
       
       // Power
-      ctx.font = `700 ${storyWidth * 0.055}px ${font.primary}`;
+      ctx.font = `700 ${storyWidth * 0.045}px ${font.primary}`;
       ctx.fillStyle = theme.primary;
-      ctx.fillText(runData.power, storyWidth * 0.64, statsRowY);
+      ctx.fillText(runData.power, storyWidth * 0.58, statsRowY);
       
-      ctx.font = `500 ${storyWidth * 0.025}px ${font.primary}`;
+      ctx.font = `500 ${storyWidth * 0.022}px ${font.primary}`;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.fillText('AVG POWER', storyWidth * 0.64, statsRowY + storyWidth * 0.035);
+      ctx.fillText('POWER', storyWidth * 0.58, statsRowY + storyWidth * 0.025);
     }
     
-    // Add Stryd branding
-    ctx.font = `bold ${storyWidth * 0.06}px ${font.primary}`;
+    // Add Stryd branding - positioned to NOT overlap stats
+    ctx.font = `bold ${storyWidth * 0.045}px ${font.primary}`;
     ctx.fillStyle = theme.primary;
     ctx.textAlign = 'center';
-    ctx.fillText('POWERED BY STRYD', storyWidth / 2, storyHeight * 0.95);
+    ctx.fillText('POWERED BY STRYD', storyWidth / 2, storyHeight * 0.75); // Moved much higher
     
-    // Add 2007 Productions watermark
-    ctx.font = `${storyWidth * 0.03}px ${font.primary}`;
+    // Add 2007 Productions watermark - top right corner
+    ctx.font = `${storyWidth * 0.025}px ${font.primary}`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.textAlign = 'right';
-    ctx.fillText('2007productions.com', storyWidth * 0.95, storyHeight * 0.05);
+    ctx.fillText('2007productions.com', storyWidth * 0.94, storyHeight * 0.06);
     
     console.log('generateStoryImage completed');
   }, [uploadedImage, imageType, overlayPosition, colorTheme, fontStyle, runData, showRouteOverlay, mockRouteData, routeStyle, routeOpacity, drawRoute]);
@@ -488,13 +696,23 @@ const StrydStoriesApp = () => {
       // Stryd PowerCenter Integration
       React.createElement('div', { className: 'stryd-integration' },
         React.createElement('h3', null, 'Import from Stryd PowerCenter'),
+        React.createElement('p', { className: 'stryd-help' }, 
+          'Paste a Stryd PowerCenter run URL to automatically extract GPS route data'
+        ),
         React.createElement('div', { className: 'stryd-input-group' },
           React.createElement('input', { 
             type: 'url', 
-            placeholder: 'https://www.stryd.com/powercenter/...', 
+            placeholder: 'https://www.stryd.com/powercenter/runs/5413337932660736', 
             className: 'stryd-url-input' 
           }),
-          React.createElement('button', { className: 'load-data-btn' }, 'Load Data')
+          React.createElement('button', { 
+            className: 'load-data-btn',
+            onClick: handleStrydUrlLoad,
+            disabled: isProcessing
+          }, isProcessing ? 'Loading...' : 'Load Data')
+        ),
+        React.createElement('p', { className: 'stryd-note' }, 
+          '⚠️ Note: Only works with public Stryd runs that have GPS tracking enabled'
         )
       ),
       
@@ -529,14 +747,14 @@ const StrydStoriesApp = () => {
         React.createElement('div', { className: 'upload-icon' }, '📁'),
         React.createElement('div', { className: 'upload-text' },
           React.createElement('p', { className: 'upload-main' }, 
-            imageType === 'map' ? 'Click to upload your Stryd run map' : 'Click to upload your personal photo'
+            imageType === 'map' ? 'Upload Stryd map image or GPS file (.gpx/.tcx)' : 'Upload your personal photo'
           ),
-          React.createElement('p', { className: 'upload-sub' }, 'Supports PNG, JPG files (max 10MB)')
+          React.createElement('p', { className: 'upload-sub' }, 'Images: PNG, JPG files (max 10MB) • GPS: GPX, TCX files')
         ),
         React.createElement('input', {
           type: 'file',
           ref: fileInputRef,
-          accept: 'image/*',
+          accept: 'image/*,.gpx,.tcx',
           style: { display: 'none' },
           onChange: (e) => {
             const files = Array.from(e.target.files || []);
@@ -589,6 +807,22 @@ const StrydStoriesApp = () => {
           )
         ),
         
+        // Route Overlay Toggle
+        React.createElement('div', { className: 'control-group' },
+          React.createElement('h3', null, 'Route Overlay'),
+          React.createElement('label', { className: 'toggle-switch' },
+            React.createElement('input', {
+              type: 'checkbox',
+              checked: showRouteOverlay,
+              onChange: (e) => setShowRouteOverlay(e.target.checked)
+            }),
+            React.createElement('span', { className: 'toggle-slider' }),
+            React.createElement('span', { className: 'toggle-label' }, 
+              showRouteOverlay ? 'Route Visible' : 'Route Hidden'
+            )
+          )
+        ),
+        
         // Route Style Selection
         showRouteOverlay && React.createElement('div', { className: 'control-group' },
           React.createElement('h3', null, 'Route Style'),
@@ -609,23 +843,6 @@ const StrydStoriesApp = () => {
               className: 'route-style-btn' + (routeStyle === 'minimal' ? ' active' : ''),
               onClick: () => setRouteStyle('minimal')
             }, '⚪ Minimal')
-          ),
-          React.createElement('div', { className: 'control-group' },
-            React.createElement('h3', null, 'Route Type'),
-            React.createElement('div', { className: 'route-type-buttons' },
-              React.createElement('button', {
-                className: 'route-type-btn' + (routeType === 'realistic' ? ' active' : ''),
-                onClick: () => { setRouteType('realistic'); generateRoute(); }
-              }, '🏃 Realistic'),
-              React.createElement('button', {
-                className: 'route-type-btn' + (routeType === 'loop' ? ' active' : ''),
-                onClick: () => { setRouteType('loop'); generateRoute(); }
-              }, '🔄 Loop'),
-              React.createElement('button', {
-                className: 'route-type-btn' + (routeType === 'zigzag' ? ' active' : ''),
-                onClick: () => { setRouteType('zigzag'); generateRoute(); }
-              }, '⚡ Trail')
-            )
           )
         )
       ),
