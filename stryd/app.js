@@ -547,10 +547,12 @@ const StrydStoriesApp = () => {
     console.log('Drawing image with params:', { sx, sy, sWidth, sHeight, destWidth: storyWidth, destHeight: storyHeight });
     ctx.drawImage(uploadedImage, sx, sy, sWidth, sHeight, 0, 0, storyWidth, storyHeight);
     
-    // Draw route overlay
-    if (showRouteOverlay && mockRouteData) {
+    // Draw route overlay only if enabled
+    if (showRouteOverlay && mockRouteData && mockRouteData.length > 0) {
       console.log('Drawing route overlay with', mockRouteData.length, 'points');
       drawRoute(ctx, canvas, mockRouteData, routeStyle, { opacity: routeOpacity });
+    } else {
+      console.log('Route overlay disabled or no route data');
     }
 
     // Draw text overlay and branding
@@ -653,7 +655,7 @@ const StrydStoriesApp = () => {
       liveCtx.drawImage(canvasRef.current, 0, 0);
       console.log('Live canvas updated');
     }
-  }, [uploadedImage, colorTheme, routeStyle, mockRouteData]); // More specific dependencies
+  }, [uploadedImage, colorTheme, routeStyle, mockRouteData, showRouteOverlay]); // Added showRouteOverlay
   
   // Initialize canvas dimensions when component mounts
   useEffect(() => {
