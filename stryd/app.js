@@ -418,7 +418,12 @@ const StrydStoriesApp = () => {
         showNotification('No GPS data found in this Stryd run. It may not have location tracking.', 'error');
       }
     } catch (error) {
-      showNotification(error.message, 'error');
+      // Handle CORS error with helpful message
+      if (error.message.includes('CORS') || error.message.includes('NetworkError')) {
+        showNotification('Cannot access Stryd data due to browser security. Please export a GPX file from Stryd and upload it instead.', 'error');
+      } else {
+        showNotification(error.message, 'error');
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -655,7 +660,7 @@ const StrydStoriesApp = () => {
       liveCtx.drawImage(canvasRef.current, 0, 0);
       console.log('Live canvas updated');
     }
-  }, [uploadedImage, colorTheme, routeStyle, mockRouteData, showRouteOverlay]); // Added showRouteOverlay
+  }, [uploadedImage, colorTheme, routeStyle, mockRouteData, showRouteOverlay, routeOpacity]); // More comprehensive dependencies
   
   // Initialize canvas dimensions when component mounts
   useEffect(() => {
@@ -714,7 +719,7 @@ const StrydStoriesApp = () => {
           }, isProcessing ? 'Loading...' : 'Load Data')
         ),
         React.createElement('p', { className: 'stryd-note' }, 
-          '⚠️ Note: Only works with public Stryd runs that have GPS tracking enabled'
+          '⚠️ Due to browser security, direct URL access may be blocked. If it fails, export a GPX file from Stryd PowerCenter and upload it instead.'
         )
       ),
       
@@ -882,11 +887,35 @@ const StrydStoriesApp = () => {
         onClick: () => {
           const canvas = canvasRef.current;
           if (canvas) {
-            const link = document.createElement('a');
-            link.download = 'stryd-story.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            showNotification('Story downloaded!', 'success');
+            try {
+              // Force a final render to ensure canvas is up to date
+              generateStoryImage();
+              
+              // Wait a brief moment for the canvas to finish drawing
+              setTimeout(() => {
+                const dataURL = canvas.toDataURL('image/png', 1.0);
+                
+                // Check if canvas has actual content
+                if (dataURL === 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==') {
+                  showNotification('No image content to download. Please upload an image first.', 'error');
+                  return;
+                }
+                
+                const link = document.createElement('a');
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '');
+                link.download = `stryd-story-${timestamp}.png`;
+                link.href = dataURL;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showNotification('Story downloaded successfully!', 'success');
+              }, 100);
+            } catch (error) {
+              console.error('Download error:', error);
+              showNotification('Download failed. Please try again.', 'error');
+            }
+          } else {
+            showNotification('Canvas not ready. Please try again.', 'error');
           }
         }
       }, '📥 Download Instagram Story')
