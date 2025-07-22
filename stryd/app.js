@@ -28,18 +28,38 @@ const FONTS = {
 
 const ROUTE_STYLES = {
   'gradient': {
-    strokeStyle: (ctx, width) => {
-      const gradient = ctx.createLinearGradient(0, 0, width, 0);
-      gradient.addColorStop(0, '#ff6b35');
-      gradient.addColorStop(0.5, '#4a9eff');
-      gradient.addColorStop(1, '#c84fff');
+    createStroke: (ctx, width, height) => {
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#FFD700');  // Gold start
+      gradient.addColorStop(0.3, '#FF6B35'); // Orange middle
+      gradient.addColorStop(0.7, '#4A9EFF'); // Blue
+      gradient.addColorStop(1, '#FF1744');   // Red finish
       return gradient;
     },
-    lineWidth: 8, lineCap: 'round', lineJoin: 'round', shadowBlur: 6, shadowColor: 'rgba(0, 0, 0, 0.3)'
+    lineWidth: 12, lineCap: 'round', lineJoin: 'round', 
+    shadowBlur: 8, shadowColor: 'rgba(0, 0, 0, 0.4)'
   },
-  'solid': { strokeStyle: '#ff6b35', lineWidth: 6, lineCap: 'round', lineJoin: 'round', shadowBlur: 4, shadowColor: 'rgba(0, 0, 0, 0.2)' },
-  'neon': { strokeStyle: '#4a9eff', lineWidth: 4, lineCap: 'round', lineJoin: 'round', shadowBlur: 12, shadowColor: '#4a9eff' },
-  'minimal': { strokeStyle: '#ffffff', lineWidth: 3, lineCap: 'round', lineJoin: 'round', shadowBlur: 2, shadowColor: 'rgba(0, 0, 0, 0.5)' }
+  'nike': {
+    createStroke: (ctx, width, height) => {
+      const gradient = ctx.createLinearGradient(0, 0, width, 0);
+      gradient.addColorStop(0, '#00D4FF');   // Nike cyan
+      gradient.addColorStop(0.5, '#5433FF'); // Nike purple
+      gradient.addColorStop(1, '#20FFAF');   // Nike green
+      return gradient;
+    },
+    lineWidth: 10, lineCap: 'round', lineJoin: 'round',
+    shadowBlur: 12, shadowColor: 'rgba(84, 51, 255, 0.3)'
+  },
+  'strava': {
+    createStroke: () => '#FC4C02', // Strava orange
+    lineWidth: 8, lineCap: 'round', lineJoin: 'round',
+    shadowBlur: 6, shadowColor: 'rgba(252, 76, 2, 0.4)'
+  },
+  'minimal': {
+    createStroke: () => '#FFFFFF',
+    lineWidth: 6, lineCap: 'round', lineJoin: 'round',
+    shadowBlur: 4, shadowColor: 'rgba(0, 0, 0, 0.6)'
+  }
 };
 
 // --- UTILITY FUNCTIONS --- //
@@ -80,7 +100,7 @@ const StrydStoriesApp = () => {
   const [dragOver, setDragOver] = useState(false);
   const [showRouteOverlay, setShowRouteOverlay] = useState(true);
   const [routeStyle, setRouteStyle] = useState('gradient');
-  const [routeType, setRouteType] = useState('loop');
+  const [routeType, setRouteType] = useState('realistic');
   const [routeOpacity, setRouteOpacity] = useState(0.9);
   const [mockRouteData, setMockRouteData] = useState(null);
 
@@ -125,16 +145,52 @@ const StrydStoriesApp = () => {
   }, [processImageFile]);
   
   const generateMockRouteData = useCallback((type) => {
-      const points = [];
-      const numPoints = 50;
-      // This logic can be expanded as you had it
+    const points = [];
+    const numPoints = 80;
+    
+    if (type === 'realistic') {
+      // Generate realistic GPS-style route data
+      const startLat = 0.3;
+      const startLng = 0.2;
+      let currentLat = startLat;
+      let currentLng = startLng;
+      
+      for (let i = 0; i < numPoints; i++) {
+        const progress = i / numPoints;
+        
+        // Create realistic turns and variations
+        const turn = Math.sin(progress * 8) * 0.15;
+        const variation = (Math.random() - 0.5) * 0.02;
+        
+        currentLat += 0.008 + variation;
+        currentLng += turn + variation;
+        
+        // Keep within bounds
+        currentLat = Math.max(0.1, Math.min(0.9, currentLat));
+        currentLng = Math.max(0.1, Math.min(0.9, currentLng));
+        
+        points.push({ x: currentLng, y: currentLat });
+      }
+    } else if (type === 'loop') {
+      // Generate a realistic running loop
       for (let i = 0; i < numPoints; i++) {
         const angle = (i / numPoints) * 2 * Math.PI;
-        const x = 0.5 + Math.cos(angle) * (0.3 + (type === 'zigzag' ? Math.sin(angle * 5) * 0.1 : 0));
-        const y = 0.5 + Math.sin(angle) * 0.3;
+        const radius = 0.25 + Math.sin(angle * 3) * 0.1;
+        const x = 0.5 + Math.cos(angle) * radius;
+        const y = 0.5 + Math.sin(angle) * radius * 0.8; // Oval shape
         points.push({ x, y });
       }
-      return points;
+    } else {
+      // Zigzag or other patterns
+      for (let i = 0; i < numPoints; i++) {
+        const progress = i / numPoints;
+        const x = 0.2 + progress * 0.6;
+        const y = 0.5 + Math.sin(progress * 12) * 0.2;
+        points.push({ x, y });
+      }
+    }
+    
+    return points;
   }, []);
 
   const handleFileSelect = useCallback((files) => {
@@ -178,43 +234,74 @@ const StrydStoriesApp = () => {
       ctx.shadowColor = style.shadowColor || 'rgba(0, 0, 0, 0.3)';
     }
     
-    // Set stroke style (handle both strings and gradient functions)
-    if (typeof style.strokeStyle === 'function') {
-      ctx.strokeStyle = style.strokeStyle(ctx, width);
+    // Set stroke style (handle both functions and strings)
+    if (typeof style.createStroke === 'function') {
+      ctx.strokeStyle = style.createStroke(ctx, width, height);
     } else {
-      ctx.strokeStyle = style.strokeStyle || '#ff6b35';
+      ctx.strokeStyle = style.createStroke || '#ff6b35';
     }
     
-    // Draw the route path
+    // Draw the route path with smooth curves
     ctx.beginPath();
-    routeData.forEach((point, index) => {
-      const x = point.x * width;
-      const y = point.y * height;
+    
+    if (routeData.length > 0) {
+      const firstPoint = routeData[0];
+      ctx.moveTo(firstPoint.x * width, firstPoint.y * height);
       
-      if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
+      // Use quadratic curves for smoother lines
+      for (let i = 1; i < routeData.length - 1; i++) {
+        const current = routeData[i];
+        const next = routeData[i + 1];
+        
+        const currentX = current.x * width;
+        const currentY = current.y * height;
+        const nextX = next.x * width;
+        const nextY = next.y * height;
+        
+        // Control point for smooth curve
+        const controlX = (currentX + nextX) / 2;
+        const controlY = (currentY + nextY) / 2;
+        
+        ctx.quadraticCurveTo(currentX, currentY, controlX, controlY);
       }
-    });
+      
+      // Connect to the last point
+      if (routeData.length > 1) {
+        const lastPoint = routeData[routeData.length - 1];
+        ctx.lineTo(lastPoint.x * width, lastPoint.y * height);
+      }
+    }
     
     ctx.stroke();
     
-    // Add start/end markers
+    // Add start/end markers with better styling
     if (routeData.length > 0) {
       const start = routeData[0];
       const end = routeData[routeData.length - 1];
       
-      // Start marker (green)
-      ctx.fillStyle = '#2ECC71';
+      // Start marker (green with white center)
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      
+      ctx.fillStyle = '#00E676'; // Bright green
       ctx.beginPath();
-      ctx.arc(start.x * width, start.y * height, 8, 0, Math.PI * 2);
+      ctx.arc(start.x * width, start.y * height, 12, 0, Math.PI * 2);
       ctx.fill();
       
-      // End marker (red)
-      ctx.fillStyle = '#E74C3C';
+      ctx.fillStyle = '#FFFFFF';
       ctx.beginPath();
-      ctx.arc(end.x * width, end.y * height, 8, 0, Math.PI * 2);
+      ctx.arc(start.x * width, start.y * height, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // End marker (red with white center)
+      ctx.fillStyle = '#FF1744'; // Bright red
+      ctx.beginPath();
+      ctx.arc(end.x * width, end.y * height, 12, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(end.x * width, end.y * height, 6, 0, Math.PI * 2);
       ctx.fill();
     }
     
@@ -269,27 +356,64 @@ const StrydStoriesApp = () => {
     ctx.fillStyle = overlayGradient;
     ctx.fillRect(0, storyHeight * 0.7, storyWidth, storyHeight * 0.3);
     
-    // Draw run data if available
+    // Draw run data with better Nike-style layout
     if (runData) {
       console.log('Drawing run data:', runData);
-      ctx.font = `bold ${storyWidth * 0.08}px ${font.primary}`;
-      ctx.fillStyle = theme.secondary;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
       
-      const dataY = storyHeight * 0.85;
+      // Create a semi-transparent background for stats
+      const statsHeight = storyHeight * 0.25;
+      const statsY = storyHeight - statsHeight;
       
-      // Distance
-      ctx.fillText(runData.distance, storyWidth * 0.2, dataY);
+      const statsGradient = ctx.createLinearGradient(0, statsY, 0, storyHeight);
+      statsGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      statsGradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.4)');
+      statsGradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+      ctx.fillStyle = statsGradient;
+      ctx.fillRect(0, statsY, storyWidth, statsHeight);
+      
+      // Main stat (distance) - large and prominent
+      ctx.font = `900 ${storyWidth * 0.12}px ${font.primary}`;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(runData.distance, storyWidth * 0.08, storyHeight * 0.88);
+      
+      // Distance label
+      ctx.font = `600 ${storyWidth * 0.04}px ${font.primary}`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillText('DISTANCE', storyWidth * 0.08, storyHeight * 0.90);
+      
+      // Secondary stats in a row
+      const statsRowY = storyHeight * 0.96;
+      const statSpacing = storyWidth * 0.28;
       
       // Time
-      ctx.fillText(runData.time, storyWidth * 0.4, dataY);
+      ctx.font = `700 ${storyWidth * 0.055}px ${font.primary}`;
+      ctx.fillStyle = theme.primary;
+      ctx.textAlign = 'left';
+      ctx.fillText(runData.time, storyWidth * 0.08, statsRowY);
+      
+      ctx.font = `500 ${storyWidth * 0.025}px ${font.primary}`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillText('TIME', storyWidth * 0.08, statsRowY + storyWidth * 0.035);
       
       // Pace
-      ctx.fillText(runData.pace, storyWidth * 0.6, dataY);
+      ctx.font = `700 ${storyWidth * 0.055}px ${font.primary}`;
+      ctx.fillStyle = theme.primary;
+      ctx.fillText(runData.pace, storyWidth * 0.36, statsRowY);
+      
+      ctx.font = `500 ${storyWidth * 0.025}px ${font.primary}`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillText('AVG PACE', storyWidth * 0.36, statsRowY + storyWidth * 0.035);
       
       // Power
-      ctx.fillText(runData.power, storyWidth * 0.8, dataY);
+      ctx.font = `700 ${storyWidth * 0.055}px ${font.primary}`;
+      ctx.fillStyle = theme.primary;
+      ctx.fillText(runData.power, storyWidth * 0.64, statsRowY);
+      
+      ctx.font = `500 ${storyWidth * 0.025}px ${font.primary}`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillText('AVG POWER', storyWidth * 0.64, statsRowY + storyWidth * 0.035);
     }
     
     // Add Stryd branding
@@ -339,7 +463,7 @@ const StrydStoriesApp = () => {
   }, []);
   
   useEffect(() => {
-    setMockRouteData(generateMockRouteData('loop'));
+    setMockRouteData(generateMockRouteData('realistic'));
   }, [generateMockRouteData]);
 
   const nextStep = () => setCurrentStep(current => (current === 'upload' ? 'customize' : 'preview'));
@@ -465,16 +589,42 @@ const StrydStoriesApp = () => {
           )
         ),
         
-        // Route Overlay Toggle
+        // Route Style Selection
         showRouteOverlay && React.createElement('div', { className: 'control-group' },
           React.createElement('h3', null, 'Route Style'),
           React.createElement('div', { className: 'route-style-buttons' },
-            Object.keys(ROUTE_STYLES).map(style =>
+            React.createElement('button', {
+              className: 'route-style-btn' + (routeStyle === 'gradient' ? ' active' : ''),
+              onClick: () => setRouteStyle('gradient')
+            }, '🌈 Gradient'),
+            React.createElement('button', {
+              className: 'route-style-btn' + (routeStyle === 'nike' ? ' active' : ''),
+              onClick: () => setRouteStyle('nike')
+            }, '💙 Nike'),
+            React.createElement('button', {
+              className: 'route-style-btn' + (routeStyle === 'strava' ? ' active' : ''),
+              onClick: () => setRouteStyle('strava')
+            }, '🧡 Strava'),
+            React.createElement('button', {
+              className: 'route-style-btn' + (routeStyle === 'minimal' ? ' active' : ''),
+              onClick: () => setRouteStyle('minimal')
+            }, '⚪ Minimal')
+          ),
+          React.createElement('div', { className: 'control-group' },
+            React.createElement('h3', null, 'Route Type'),
+            React.createElement('div', { className: 'route-type-buttons' },
               React.createElement('button', {
-                key: style,
-                className: 'route-style-btn' + (routeStyle === style ? ' active' : ''),
-                onClick: () => setRouteStyle(style)
-              }, style.charAt(0).toUpperCase() + style.slice(1))
+                className: 'route-type-btn' + (routeType === 'realistic' ? ' active' : ''),
+                onClick: () => { setRouteType('realistic'); generateRoute(); }
+              }, '🏃 Realistic'),
+              React.createElement('button', {
+                className: 'route-type-btn' + (routeType === 'loop' ? ' active' : ''),
+                onClick: () => { setRouteType('loop'); generateRoute(); }
+              }, '🔄 Loop'),
+              React.createElement('button', {
+                className: 'route-type-btn' + (routeType === 'zigzag' ? ' active' : ''),
+                onClick: () => { setRouteType('zigzag'); generateRoute(); }
+              }, '⚡ Trail')
             )
           )
         )
