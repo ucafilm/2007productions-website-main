@@ -439,11 +439,12 @@ const StrydStoriesApp = () => {
       
       // Image Preview
       React.createElement('div', { className: 'image-preview' },
-        uploadedImage && React.createElement('canvas', {
+        React.createElement('canvas', {
           ref: liveCanvasRef,
           width: 405,
           height: 720,
-          className: 'preview-canvas'
+          className: 'preview-canvas',
+          style: { border: '1px solid #333', maxWidth: '100%', height: 'auto' }
         })
       ),
       
@@ -520,7 +521,15 @@ const StrydStoriesApp = () => {
           }
         }
       }, '📥 Download Instagram Story')
-    )
+    ),
+
+    // Hidden canvas for image generation
+    React.createElement('canvas', {
+      ref: canvasRef,
+      width: 405,
+      height: 720,
+      style: { display: 'none' }
+    })
   );
 };
 
