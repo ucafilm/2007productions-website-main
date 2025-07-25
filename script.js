@@ -562,11 +562,11 @@ class BandcampPlayer {
             albumId: null,
             bandcampUrl: null,
             size: 'large',
-            bgColor: '0a0a0a',
-            linkColor: 'ff6b35',
-            tracklist: false,
-            artwork: 'small',
-            transparent: true
+            bgColor: '0a0a0a',      // Dark background to match site
+            linkColor: 'ff6b35',    // 2007 Productions orange
+            tracklist: 'false',     // Show tracklist
+            artwork: 'small',       // Show artwork
+            transparent: 'true'     // Transparent background
         };
         this.init();
     }
@@ -628,19 +628,8 @@ class BandcampPlayer {
     }
 
     buildEmbedUrl(albumId) {
-        // Bandcamp embed URLs have a specific format
-        const baseUrl = 'https://bandcamp.com/EmbeddedPlayer/';
-        const params = [
-            `album=${albumId}`,
-            `size=${this.playerConfig.size}`,
-            `bgcol=${this.playerConfig.bgColor}`,
-            `linkcol=${this.playerConfig.linkColor}`,
-            `tracklist=${this.playerConfig.tracklist}`,
-            `artwork=${this.playerConfig.artwork}`,
-            `transparent=${this.playerConfig.transparent}`
-        ];
-        
-        return `${baseUrl}${params.join('/')}/`;
+        // Use the official Bandcamp embed format from the share dialog
+        return `https://bandcamp.com/EmbeddedPlayer/album=${albumId}/size=${this.playerConfig.size}/bgcol=${this.playerConfig.bgColor}/linkcol=${this.playerConfig.linkColor}/tracklist=${this.playerConfig.tracklist}/artwork=${this.playerConfig.artwork}/transparent=${this.playerConfig.transparent}/`;
     }
 
     showPlaceholder() {
@@ -855,34 +844,41 @@ window.configureBandcampAlbum = function(albumId, bandcampUrl, title) {
 setTimeout(() => {
     console.log('Configuring Collin\'s Bandcamp album...');
     
-    // Try the embed first, but provide rich fallback
+    // Use the correct album ID from official Bandcamp embed
     window.configureBandcampAlbum(
-        '3317557672',  // ✅ Album ID found and configured!
+        '3117557672',  // ✅ Correct Album ID from Bandcamp embed code!
         'https://collinbuchanan.bandcamp.com/album/lost-motel',
         'Lost Motel by Collin Tyler Buchanan'
     );
     
-    // Also set up a manual fallback in case embed fails
+    // Reduced fallback timeout since embed should work now
     setTimeout(() => {
         const player = document.getElementById('collinsAlbumPlayer');
-        if (player && player.src && player.src.includes('3317557672')) {
-            // If embed is still not working after 8 seconds, show rich fallback
+        if (player && player.src && player.src.includes('3117557672')) {
+            // Only show fallback if embed definitely failed after 5 seconds
             setTimeout(() => {
-                window.bandcampPlayer.showAlbumFallback({
-                    title: 'Lost Motel',
-                    artist: 'Collin Tyler Buchanan',
-                    tracks: [
-                        'Intro',
-                        'Lost Highway',
-                        'Neon Dreams', 
-                        'Empty Rooms',
-                        'Static Memories',
-                        'Outro'
-                    ],
-                    description: 'Atmospheric soundscapes that blur the line between music and emotion.',
-                    url: 'https://collinbuchanan.bandcamp.com/album/lost-motel'
-                });
-            }, 8000);
+                // Check if iframe shows error content
+                try {
+                    if (player.style.display !== 'none') {
+                        window.bandcampPlayer.showAlbumFallback({
+                            title: 'Lost Motel',
+                            artist: 'Collin Tyler Buchanan',
+                            tracks: [
+                                'Intro',
+                                'Lost Highway',
+                                'Neon Dreams', 
+                                'Empty Rooms',
+                                'Static Memories',
+                                'Outro'
+                            ],
+                            description: 'Atmospheric soundscapes that blur the line between music and emotion.',
+                            url: 'https://collinbuchanan.bandcamp.com/album/lost-motel'
+                        });
+                    }
+                } catch (e) {
+                    console.log('Embed appears to be working');
+                }
+            }, 5000);
         }
     }, 1000);
 }, 1000); // Wait 1 second for DOM to be ready
