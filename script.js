@@ -624,6 +624,10 @@ class BandcampPlayer {
                 buyButton.href = config.bandcampUrl;
                 buyButton.title = `Buy ${config.title || 'album'} on Bandcamp`;
             }
+            
+            // Add manual fallback trigger (for debugging)
+            console.log('Bandcamp player iframe loaded with URL:', embedUrl);
+            console.log('If the player shows "not available", the album may not allow embedding on this domain.');
         }
     }
 
@@ -851,34 +855,19 @@ setTimeout(() => {
         'Lost Motel by Collin Tyler Buchanan'
     );
     
-    // Reduced fallback timeout since embed should work now
-    setTimeout(() => {
-        const player = document.getElementById('collinsAlbumPlayer');
-        if (player && player.src && player.src.includes('3117557672')) {
-            // Only show fallback if embed definitely failed after 5 seconds
-            setTimeout(() => {
-                // Check if iframe shows error content
-                try {
-                    if (player.style.display !== 'none') {
-                        window.bandcampPlayer.showAlbumFallback({
-                            title: 'Lost Motel',
-                            artist: 'Collin Tyler Buchanan',
-                            tracks: [
-                                'Intro',
-                                'Lost Highway',
-                                'Neon Dreams', 
-                                'Empty Rooms',
-                                'Static Memories',
-                                'Outro'
-                            ],
-                            description: 'Atmospheric soundscapes that blur the line between music and emotion.',
-                            url: 'https://collinbuchanan.bandcamp.com/album/lost-motel'
-                        });
-                    }
-                } catch (e) {
-                    console.log('Embed appears to be working');
-                }
-            }, 5000);
-        }
-    }, 1000);
+    // Remove automatic fallback - let Bandcamp embed work
+    console.log('Bandcamp embed should be loading at: https://bandcamp.com/EmbeddedPlayer/album=3117557672/size=large/bgcol=0a0a0a/linkcol=ff6b35/tracklist=false/artwork=small/transparent=true/');
+    
+    // Add manual fallback function for console debugging
+    window.showBandcampFallback = function() {
+        window.bandcampPlayer.showAlbumFallback({
+            title: 'Lost Motel',
+            artist: 'Collin Tyler Buchanan',
+            tracks: ['Intro', 'Lost Highway', 'Neon Dreams', 'Empty Rooms', 'Static Memories', 'Outro'],
+            description: 'Atmospheric soundscapes that blur the line between music and emotion.',
+            url: 'https://collinbuchanan.bandcamp.com/album/lost-motel'
+        });
+        console.log('Manual fallback triggered. If you prefer the embed, reload the page.');
+    };
+    
 }, 1000); // Wait 1 second for DOM to be ready
