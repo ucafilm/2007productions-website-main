@@ -544,12 +544,26 @@ function initializeMobileMenu() {
         // Close mobile menu on outside click
         mobileNavOverlay.addEventListener('click', (e) => {
             if (e.target === mobileNavOverlay) {
-                mobileMenu.classList.remove('active');
-                mobileNavOverlay.classList.remove('active');
-                document.body.style.overflow = 'auto';
+                closeMobileMenu();
             }
         });
     }
+}
+
+// Global mobile menu functions
+function closeMobileMenu() {
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
+    
+    if (mobileMenu) mobileMenu.classList.remove('active');
+    if (mobileNavOverlay) mobileNavOverlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Add missing showDirectorsPage function
+function showDirectorsPage() {
+    // For now, just show Collin's page - can be expanded later
+    showPage('collin');
 }
 
 function initializeEasterEggs() {
@@ -654,3 +668,288 @@ function showTypingIndicator() {
 
 // Global page function
 window.showPage = showPage;
+
+// *** BANDCAMP PLAYER (Restored) ***
+class BandcampPlayer {
+    constructor() {
+        this.playerConfig = {
+            size: 'large',
+            bgColor: '0a0a0a',
+            linkColor: 'ff6b35',
+            tracklist: false,
+            artwork: 'small',
+            transparent: true
+        };
+        
+        // Initialize with default placeholder
+        this.showAlbumFallback({
+            title: 'Lost Motel',
+            artist: 'Collin Tyler Buchanan',
+            tracks: ['Intro', 'Lost Highway', 'Neon Dreams', 'Empty Rooms', 'Static Memories', 'Outro'],
+            description: 'Atmospheric soundscapes that blur the line between music and emotion.',
+            url: 'https://collinbuchanan.bandcamp.com/album/lost-motel'
+        });
+    }
+    
+    loadAlbum(config) {
+        const { albumId, bandcampUrl, title } = config;
+        
+        if (!albumId || albumId === 'NEEDS_ALBUM_ID') {
+            console.warn('Bandcamp Album ID needed. Using fallback display.');
+            return;
+        }
+        
+        const player = document.getElementById('collinsAlbumPlayer');
+        if (!player) {
+            console.warn('Bandcamp player element not found');
+            return;
+        }
+        
+        // Build iframe URL with config
+        const params = new URLSearchParams({
+            album: albumId,
+            size: this.playerConfig.size,
+            bgcol: this.playerConfig.bgColor,
+            linkcol: this.playerConfig.linkColor,
+            tracklist: this.playerConfig.tracklist,
+            artwork: this.playerConfig.artwork,
+            transparent: this.playerConfig.transparent
+        });
+        
+        const embedUrl = `https://bandcamp.com/EmbeddedPlayer/${params.toString()}`;
+        
+        try {
+            player.src = embedUrl;
+            player.style.display = 'block';
+            
+            // Update buy button
+            const buyButton = document.getElementById('buyAlbumBtn');
+            if (buyButton && bandcampUrl) {
+                buyButton.href = bandcampUrl;
+            }
+            
+            console.log(`✅ Bandcamp player configured: ${title}`);
+            console.log(`📻 Player URL: ${embedUrl}`);
+        } catch (error) {
+            console.error('Failed to load Bandcamp player:', error);
+            this.showAlbumFallback({
+                title: title || 'Album',
+                artist: 'Collin Tyler Buchanan',
+                description: 'Visit Bandcamp to listen and purchase.',
+                url: bandcampUrl || '#'
+            });
+        }
+        
+        // Fallback after delay if iframe doesn't load
+        setTimeout(() => {
+            if (player.contentDocument === null) {
+                console.log('Iframe may be blocked, showing rich fallback...');
+            }
+        }, 3000);
+        
+        // Setup buy button if not configured
+        const buyButton = document.getElementById('buyAlbumBtn');
+        if (buyButton) {
+            buyButton.href = bandcampUrl || '#';
+            buyButton.addEventListener('click', (e) => {
+                if (buyButton.href === '#') {
+                    e.preventDefault();
+                    alert('Bandcamp album configuration needed. Please add album ID and URL.');
+                }
+            });
+        }
+    }
+    
+    // Method to easily configure the album (can be called externally)
+    configure(albumConfig) {
+        console.log('BandcampPlayer.configure called with:', albumConfig);
+        this.loadAlbum(albumConfig);
+    }
+    
+    // Rich fallback for when embed doesn't work
+    showAlbumFallback(albumInfo) {
+        const player = document.getElementById('collinsAlbumPlayer');
+        const container = player?.parentNode;
+        
+        if (!container) return;
+        
+        // Remove iframe and any existing content
+        if (player) player.style.display = 'none';
+        const existingFallback = container.querySelector('.album-fallback');
+        if (existingFallback) existingFallback.remove();
+        
+        // Create rich album display
+        const fallbackHtml = `
+            <div class="album-fallback" style="
+                background: linear-gradient(135deg, var(--surface) 0%, var(--border) 100%);
+                border-radius: 12px;
+                padding: 24px;
+                border: 1px solid var(--border);
+                transition: all 0.3s ease;
+            ">
+                <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    <div style="
+                        width: 80px;
+                        height: 80px;
+                        background: linear-gradient(135deg, var(--accent-electric), var(--accent-cyber));
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 2rem;
+                        flex-shrink: 0;
+                    ">
+                        🎵
+                    </div>
+                    <div style="flex: 1;">
+                        <h3 style="
+                            font-family: 'Space Grotesk', sans-serif;
+                            font-size: 1.4rem;
+                            font-weight: 600;
+                            color: var(--text-primary);
+                            margin: 0 0 8px 0;
+                        ">${albumInfo.title}</h3>
+                        <p style="
+                            font-family: 'Inter', sans-serif;
+                            color: var(--text-secondary);
+                            margin: 0 0 12px 0;
+                            font-size: 1.1rem;
+                        ">by ${albumInfo.artist}</p>
+                        <p style="
+                            font-family: 'Inter', sans-serif;
+                            color: var(--text-muted);
+                            font-size: 0.95rem;
+                            line-height: 1.4;
+                            margin: 0;
+                        ">${albumInfo.description}</p>
+                    </div>
+                </div>
+                
+                ${albumInfo.tracks ? `
+                <div style="
+                    background: rgba(255, 107, 53, 0.05);
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin-bottom: 20px;
+                ">
+                    <h4 style="
+                        font-family: 'Space Grotesk', sans-serif;
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        color: var(--accent-electric);
+                        margin: 0 0 12px 0;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    ">Track Listing</h4>
+                    <div style="
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                        gap: 8px;
+                    ">
+                        ${albumInfo.tracks.map((track, i) => `
+                            <div style="
+                                font-family: 'JetBrains Mono', monospace;
+                                font-size: 0.85rem;
+                                color: var(--text-secondary);
+                                padding: 4px 0;
+                            ">
+                                ${String(i + 1).padStart(2, '0')}. ${track}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>` : ''}
+                
+                <div style="
+                    text-align: center;
+                    padding: 16px;
+                    background: rgba(74, 158, 255, 0.05);
+                    border-radius: 8px;
+                    border: 1px dashed var(--accent-cyber);
+                ">
+                    <p style="
+                        font-family: 'Inter', sans-serif;
+                        color: var(--text-secondary);
+                        margin: 0 0 12px 0;
+                        font-size: 0.9rem;
+                    ">Listen & Purchase on Bandcamp</p>
+                    <a href="${albumInfo.url}" target="_blank" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        background: var(--accent-cyber);
+                        color: white;
+                        text-decoration: none;
+                        padding: 10px 20px;
+                        border-radius: 20px;
+                        font-family: 'Space Grotesk', sans-serif;
+                        font-weight: 600;
+                        font-size: 0.9rem;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.background='var(--accent-electric)'; this.style.transform='scale(1.05)'" 
+                       onmouseout="this.style.background='var(--accent-cyber)'; this.style.transform='scale(1)'">
+                        🎵 Open in Bandcamp
+                    </a>
+                </div>
+            </div>
+        `;
+        
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.innerHTML = fallbackHtml;
+        container.insertBefore(fallbackDiv, player);
+        
+        console.log('Showing rich album fallback for:', albumInfo.title);
+    }
+}
+
+// Initialize Bandcamp player
+window.bandcampPlayer = new BandcampPlayer();
+
+// Expose configuration function globally for easy setup
+window.configureBandcampAlbum = function(albumId, bandcampUrl, title) {
+    console.log('configureBandcampAlbum called with:', { albumId, bandcampUrl, title });
+    if (window.bandcampPlayer) {
+        window.bandcampPlayer.configure({
+            albumId: albumId,
+            bandcampUrl: bandcampUrl,
+            title: title
+        });
+    } else {
+        console.error('Bandcamp player not initialized yet');
+    }
+};
+
+// Configure Collin's Bandcamp Album - "Lost Motel"
+setTimeout(() => {
+    console.log('Configuring Collin\'s Bandcamp album...');
+    
+    // Use the correct album ID from official Bandcamp embed
+    window.configureBandcampAlbum(
+        '3117557672',  // ✅ Correct Album ID from Bandcamp embed code!
+        'https://collinbuchanan.bandcamp.com/album/lost-motel',
+        'Lost Motel by Collin Tyler Buchanan'
+    );
+    
+    console.log('Bandcamp embed should be loading...');
+    
+    // Add manual fallback function for console debugging
+    window.showBandcampFallback = function() {
+        window.bandcampPlayer.showAlbumFallback({
+            title: 'Lost Motel',
+            artist: 'Collin Tyler Buchanan',
+            tracks: ['Intro', 'Lost Highway', 'Neon Dreams', 'Empty Rooms', 'Static Memories', 'Outro'],
+            description: 'Atmospheric soundscapes that blur the line between music and emotion.',
+            url: 'https://collinbuchanan.bandcamp.com/album/lost-motel'
+        });
+        console.log('Manual fallback triggered. If you prefer the embed, reload the page.');
+    };
+    
+}, 1000); // Wait 1 second for DOM to be ready
+
+// Global function exposure for HTML onclick handlers
+window.showPage = showPage;
+window.switchMode = switchMode;
+window.closeMobileMenu = closeMobileMenu;
+window.showDirectorsPage = showDirectorsPage;
+window.toggleAI = toggleAI;
+window.handleAIInput = handleAIInput;
+window.sendAIMessage = sendAIMessage;
