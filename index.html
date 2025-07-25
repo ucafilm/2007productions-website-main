@@ -6,6 +6,8 @@
     <title>2007 Productions</title>
     <!-- Core styles -->
     <link rel="stylesheet" href="style.css">
+    <!-- Mobile optimization fixes -->
+    <link rel="stylesheet" href="mobile-fixes.css">
     
     <!-- Effect styles (loaded conditionally) -->
     <link rel="stylesheet" href="effects/kinetic-typography/kinetic-typography.css" media="screen and (min-width: 769px)">
@@ -97,6 +99,19 @@
                     </div>
                 </div>
             </nav>
+
+            <!-- Mobile Navigation Overlay -->
+            <div class="mobile-nav-overlay" id="mobileNavOverlay">
+                <div class="mobile-nav-links">
+                    <a href="#home" onclick="showPage('home'); closeMobileMenu();" class="mobile-nav-link">Home</a>
+                    <a href="#directors" onclick="showDirectorsPage(); closeMobileMenu();" class="mobile-nav-link">Directors</a>
+                    <a href="#collin" onclick="showPage('collin'); closeMobileMenu();" class="mobile-nav-link">Collin</a>
+                    <a href="#corey" onclick="showPage('corey'); closeMobileMenu();" class="mobile-nav-link">Corey</a>
+                    <a href="#levi" onclick="showPage('levi'); closeMobileMenu();" class="mobile-nav-link">Levi</a>
+                    <a href="#tim" onclick="showPage('tim'); closeMobileMenu();" class="mobile-nav-link">Tim</a>
+                    <a href="#terrell" onclick="showPage('terrell'); closeMobileMenu();" class="mobile-nav-link">Terrell</a>
+                </div>
+            </div>
 
             <div class="cursor" id="cursor"></div>
             <div class="cursor-trail" id="cursorTrail"></div>

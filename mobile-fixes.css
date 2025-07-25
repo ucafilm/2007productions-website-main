@@ -1,0 +1,458 @@
+/* ===== MOBILE OPTIMIZATION FIXES ===== */
+/* Add this CSS to fix mobile scrolling issues */
+
+/* Mobile-First Scroll Optimization */
+@media (max-width: 768px) {
+    body {
+        cursor: auto !important;
+        overflow-y: auto !important;
+        /* iOS scroll optimization */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: none;
+    }
+    
+    /* Critical: Reset ScrollSmoother wrapper for native mobile scroll */
+    #smooth-wrapper {
+        position: static !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+    
+    #smooth-content {
+        overflow: visible !important;
+        width: auto !important;
+        transform: none !important;
+    }
+    
+    /* Disable problematic animations on mobile */
+    .parallax-element {
+        transform: none !important;
+    }
+    
+    /* Disable floating elements on mobile */
+    .floating-element {
+        display: none !important;
+    }
+    
+    /* Disable chaos elements on mobile */
+    .chaos-element {
+        display: none !important;
+    }
+    
+    /* Fix mobile navigation issues */
+    .nav {
+        position: fixed;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    
+    /* Mobile-optimized member pages */
+    .page {
+        padding: 80px 20px 40px !important;
+        min-height: auto !important;
+    }
+    
+    .member-layout {
+        display: block !important;
+        gap: 40px !important;
+    }
+    
+    .member-info {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .member-visual {
+        height: 300px !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+    
+    /* Disable magnetic effects on mobile */
+    [data-magnetic] {
+        transform: none !important;
+    }
+    
+    /* Simplified animations for mobile */
+    .member-visual:active {
+        transform: scale(0.98) !important;
+        transition: transform 0.1s ease;
+    }
+    
+    /* Cursor disabled on mobile */
+    .cursor,
+    .cursor-trail {
+        display: none !important;
+    }
+    
+    /* Hero optimizations */
+    .hero-year {
+        font-size: clamp(4rem, 15vw, 8rem) !important;
+        line-height: 0.85 !important;
+        animation: none !important; /* Simplify for mobile */
+        filter: none !important;
+    }
+    
+    .hero-company {
+        font-size: clamp(1rem, 4vw, 2rem) !important;
+        letter-spacing: 8px !important;
+    }
+    
+    .hero-descriptor {
+        font-size: clamp(0.9rem, 2.5vw, 1.2rem) !important;
+        letter-spacing: 2px !important;
+        margin-bottom: 40px !important;
+    }
+    
+    .hero-descriptor::before,
+    .hero-descriptor::after {
+        margin: 0 10px !important;
+    }
+    
+    /* Disable background animations on mobile */
+    .hero-bg {
+        animation: none !important;
+    }
+    
+    /* Member page optimizations */
+    .member-name {
+        font-size: clamp(2.5rem, 8vw, 4rem) !important;
+        line-height: 0.9 !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .member-name::after {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+    
+    .member-role {
+        font-size: 14px !important;
+        letter-spacing: 2px !important;
+        margin-bottom: 30px !important;
+    }
+    
+    .member-bio {
+        font-size: 16px !important;
+        line-height: 1.6 !important;
+        margin-bottom: 40px !important;
+        max-width: 100% !important;
+    }
+    
+    /* Skills optimization */
+    .skills-grid {
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+    
+    .skill-tag {
+        font-size: 11px !important;
+        padding: 6px 12px !important;
+    }
+    
+    .skill-tag:active {
+        border-color: var(--accent-electric) !important;
+        color: var(--accent-electric) !important;
+        transform: scale(0.95) !important;
+    }
+    
+    /* Remove hover states on mobile */
+    .skill-tag:hover,
+    .contact-link:hover,
+    .nav-links a:hover {
+        transform: none !important;
+        color: inherit !important;
+        text-shadow: none !important;
+        border-color: inherit !important;
+        box-shadow: none !important;
+    }
+    
+    /* Contact links */
+    .contact-link {
+        font-size: 13px !important;
+        padding: 10px 0 !important;
+        display: block !important;
+    }
+    
+    /* Navigation optimizations */
+    .nav {
+        padding: 15px 0 !important;
+    }
+    
+    .nav-container {
+        padding: 0 20px !important;
+    }
+    
+    .nav-links {
+        display: none !important;
+    }
+    
+    .mobile-menu {
+        display: flex !important;
+        flex-direction: column;
+        cursor: pointer;
+        gap: 4px;
+    }
+    
+    .logo-symbol {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
+    .logo-text {
+        font-size: 20px !important;
+        letter-spacing: 1px !important;
+    }
+    
+    .nav-mode-switch {
+        gap: 15px !important;
+    }
+    
+    .mode-button {
+        font-size: 12px !important;
+        padding: 6px 12px !important;
+    }
+    
+    .mode-button:active {
+        color: var(--text-primary) !important;
+        background: var(--surface) !important;
+        transform: scale(0.95) !important;
+    }
+    
+    /* Reel titles */
+    .reel-title {
+        font-size: 1.8rem !important;
+        letter-spacing: 1px !important;
+    }
+    
+    .reel-descriptor {
+        font-size: 14px !important;
+        padding: 0 20px !important;
+        opacity: 1 !important; /* Always visible on mobile */
+        transform: translateY(0) !important;
+    }
+    
+    /* AI Assistant optimizations */
+    .ai-assistant {
+        bottom: 20px !important;
+        right: 20px !important;
+    }
+    
+    .ai-button {
+        width: 50px !important;
+        height: 50px !important;
+        animation: none !important;
+    }
+    
+    .ai-button::after {
+        font-size: 20px !important;
+    }
+    
+    .ai-button:active {
+        transform: scale(0.95) !important;
+    }
+    
+    .ai-chat {
+        width: 300px !important;
+        height: 400px !important;
+        bottom: 70px !important;
+    }
+    
+    .ai-header {
+        padding: 15px !important;
+    }
+    
+    .ai-avatar {
+        width: 35px !important;
+        height: 35px !important;
+        font-size: 18px !important;
+    }
+    
+    .ai-info h3 {
+        font-size: 14px !important;
+    }
+    
+    .ai-info p {
+        font-size: 11px !important;
+    }
+    
+    .ai-messages {
+        padding: 15px !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .ai-message {
+        font-size: 13px !important;
+        padding: 10px 14px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .ai-input-area {
+        padding: 15px !important;
+        gap: 8px !important;
+    }
+    
+    .ai-input {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+        padding: 10px 14px !important;
+    }
+    
+    .ai-send {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .ai-send:active {
+        background: var(--accent-cyber) !important;
+        transform: scale(0.95) !important;
+    }
+    
+    /* Loading optimizations */
+    .loading-symbol {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .loading-text {
+        font-size: 16px !important;
+        letter-spacing: 2px !important;
+    }
+    
+    /* Page container */
+    .page-container {
+        padding: 0 20px !important;
+    }
+    
+    /* Improved touch targets */
+    .nav-link,
+    .mode-button,
+    .skill-tag,
+    .contact-link,
+    .member-visual {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Prevent zoom on input focus (iOS) */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+    
+    /* Grain effect reduction */
+    body::before {
+        opacity: 0.01 !important;
+        background-size: 30px 30px !important;
+    }
+}
+
+/* Desktop-specific enhancements */
+@media (min-width: 769px) {
+    body {
+        cursor: none;
+    }
+    
+    #smooth-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    #smooth-content {
+        overflow: visible;
+        width: 100%;
+    }
+    
+    /* Desktop cursor */
+    .cursor {
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        background: var(--accent-electric);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: difference;
+        transition: all 0.1s ease;
+    }
+
+    .cursor-trail {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--accent-cyber);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9998;
+        transform: translate(-50%, -50%);
+        opacity: 0.7;
+    }
+    
+    /* Desktop hover effects */
+    .member-visual:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 
+            0 30px 60px rgba(0, 0, 0, 0.3),
+            0 0 20px rgba(255, 107, 53, 0.4);
+        border-color: var(--accent-electric);
+    }
+
+    .member-visual:hover .reel-title {
+        filter: blur(2px);
+        opacity: 0.3;
+        transform: scale(1.1);
+    }
+
+    .member-visual:hover .reel-descriptor {
+        opacity: 1;
+        transform: translateY(-10px);
+    }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        padding: 60px 0 !important;
+    }
+
+    .hero-year {
+        font-size: clamp(3rem, 10vw, 5rem) !important;
+    }
+
+    .hero-company {
+        font-size: clamp(1rem, 3vw, 1.5rem) !important;
+        margin-bottom: 20px !important;
+    }
+
+    .hero-descriptor {
+        margin-bottom: 20px !important;
+    }
+}
+
+/* Tablet optimizations */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .member-layout {
+        grid-template-columns: 1fr !important;
+        gap: 80px !important;
+        text-align: center !important;
+    }
+    
+    .member-visual {
+        max-width: 500px !important;
+        margin: 0 auto !important;
+        height: 500px !important;
+    }
+    
+    .nav-container,
+    .page-container {
+        padding: 0 40px !important;
+    }
+}
