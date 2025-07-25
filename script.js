@@ -628,17 +628,19 @@ class BandcampPlayer {
     }
 
     buildEmbedUrl(albumId) {
-        const params = new URLSearchParams({
-            album: albumId,
-            size: this.playerConfig.size,
-            bgcol: this.playerConfig.bgColor,
-            linkcol: this.playerConfig.linkColor,
-            tracklist: this.playerConfig.tracklist,
-            artwork: this.playerConfig.artwork,
-            transparent: this.playerConfig.transparent
-        });
+        // Bandcamp embed URLs have a specific format
+        const baseUrl = 'https://bandcamp.com/EmbeddedPlayer/';
+        const params = [
+            `album=${albumId}`,
+            `size=${this.playerConfig.size}`,
+            `bgcol=${this.playerConfig.bgColor}`,
+            `linkcol=${this.playerConfig.linkColor}`,
+            `tracklist=${this.playerConfig.tracklist}`,
+            `artwork=${this.playerConfig.artwork}`,
+            `transparent=${this.playerConfig.transparent}`
+        ];
         
-        return `https://bandcamp.com/EmbeddedPlayer/${params.toString()}/`;
+        return `${baseUrl}${params.join('/')}/`;
     }
 
     showPlaceholder() {
