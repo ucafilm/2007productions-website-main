@@ -553,3 +553,158 @@ function showTypingIndicator() {
     messagesContainer.appendChild(indicator);
     return indicator;
 }
+
+// Bandcamp Player Integration
+class BandcampPlayer {
+    constructor() {
+        this.playerConfig = {
+            // Replace these with actual Bandcamp album details
+            albumId: null,
+            bandcampUrl: null,
+            size: 'large',
+            bgColor: '0a0a0a',
+            linkColor: 'ff6b35',
+            tracklist: false,
+            artwork: 'small',
+            transparent: true
+        };
+        this.init();
+    }
+
+    init() {
+        // Initialize player when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setupPlayer());
+        } else {
+            this.setupPlayer();
+        }
+    }
+
+    setupPlayer() {
+        const player = document.getElementById('collinsAlbumPlayer');
+        const buyButton = document.getElementById('buyAlbumBtn');
+        
+        if (!player) return;
+
+        // TODO: Replace with actual Bandcamp album details
+        // For now, we'll set up a placeholder that can be easily configured
+        this.loadAlbum({
+            albumId: '1234567890', // Replace with actual album ID
+            bandcampUrl: 'https://example.bandcamp.com/album/album-name', // Replace with actual URL
+            title: 'Album Title' // Replace with actual title
+        });
+    }
+
+    loadAlbum(config) {
+        if (!config.albumId || config.albumId === '1234567890') {
+            // Show placeholder until real album is configured
+            this.showPlaceholder();
+            return;
+        }
+
+        const player = document.getElementById('collinsAlbumPlayer');
+        const buyButton = document.getElementById('buyAlbumBtn');
+        
+        if (player) {
+            // Construct Bandcamp embed URL
+            const embedUrl = this.buildEmbedUrl(config.albumId);
+            player.src = embedUrl;
+            
+            // Set up buy button
+            if (buyButton && config.bandcampUrl) {
+                buyButton.href = config.bandcampUrl;
+                buyButton.title = `Buy ${config.title || 'album'} on Bandcamp`;
+            }
+        }
+    }
+
+    buildEmbedUrl(albumId) {
+        const params = new URLSearchParams({
+            album: albumId,
+            size: this.playerConfig.size,
+            bgcol: this.playerConfig.bgColor,
+            linkcol: this.playerConfig.linkColor,
+            tracklist: this.playerConfig.tracklist,
+            artwork: this.playerConfig.artwork,
+            transparent: this.playerConfig.transparent
+        });
+        
+        return `https://bandcamp.com/EmbeddedPlayer/${params.toString()}/`;
+    }
+
+    showPlaceholder() {
+        const player = document.getElementById('collinsAlbumPlayer');
+        const buyButton = document.getElementById('buyAlbumBtn');
+        
+        if (player) {
+            // Create a styled placeholder
+            const placeholderHtml = `
+                <div style="
+                    width: 100%;
+                    height: 120px;
+                    background: linear-gradient(135deg, var(--surface) 0%, var(--border) 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 8px;
+                    font-family: 'Space Grotesk', sans-serif;
+                    color: var(--text-secondary);
+                    text-align: center;
+                    padding: 20px;
+                ">
+                    <div>
+                        <div style="font-size: 2rem; margin-bottom: 8px;">🎵</div>
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Bandcamp Player</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Album configuration needed</div>
+                    </div>
+                </div>
+            `;
+            
+            player.style.display = 'none';
+            const placeholder = document.createElement('div');
+            placeholder.innerHTML = placeholderHtml;
+            placeholder.className = 'bandcamp-placeholder';
+            player.parentNode.insertBefore(placeholder, player);
+        }
+        
+        if (buyButton) {
+            buyButton.href = '#';
+            buyButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('Bandcamp album configuration needed. Please add album ID and URL.');
+            });
+        }
+    }
+
+    // Method to easily configure the album (can be called externally)
+    configure(albumConfig) {
+        this.loadAlbum(albumConfig);
+    }
+}
+
+// Initialize Bandcamp player
+window.bandcampPlayer = new BandcampPlayer();
+
+// Expose configuration function globally for easy setup
+window.configureBandcampAlbum = function(albumId, bandcampUrl, title) {
+    if (window.bandcampPlayer) {
+        window.bandcampPlayer.configure({
+            albumId: albumId,
+            bandcampUrl: bandcampUrl,
+            title: title
+        });
+    }
+};
+
+// SETUP INSTRUCTIONS FOR COLLIN'S BANDCAMP:
+// 1. Go to: https://collinbuchanan.bandcamp.com/album/lost-motel
+// 2. Open browser console (F12)
+// 3. Run: JSON.parse(document.querySelector('meta[name="bc-page-properties"]').content).item_id
+// 4. Replace 'NEEDS_ALBUM_ID' below with the number that appears
+// 
+// Configure Collin's Bandcamp Album - "Lost Motel"
+window.configureBandcampAlbum(
+    '3317557672',  // ✅ Album ID found and configured!
+    'https://collinbuchanan.bandcamp.com/album/lost-motel',
+    'Lost Motel by Collin Tyler Buchanan'
+);
