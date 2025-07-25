@@ -828,13 +828,12 @@ window.showPage = showPage;
 class BandcampPlayer {
     constructor() {
         this.playerConfig = {
-            size: 'medium',         // Change to medium for better fit
-            bgColor: '0a0a0a',
-            linkColor: 'ff6b35',
-            tracklist: true,        // Enable tracklist
+            size: 'large',          // Use large size like the working example
+            bgColor: '333333',      // Use Bandcamp's default dark background
+            linkColor: '0f91ff',    // Use the blue from the working example
+            tracklist: 'false',     // Bandcamp uses string 'false' not boolean
             artwork: 'small',
-            transparent: true,
-            minimal: false          // Full player with controls
+            transparent: 'true'     // Bandcamp uses string 'true' not boolean
         };
         
         // Do NOT show automatic fallback - let embed load first
@@ -855,18 +854,8 @@ class BandcampPlayer {
             return;
         }
         
-        // Build iframe URL with config
-        const params = new URLSearchParams({
-            album: albumId,
-            size: this.playerConfig.size,
-            bgcol: this.playerConfig.bgColor,
-            linkcol: this.playerConfig.linkColor,
-            tracklist: this.playerConfig.tracklist,
-            artwork: this.playerConfig.artwork,
-            transparent: this.playerConfig.transparent
-        });
-        
-        const embedUrl = `https://bandcamp.com/EmbeddedPlayer/${params.toString()}`;
+        // Build iframe URL with correct Bandcamp format
+        const embedUrl = `https://bandcamp.com/EmbeddedPlayer/album=${albumId}/size=${this.playerConfig.size}/bgcol=${this.playerConfig.bgColor}/linkcol=${this.playerConfig.linkColor}/artwork=${this.playerConfig.artwork}/transparent=${this.playerConfig.transparent}/tracklist=${this.playerConfig.tracklist}/`;
         
         try {
             player.src = embedUrl;

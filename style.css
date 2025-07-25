@@ -1801,6 +1801,43 @@ body.enhanced-effects {
     z-index: 2;
 }
 
+/* Responsive wrapper for Bandcamp iframe - CRITICAL FIX */
+.bandcamp-responsive-wrapper {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: var(--surface);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.bandcamp-responsive-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent;
+    border-radius: 15px;
+}
+
+/* Enhanced bandcamp player container */
+.bandcamp-player-container {
+    position: relative;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.bandcamp-player-container:hover {
+    border-color: var(--accent-electric);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+}
+
 /* Mobile optimizations for music player */
 @media (max-width: 768px) {
     .member-music {
@@ -1817,6 +1854,10 @@ body.enhanced-effects {
         margin-bottom: 15px;
     }
     
+    .bandcamp-responsive-wrapper {
+        height: 350px;
+    }
+    
     .buy-album-btn {
         padding: 10px 20px;
         font-size: 13px;
@@ -1827,5 +1868,15 @@ body.enhanced-effects {
     .music-actions {
         flex-direction: column;
         gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bandcamp-responsive-wrapper {
+        height: 300px;
+    }
+    
+    .bandcamp-responsive-wrapper iframe {
+        border-radius: 10px;
     }
 }
