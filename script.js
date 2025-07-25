@@ -828,12 +828,13 @@ window.showPage = showPage;
 class BandcampPlayer {
     constructor() {
         this.playerConfig = {
-            size: 'large',
+            size: 'medium',         // Change to medium for better fit
             bgColor: '0a0a0a',
             linkColor: 'ff6b35',
-            tracklist: false,
+            tracklist: true,        // Enable tracklist
             artwork: 'small',
-            transparent: true
+            transparent: true,
+            minimal: false          // Full player with controls
         };
         
         // Do NOT show automatic fallback - let embed load first
@@ -870,6 +871,7 @@ class BandcampPlayer {
         try {
             player.src = embedUrl;
             player.style.display = 'block';
+            player.style.height = '400px'; // Ensure proper height for tracklist
             
             // Update buy button
             const buyButton = document.getElementById('buyAlbumBtn');
@@ -879,6 +881,8 @@ class BandcampPlayer {
             
             console.log(`✅ Bandcamp player configured: ${title}`);
             console.log(`📻 Player URL: ${embedUrl}`);
+            console.log(`🎵 Tracklist enabled: ${this.playerConfig.tracklist}`);
+            console.log(`📏 Player size: ${this.playerConfig.size} (height: 400px)`);
         } catch (error) {
             console.error('Failed to load Bandcamp player:', error);
             this.showAlbumFallback({
