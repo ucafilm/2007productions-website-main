@@ -589,14 +589,14 @@ class BandcampPlayer {
         // TODO: Replace with actual Bandcamp album details
         // For now, we'll set up a placeholder that can be easily configured
         this.loadAlbum({
-            albumId: '1234567890', // Replace with actual album ID
-            bandcampUrl: 'https://example.bandcamp.com/album/album-name', // Replace with actual URL
-            title: 'Album Title' // Replace with actual title
+            albumId: 1234567890, // Changed to trigger placeholder
+            bandcampUrl: 'https://example.bandcamp.com/album/album-namehttps://collinbuchanan.bandcamp.com/album/lost-motel', // Replace with actual URL
+            title: 'Lost Motel' // Replace with actual title
         });
     }
 
     loadAlbum(config) {
-        if (!config.albumId || config.albumId === '1234567890') {
+        if (!config.albumId || config.albumId === '1234567890' || config.albumId === '1234567890') {
             // Show placeholder until real album is configured
             this.showPlaceholder();
             return;
@@ -606,6 +606,15 @@ class BandcampPlayer {
         const buyButton = document.getElementById('buyAlbumBtn');
         
         if (player) {
+            // Remove any existing placeholder
+            const existingPlaceholder = player.parentNode.querySelector('.bandcamp-placeholder');
+            if (existingPlaceholder) {
+                existingPlaceholder.remove();
+            }
+            
+            // Show the iframe and load the album
+            player.style.display = 'block';
+            
             // Construct Bandcamp embed URL
             const embedUrl = this.buildEmbedUrl(config.albumId);
             player.src = embedUrl;
@@ -678,6 +687,7 @@ class BandcampPlayer {
 
     // Method to easily configure the album (can be called externally)
     configure(albumConfig) {
+        console.log('BandcampPlayer.configure called with:', albumConfig);
         this.loadAlbum(albumConfig);
     }
 }
@@ -687,12 +697,15 @@ window.bandcampPlayer = new BandcampPlayer();
 
 // Expose configuration function globally for easy setup
 window.configureBandcampAlbum = function(albumId, bandcampUrl, title) {
+    console.log('configureBandcampAlbum called with:', { albumId, bandcampUrl, title });
     if (window.bandcampPlayer) {
         window.bandcampPlayer.configure({
             albumId: albumId,
             bandcampUrl: bandcampUrl,
             title: title
         });
+    } else {
+        console.error('Bandcamp player not initialized yet');
     }
 };
 
@@ -703,8 +716,12 @@ window.configureBandcampAlbum = function(albumId, bandcampUrl, title) {
 // 4. Replace 'NEEDS_ALBUM_ID' below with the number that appears
 // 
 // Configure Collin's Bandcamp Album - "Lost Motel"
-window.configureBandcampAlbum(
-    '3317557672',  // ✅ Album ID found and configured!
-    'https://collinbuchanan.bandcamp.com/album/lost-motel',
-    'Lost Motel by Collin Tyler Buchanan'
-);
+// This will override the default placeholder
+setTimeout(() => {
+    console.log('Configuring Collin\'s Bandcamp album...');
+    window.configureBandcampAlbum(
+        '3317557672',  // ✅ Album ID found and configured!
+        'https://collinbuchanan.bandcamp.com/album/lost-motel',
+        'Lost Motel by Collin Tyler Buchanan'
+    );
+}, 1000); // Wait 1 second for DOM to be ready
