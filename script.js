@@ -1,5 +1,145 @@
 // Enhanced JavaScript for 2007 Productions - Mobile Optimized
 
+// Robot-Style Kinetic Typography Functions (RESTORED)
+function initializeKineticHero() {
+    const kineticSequence = [
+        { id: 'kinetic1', delay: 500, duration: 2000 },   // 2007
+        { id: 'kinetic2', delay: 2800, duration: 2200 },  // PRODUCTIONS
+        { id: 'kinetic3', delay: 5300, duration: 1800 },  // WHERE STORIES
+        { id: 'kinetic4', delay: 7400, duration: 2000 },  // GET WEIRD
+        { id: 'kinetic5', delay: 9700, duration: 1800 },  // CREATIVE
+        { id: 'kinetic6', delay: 11800, duration: 2000 }, // POWERHOUSE
+        { id: 'kinetic7', delay: 14100, duration: 1500 }, // FEARLESS
+        { id: 'kinetic8', delay: 15900, duration: 1800 }, // INNOVATION
+        { id: 'kinetic9', delay: 18000, duration: 3000 }  // WELCOME (final)
+    ];
+
+    let kineticTimeouts = [];
+    let kineticStep = 0;
+
+    function showKineticText(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.classList.add('visible');
+        }
+    }
+
+    function hideKineticText(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.classList.add('exit');
+            setTimeout(() => {
+                element.classList.remove('visible', 'exit');
+            }, 800);
+        }
+    }
+
+    function updateKineticProgress(step) {
+        const dots = document.querySelectorAll('.kinetic-progress .progress-dot');
+        dots.forEach((dot, index) => {
+            if (index <= Math.floor(step / 2)) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    function startKineticSequence() {
+        kineticSequence.forEach((item, index) => {
+            // Show text
+            const showTimeout = setTimeout(() => {
+                showKineticText(item.id);
+                updateKineticProgress(index);
+                kineticStep = index;
+            }, item.delay);
+            kineticTimeouts.push(showTimeout);
+
+            // Hide text (except the last one)
+            if (index < kineticSequence.length - 1) {
+                const hideTimeout = setTimeout(() => {
+                    hideKineticText(item.id);
+                }, item.delay + item.duration);
+                kineticTimeouts.push(hideTimeout);
+            }
+        });
+
+        // Final transition to main site
+        const finalTimeout = setTimeout(() => {
+            transitionToMainSite();
+        }, 21500);
+        kineticTimeouts.push(finalTimeout);
+    }
+
+    function transitionToMainSite() {
+        const kineticHero = document.getElementById('kineticHero');
+        const originalHero = document.getElementById('originalHero');
+        const nav = document.querySelector('.nav');
+
+        if (kineticHero && originalHero) {
+            // Fade out kinetic hero
+            kineticHero.style.transition = 'opacity 1s ease';
+            kineticHero.style.opacity = '0';
+
+            setTimeout(() => {
+                kineticHero.style.display = 'none';
+                originalHero.style.display = 'block';
+                
+                // Show navigation
+                if (nav) {
+                    nav.classList.add('show');
+                    nav.style.opacity = '1';
+                    nav.style.pointerEvents = 'auto';
+                }
+                
+                // Initialize original hero animations if GSAP is available
+                if (typeof gsap !== 'undefined') {
+                    gsap.fromTo('.hero-year > span', 
+                        { yPercent: 110 }, 
+                        { yPercent: 0, stagger: 0.05, duration: 1, ease: 'power3.out' }
+                    );
+                }
+                
+                console.log('Transitioned to main 2007 Productions site');
+            }, 1000);
+        }
+    }
+
+    // Global skip function
+    window.skipKineticIntro = function() {
+        // Clear all timeouts
+        kineticTimeouts.forEach(timeout => clearTimeout(timeout));
+        
+        // Hide all text
+        kineticSequence.forEach(item => {
+            const element = document.getElementById(item.id);
+            if (element) {
+                element.classList.remove('visible');
+                element.classList.add('exit');
+            }
+        });
+
+        // Transition immediately
+        setTimeout(transitionToMainSite, 500);
+    };
+
+    // Click anywhere to advance
+    document.addEventListener('click', (e) => {
+        // Don't trigger on skip button clicks
+        if (e.target.classList.contains('kinetic-skip')) return;
+        
+        if (kineticStep < kineticSequence.length - 1) {
+            // Skip to next text immediately
+            kineticStep++;
+        } else {
+            window.skipKineticIntro();
+        }
+    });
+
+    // Start the kinetic sequence
+    startKineticSequence();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
 });
@@ -63,9 +203,24 @@ function initializeApp() {
         delay: 0.5, 
         onComplete: () => {
             document.getElementById('loadingOverlay').style.display = 'none';
-            initializeAnimations();
-            if (!isMobile) {
-                new EnhancedInteractions(); // Desktop only
+            
+            // Check if kinetic hero exists and start it
+            const kineticHero = document.getElementById('kineticHero');
+            if (kineticHero) {
+                console.log('Starting kinetic typography intro...');
+                initializeKineticHero();
+            } else {
+                console.log('No kinetic hero found, proceeding with normal initialization...');
+                // Show navigation immediately
+                const nav = document.querySelector('.nav');
+                if (nav) {
+                    nav.classList.add('show');
+                }
+                
+                initializeAnimations();
+                if (!isMobile) {
+                    new EnhancedInteractions(); // Desktop only
+                }
             }
         }
     });
@@ -681,14 +836,8 @@ class BandcampPlayer {
             transparent: true
         };
         
-        // Initialize with default placeholder
-        this.showAlbumFallback({
-            title: 'Lost Motel',
-            artist: 'Collin Tyler Buchanan',
-            tracks: ['Intro', 'Lost Highway', 'Neon Dreams', 'Empty Rooms', 'Static Memories', 'Outro'],
-            description: 'Atmospheric soundscapes that blur the line between music and emotion.',
-            url: 'https://collinbuchanan.bandcamp.com/album/lost-motel'
-        });
+        // Do NOT show automatic fallback - let embed load first
+        console.log('BandcampPlayer initialized - waiting for album configuration...');
     }
     
     loadAlbum(config) {
@@ -740,10 +889,10 @@ class BandcampPlayer {
             });
         }
         
-        // Fallback after delay if iframe doesn't load
+        // Fallback after delay if iframe doesn't load - DISABLED for manual control
         setTimeout(() => {
             if (player.contentDocument === null) {
-                console.log('Iframe may be blocked, showing rich fallback...');
+                console.log('Iframe may be blocked - use window.showBandcampFallback() to show fallback manually');
             }
         }, 3000);
         
