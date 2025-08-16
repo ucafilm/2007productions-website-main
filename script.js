@@ -5,8 +5,8 @@ function initializeKineticHero() {
     const kineticSequence = [
         { id: 'kinetic1', delay: 500, duration: 2000 },   // 2007
         { id: 'kinetic2', delay: 2800, duration: 2200 },  // PRODUCTIONS
-        { id: 'kinetic3', delay: 5300, duration: 1800 },  // WHERE STORIES
-        { id: 'kinetic4', delay: 7400, duration: 2000 },  // GET WEIRD
+        { id: 'kinetic3', delay: 5300, duration: 1800 },  // it's just a
+        { id: 'kinetic4', delay: 7400, duration: 2000 },  // video thang
         { id: 'kinetic5', delay: 9700, duration: 1800 },  // CREATIVE
         { id: 'kinetic6', delay: 11800, duration: 2000 }, // POWERHOUSE
         { id: 'kinetic7', delay: 14100, duration: 1500 }, // FEARLESS
@@ -659,7 +659,7 @@ function switchMode(mode, event) {
         const labels = mode === 'agency' ? agencyLabels : workLabels;
 
         if (heroDescriptor) {
-           heroDescriptor.textContent = mode === 'agency' ? 'Creating Legendary Experiences' : 'Where Stories Get Weird';
+           heroDescriptor.textContent = mode === 'agency' ? 'Creating Legendary Experiences' : 'it\'s just a video thang';
         }
         document.querySelectorAll('.member-label').forEach((label, i) => {
             if(labels[i]) label.textContent = labels[i];

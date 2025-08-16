@@ -4,7 +4,7 @@ A cutting-edge creative portfolio website showcasing the team and work of 2007 P
 
 ## 🎯 Overview
 
-**2007 Productions** is a creative powerhouse specializing in Films, Webisodes, Music Production, and Sound Design. Our tagline: "Where Stories Get Weird" - we break rules for fun and guarantee weirdness in everything we create.
+**2007 Productions** is a creative powerhouse specializing in Films, Webisodes, Music Production, and Sound Design. Our tagline: "it's just a video thang" - we break rules for fun and guarantee weirdness in everything we create.
 
 **Live Site**: [2007productions.com](https://2007productions.com)
 
@@ -22,7 +22,7 @@ A cutting-edge creative portfolio website showcasing the team and work of 2007 P
 ### 🤖 AI Assistant (ARIA)
 - **Google Gemini Integration**: Powered by advanced AI
 - **Context-Aware**: Knows all team members and company info
-- **Quirky Personality**: Matches the "weird stories" brand tone
+- **Quirky Personality**: Matches the "it's just a video thang" brand tone
 - **Serverless Function**: Netlify Functions backend
 - **Real-time Chat**: Instant responses with typing indicators
 
@@ -163,7 +163,7 @@ GEMINI_API_KEY=your_google_gemini_api_key
 
 ### Kinetic Typography System
 Robot-style text animations with 9 sequential reveals:
-- 2007 → PRODUCTIONS → WHERE STORIES → GET WEIRD → CREATIVE → POWERHOUSE → FEARLESS → INNOVATION → WELCOME
+- 2007 → PRODUCTIONS → it's just a → video thang → CREATIVE → POWERHOUSE → FEARLESS → INNOVATION → WELCOME
 
 ### AI Assistant (ARIA)
 Context-aware chatbot with personality:
@@ -257,7 +257,7 @@ Required environment variables in Netlify:
 
 ### Visual Identity
 - Maintains 2007 Productions brand consistency
-- "Where Stories Get Weird" tagline integration
+- "it's just a video thang" tagline integration
 - Professional portfolio presentation
 - Creative personality expression
 
