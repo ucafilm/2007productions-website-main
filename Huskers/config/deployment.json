@@ -1,0 +1,108 @@
+{
+    "name": "Nebraska Huskers Advanced Game Sheet Generator",
+    "version": "1.0.0",
+    "description": "Comprehensive Nebraska football game analysis with real-time statistics and interactive visualizations",
+    "author": "2007 Productions",
+    "website": "https://www.2007productions.com/huskers",
+    
+    "deployment": {
+        "url": "www.2007productions.com/huskers",
+        "environment": "production",
+        "ssl_required": true,
+        "cors_enabled": true
+    },
+    
+    "dependencies": {
+        "external_scripts": [
+            "https://cdn.tailwindcss.com",
+            "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        ],
+        "apis": [
+            {
+                "name": "College Football Data API",
+                "url": "https://api.collegefootballdata.com",
+                "auth_required": true,
+                "rate_limit": "100/minute",
+                "cost": "free"
+            },
+            {
+                "name": "The Odds API",
+                "url": "https://api.the-odds-api.com",
+                "auth_required": true,
+                "rate_limit": "500/month",
+                "cost": "free_tier"
+            },
+            {
+                "name": "ESPN API",
+                "url": "https://site.api.espn.com",
+                "auth_required": false,
+                "rate_limit": "1000/day",
+                "cost": "free"
+            }
+        ]
+    },
+    
+    "features": {
+        "real_time_data": true,
+        "interactive_charts": true,
+        "betting_lines": true,
+        "injury_reports": true,
+        "historical_analysis": true,
+        "mobile_responsive": true,
+        "offline_support": true,
+        "print_optimization": true
+    },
+    
+    "browser_support": {
+        "chrome": "90+",
+        "firefox": "88+",
+        "safari": "14+",
+        "edge": "90+",
+        "ie": "limited"
+    },
+    
+    "file_structure": {
+        "index.html": "Main application file",
+        "assets/css/huskers.css": "Custom styling and Nebraska branding",
+        "assets/js/config.js": "Application configuration and API endpoints",
+        "assets/js/api.js": "API handlers and data processing",
+        "assets/js/charts.js": "Chart generation and visualization",
+        "assets/js/game-sheet.js": "Main game sheet generation logic",
+        "assets/js/main.js": "Application initialization and event handling",
+        "sw.js": "Service worker for offline capabilities",
+        "README.md": "Setup and usage documentation"
+    },
+    
+    "setup_instructions": [
+        "1. Upload all files to web server at /huskers/ directory",
+        "2. Ensure HTTPS is enabled (required for some APIs)",
+        "3. Register for API keys at collegefootballdata.com and the-odds-api.com",
+        "4. Configure API keys in the application interface",
+        "5. Test with sample data (Nebraska vs Cincinnati)",
+        "6. Verify all charts and features work correctly",
+        "7. Set up automated generation if desired"
+    ],
+    
+    "customization": {
+        "branding": "Modify CSS variables for team colors",
+        "data_sources": "Add/remove API endpoints in config.js",
+        "chart_types": "Extend charts.js for new visualizations",
+        "export_formats": "Add PDF/Excel generation capabilities",
+        "automation": "Set up cron jobs for scheduled generation"
+    },
+    
+    "performance": {
+        "caching": "5-minute default cache for API responses",
+        "lazy_loading": "Charts load after DOM ready",
+        "error_handling": "Graceful fallback to demo data",
+        "responsive_design": "Mobile-first approach with breakpoints"
+    },
+    
+    "security": {
+        "api_keys": "Stored securely in localStorage",
+        "cors": "Configured for external API access",
+        "https": "Required for secure API communications",
+        "input_validation": "All user inputs sanitized"
+    }
+}

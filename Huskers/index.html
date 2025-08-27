@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebraska Huskers Advanced Game Sheet Generator | 2007 Productions</title>
+    <meta name="description" content="Comprehensive Nebraska football game analysis with real-time stats, betting lines, injury reports, and interactive visualizations">
+    <meta name="keywords" content="Nebraska Huskers, college football, game analysis, statistics, betting lines, injury reports">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/huskers.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/images/huskers-favicon.ico">
+    
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="Nebraska Huskers Advanced Game Sheet Generator">
+    <meta property="og:description" content="Comprehensive Nebraska football game analysis with real-time stats and interactive visualizations">
+    <meta property="og:image" content="https://www.2007productions.com/huskers/assets/images/huskers-og-image.jpg">
+    <meta property="og:url" content="https://www.2007productions.com/huskers/">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nebraska Huskers Advanced Game Sheet Generator">
+    <meta name="twitter:description" content="Comprehensive Nebraska football game analysis">
+    <meta name="twitter:image" content="https://www.2007productions.com/huskers/assets/images/huskers-og-image.jpg">
+    
+    <!-- Structured data for search engines -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Nebraska Huskers Advanced Game Sheet Generator",
+        "description": "Comprehensive Nebraska football game analysis with real-time statistics, betting lines, and interactive visualizations",
+        "url": "https://www.2007productions.com/huskers/",
+        "applicationCategory": "Sports",
+        "operatingSystem": "Web Browser",
+        "author": {
+            "@type": "Organization",
+            "name": "2007 Productions",
+            "url": "https://www.2007productions.com"
+        }
+    }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-red-50 to-gray-100 min-h-screen">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-red-600 z-50 flex items-center justify-center">
+        <div class="text-center text-white">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
+            <h2 class="text-2xl font-bold">Loading Huskers Analysis...</h2>
+            <p class="text-red-200">Fetching the latest data</p>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="bg-red-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <img src="assets/images/huskers-logo.png" alt="Nebraska Huskers" class="h-10 w-10" id="huskers-logo">
+                    <div>
+                        <h1 class="text-xl font-bold">Nebraska Huskers</h1>
+                        <p class="text-red-200 text-sm">Advanced Game Analysis</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://www.2007productions.com" class="text-red-200 hover:text-white text-sm">
+                        <i class="fas fa-home mr-1"></i> 2007 Productions
+                    </a>
+                    <div id="api-status" class="flex items-center text-sm">
+                        <div class="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
+                        <span>Demo Mode</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Page Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-chart-line text-red-600 mr-3"></i>
+                Nebraska Cornhuskers Advanced Game Sheet
+            </h1>
+            <p class="text-xl text-gray-600 mb-4">
+                Comprehensive Analysis • Real-Time Data • Interactive Visualizations
+            </p>
+            <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-full inline-block">
+                <i class="fas fa-globe mr-2"></i>
+                Deployed at www.2007productions.com/huskers
+            </div>
+        </div>
+
+        <!-- API Configuration Panel -->
+        <div class="mb-8 bg-white rounded-xl shadow-lg border p-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                <i class="fas fa-key text-gray-600 mr-2"></i>
+                API Configuration
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        College Football Data API Key
+                    </label>
+                    <input type="password" id="cfbd-api-key" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                           placeholder="Enter CFBD API key">
+                    <a href="https://collegefootballdata.com/key" target="_blank" 
+                       class="text-xs text-blue-600 hover:underline mt-1 block">
+                        Get Free API Key
+                    </a>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        The Odds API Key
+                    </label>
+                    <input type="password" id="odds-api-key"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                           placeholder="Enter Odds API key">
+                    <a href="https://the-odds-api.com/" target="_blank"
+                       class="text-xs text-blue-600 hover:underline mt-1 block">
+                        Get Free API Key (500/month)
+                    </a>
+                </div>
+                <div class="flex flex-col justify-end">
+                    <button id="save-api-keys" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 mb-2">
+                        <i class="fas fa-save mr-2"></i>Save API Keys
+                    </button>
+                    <div id="api-status-detail" class="text-xs text-center">
+                        <span class="text-yellow-600">Demo Mode - Add keys for live data</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Setup Controls -->
+        <div class="mb-8 bg-white rounded-xl shadow-lg border p-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                <i class="fas fa-cogs text-gray-600 mr-2"></i>
+                Game Configuration
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Opponent Team
+                    </label>
+                    <input type="text" id="opponent-input" value="Cincinnati"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Game Date
+                    </label>
+                    <input type="date" id="game-date" value="2025-08-28"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Season Year
+                    </label>
+                    <select id="season-year" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button id="generate-sheet" 
+                            class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-md hover:from-red-700 hover:to-red-800 font-semibold">
+                        <i class="fas fa-rocket mr-2"></i>
+                        <span id="generate-text">Generate Game Sheet</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span id="error-text"></span>
+            </div>
+        </div>
+
+        <!-- Generated Content Container -->
+        <div id="game-sheet-content" class="hidden">
+            <!-- Content will be dynamically generated here -->
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 border-t pt-8">
+            <div class="mb-4">
+                <a href="https://www.2007productions.com" class="text-red-600 hover:text-red-700 font-semibold">
+                    2007 Productions
+                </a>
+                <span class="mx-2">•</span>
+                <span>Nebraska Huskers Advanced Analytics</span>
+            </div>
+            <div class="text-sm">
+                <p>Data Sources: College Football Data API • The Odds API • ESPN Sports • NCAA Official</p>
+                <p class="mt-1">© 2025 2007 Productions. Built for Nebraska Husker fans.</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Scripts -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/game-sheet.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
