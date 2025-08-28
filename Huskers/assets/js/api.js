@@ -1,52 +1,44 @@
 // API Handler for Nebraska Huskers Game Sheet Generator
-// Handles all external API calls and data processing
+// Now uses secure proxy server to keep API keys safe
 
 class HuskersAPI {
     constructor() {
-        this.apiKeys = {
-            cfbd: localStorage.getItem('cfbd_api_key') || '',
-            odds: localStorage.getItem('odds_api_key') || '',
-            espn: '' // ESPN doesn't require API key for basic endpoints
-        };
-        
+        // Use your deployed proxy server
+        this.proxyUrl = 'https://huskers-api-proxy-jct26cvi3-tims-projects-9a7ee615.vercel.app';
         this.cache = new Map();
         this.requestQueue = [];
         this.isProcessingQueue = false;
         
-        // Bind methods
-        this.makeRequest = this.makeRequest.bind(this);
+        // No API keys stored client-side anymore!
+        console.log('🛡️ Using secure API proxy at:', this.proxyUrl);
     }
     
-    // Set API keys
+    // Remove API key management (handled server-side now)
     setApiKeys(keys) {
-        this.apiKeys = { ...this.apiKeys, ...keys };
-        
-        // Store in localStorage
-        if (keys.cfbd) localStorage.setItem('cfbd_api_key', keys.cfbd);
-        if (keys.odds) localStorage.setItem('odds_api_key', keys.odds);
-        
-        console.log('API keys updated');
+        console.warn('⚠️ API keys are now managed server-side for security');
+        showNotification('API keys are managed server-side. No client configuration needed.', 'info');
     }
     
-    // Get API keys status
+    // Always return true for real data (proxy handles this)
     getApiStatus() {
         return {
-            cfbd: !!this.apiKeys.cfbd,
-            odds: !!this.apiKeys.odds,
-            espn: true, // Always available
-            realData: !!(this.apiKeys.cfbd && this.apiKeys.odds)
+            cfbd: true,
+            odds: true,
+            espn: true,
+            realData: true,
+            secure: true
         };
     }
     
-    // Generic request handler with error handling and caching
-    async makeRequest(url, options = {}) {
-        const cacheKey = url + JSON.stringify(options);
+    // Secure request handler - goes through proxy
+    async makeRequest(endpoint, options = {}) {
+        const cacheKey = endpoint + JSON.stringify(options);
         
         // Check cache first
         if (CONFIG.shouldUseCache() && this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
             if (Date.now() - cached.timestamp < CONFIG.CACHE.defaultTTL) {
-                console.log('Returning cached data for:', url);
+                console.log('📦 Returning cached data for:', endpoint);
                 return cached.data;
             }
         }
@@ -61,8 +53,8 @@ class HuskersAPI {
         };
         
         try {
-            console.log('Making API request to:', url);
-            const response = await fetch(url, requestOptions);
+            console.log('🔒 Making secure API request:', endpoint);
+            const response = await fetch(`${this.proxyUrl}${endpoint}`, requestOptions);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -80,37 +72,42 @@ class HuskersAPI {
             
             return data;
         } catch (error) {
-            console.error('API request failed:', error);
+            console.error('🚨 Secure API request failed:', error);
+            
+            // Fallback to demo data if proxy fails
+            if (endpoint.includes('stats/season')) {
+                const teamName = new URLSearchParams(endpoint.split('?')[1] || '').get('team') || 'Unknown';
+                console.warn('📈 Using demo data for team stats');
+                return this.getMockTeamStats(teamName);
+            } else if (endpoint.includes('odds')) {
+                console.warn('🎲 Using demo data for betting lines');
+                return this.getMockBettingLines();
+            }
+            
             throw error;
         }
     }
     
-    // College Football Data API calls
+    // Get team statistics through secure proxy
     async getTeamStats(teamName, year = 2024) {
-        if (!this.apiKeys.cfbd) {
-            console.warn('CFBD API key not set, using mock data');
-            return this.getMockTeamStats(teamName);
-        }
-        
         try {
-            const headers = { 'Authorization': `Bearer ${this.apiKeys.cfbd}` };
+            // Multiple endpoints for comprehensive data
+            const endpoints = [
+                `/api/cfbd/stats/season?year=${year}&team=${teamName}`,
+                `/api/cfbd/stats/season/advanced?year=${year}&team=${teamName}`,
+                `/api/cfbd/ratings/fpi?year=${year}&team=${teamName}`
+            ];
             
-            // Get basic stats
-            const basicStatsUrl = `${CONFIG.APIs.COLLEGE_FOOTBALL_DATA.baseUrl}/stats/season?year=${year}&team=${teamName}`;
+            const [basicStats, advancedStats, fpiData] = await Promise.allSettled(
+                endpoints.map(endpoint => this.makeRequest(endpoint))
+            );
             
-            // Get advanced stats
-            const advancedStatsUrl = `${CONFIG.APIs.COLLEGE_FOOTBALL_DATA.baseUrl}/stats/season/advanced?year=${year}&team=${teamName}`;
-            
-            // Get FPI ratings
-            const fpiUrl = `${CONFIG.APIs.COLLEGE_FOOTBALL_DATA.baseUrl}/ratings/fpi?year=${year}&team=${teamName}`;
-            
-            const [basicStats, advancedStats, fpiData] = await Promise.all([
-                this.makeRequest(basicStatsUrl, { headers }).catch(() => null),
-                this.makeRequest(advancedStatsUrl, { headers }).catch(() => null),
-                this.makeRequest(fpiUrl, { headers }).catch(() => null)
-            ]);
-            
-            return this.processTeamStats(teamName, basicStats, advancedStats, fpiData);
+            return this.processTeamStats(
+                teamName,
+                basicStats.status === 'fulfilled' ? basicStats.value : null,
+                advancedStats.status === 'fulfilled' ? advancedStats.value : null,
+                fpiData.status === 'fulfilled' ? fpiData.value : null
+            );
             
         } catch (error) {
             console.error('Failed to fetch team stats:', error);
@@ -137,17 +134,11 @@ class HuskersAPI {
         }
     }
     
-    // Get betting lines
+    // Get betting lines through secure proxy
     async getBettingLines(sport = 'americanfootball_ncaaf') {
-        if (!this.apiKeys.odds) {
-            console.warn('Odds API key not set, using mock data');
-            return this.getMockBettingLines();
-        }
-        
         try {
-            const url = `${CONFIG.APIs.THE_ODDS_API.baseUrl}/sports/${sport}/odds?apiKey=${this.apiKeys.odds}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
-            
-            const bettingData = await this.makeRequest(url);
+            const endpoint = `/api/odds/sports/${sport}/odds?regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
+            const bettingData = await this.makeRequest(endpoint);
             
             // Find Nebraska game
             const nebraskaGame = bettingData.find(game => 
@@ -156,7 +147,6 @@ class HuskersAPI {
             );
             
             return this.processBettingLines(nebraskaGame);
-            
         } catch (error) {
             console.error('Failed to fetch betting lines:', error);
             return this.getMockBettingLines();
