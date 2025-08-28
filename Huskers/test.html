@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebraska Huskers - Deployment Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .test-item { margin: 10px 0; padding: 10px; border-left: 4px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>🏈 Nebraska Huskers Game Sheet - Deployment Test</h1>
+    
+    <div id="test-results"></div>
+    
+    <script>
+        const results = document.getElementById('test-results');
+        
+        function addTest(name, status, details = '') {
+            const div = document.createElement('div');
+            div.className = `status ${status ? 'success' : 'error'}`;
+            div.innerHTML = `
+                <strong>${status ? '✅' : '❌'} ${name}</strong>
+                ${details ? `<br><small>${details}</small>` : ''}
+            `;
+            results.appendChild(div);
+        }
+        
+        // Test 1: Basic file structure
+        addTest('HTML Structure', document.querySelector('h1') !== null, 'Base HTML loaded correctly');
+        
+        // Test 2: Check if main files exist
+        const files = [
+            'assets/css/huskers.css',
+            'assets/js/config.js',
+            'assets/js/api.js',
+            'assets/js/charts.js',
+            'assets/js/game-sheet.js',
+            'assets/js/main.js'
+        ];
+        
+        files.forEach(file => {
+            const script = document.createElement('script');
+            script.src = file.replace('.css', '.js');
+            script.onload = () => addTest(`File: ${file}`, true, 'Loaded successfully');
+            script.onerror = () => addTest(`File: ${file}`, false, 'Failed to load - check file path');
+            if (file.endsWith('.js')) document.head.appendChild(script);
+        });
+        
+        // Test 3: Check external dependencies
+        const tailwind = document.createElement('script');
+        tailwind.src = 'https://cdn.tailwindcss.com';
+        tailwind.onload = () => addTest('Tailwind CSS', true, 'External CDN accessible');
+        tailwind.onerror = () => addTest('Tailwind CSS', false, 'CDN blocked or unavailable');
+        document.head.appendChild(tailwind);
+        
+        // Test 4: Local storage test
+        try {
+            localStorage.setItem('test', 'value');
+            localStorage.removeItem('test');
+            addTest('Local Storage', true, 'API key storage will work');
+        } catch (e) {
+            addTest('Local Storage', false, 'API keys cannot be saved locally');
+        }
+        
+        // Test 5: Chart.js
+        const chartjs = document.createElement('script');
+        chartjs.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+        chartjs.onload = () => addTest('Chart.js', true, 'Visualization library loaded');
+        chartjs.onerror = () => addTest('Chart.js', false, 'Charts will not render');
+        document.head.appendChild(chartjs);
+        
+        setTimeout(() => {
+            results.innerHTML += `
+                <div class="test-item">
+                    <h3>🚀 Ready to Deploy!</h3>
+                    <p>If all tests above are green (✅), your Nebraska Huskers Game Sheet is ready to go!</p>
+                    <p><strong>Next Steps:</strong></p>
+                    <ul>
+                        <li>Visit the main application: <a href="index.html">index.html</a></li>
+                        <li>Get API keys from <a href="https://collegefootballdata.com/key" target="_blank">College Football Data</a></li>
+                        <li>Get API keys from <a href="https://the-odds-api.com" target="_blank">The Odds API</a></li>
+                        <li>Test with: Nebraska vs Cincinnati on 2025-08-28</li>
+                    </ul>
+                </div>
+            `;
+        }, 3000);
+    </script>
+</body>
+</html>

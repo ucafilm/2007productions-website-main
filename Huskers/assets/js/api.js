@@ -15,7 +15,6 @@ class HuskersAPI {
         
         // Bind methods
         this.makeRequest = this.makeRequest.bind(this);
-        this.processQueue = this.processQueue.bind(this);
     }
     
     // Set API keys
