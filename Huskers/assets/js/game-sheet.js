@@ -93,12 +93,12 @@ class HuskersGameSheet {
     // Get form data
     getFormData() {
         return {
-            opponent: document.getElementById('opponent')?.value?.trim() || '',
+            opponent: document.getElementById('opponent-input')?.value?.trim() || '',
             date: document.getElementById('game-date')?.value || '',
-            season: document.getElementById('season')?.value || new Date().getFullYear().toString(),
-            location: document.getElementById('location')?.value?.trim() || '',
-            tv: document.getElementById('tv')?.value?.trim() || '',
-            time: document.getElementById('game-time')?.value || ''
+            season: document.getElementById('season-year')?.value || new Date().getFullYear().toString(),
+            location: 'Memorial Stadium, Lincoln, NE',
+            tv: 'TBD',
+            time: '2:30 PM CT'
         };
     }
     

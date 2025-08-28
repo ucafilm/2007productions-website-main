@@ -41,6 +41,11 @@ function setupEventListeners() {
         saveKeysButton.addEventListener('click', handleSaveApiKeys);
     }
     
+    const testKeysButton = document.getElementById('test-api-keys');
+    if (testKeysButton) {
+        testKeysButton.addEventListener('click', handleTestApiKeys);
+    }
+    
     // Game generation
     const generateButton = document.getElementById('generate-sheet');
     if (generateButton) {
@@ -138,6 +143,77 @@ function handleSaveApiKeys() {
         document.getElementById('cfbd-api-key').value = '';
         document.getElementById('odds-api-key').value = '';
     }, 2000);
+}
+
+// Handle testing API keys
+async function handleTestApiKeys() {
+    const testButton = document.getElementById('test-api-keys');
+    const originalText = testButton.innerHTML;
+    
+    // Show loading state
+    testButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Testing...';
+    testButton.disabled = true;
+    
+    try {
+        const status = api.getApiStatus();
+        
+        let cfbdResult = '❌ No key';
+        let oddsResult = '❌ No key';
+        let espnResult = '✅ Always available';
+        
+        // Test CFBD API
+        if (status.cfbd) {
+            try {
+                const testData = await api.getTeamStats('Nebraska', 2024);
+                if (testData && testData.team) {
+                    cfbdResult = '✅ Working';
+                } else {
+                    cfbdResult = '⚠️ Invalid response';
+                }
+            } catch (error) {
+                cfbdResult = `❌ Error: ${error.message.substring(0, 20)}...`;
+            }
+        }
+        
+        // Test Odds API
+        if (status.odds) {
+            try {
+                const bettingData = await api.getBettingLines('americanfootball_ncaaf');
+                if (bettingData) {
+                    oddsResult = '✅ Working';
+                } else {
+                    oddsResult = '⚠️ Invalid response';
+                }
+            } catch (error) {
+                oddsResult = `❌ Error: ${error.message.substring(0, 20)}...`;
+            }
+        }
+        
+        // Show results
+        const resultMessage = `API Test Results:\n\n` +
+            `College Football Data: ${cfbdResult}\n` +
+            `The Odds API: ${oddsResult}\n` +
+            `ESPN API: ${espnResult}\n\n` +
+            `Overall Status: ${status.realData ? '✅ Live Data Ready' : '⚠️ Demo Mode'}`;
+        
+        alert(resultMessage);
+        
+        if (status.realData && cfbdResult.includes('✅') && oddsResult.includes('✅')) {
+            showNotification('All APIs are working! You\'re ready for live data.', 'success');
+        } else if (status.cfbd || status.odds) {
+            showNotification('Some APIs are working. You\'ll get partial live data.', 'warning');
+        } else {
+            showNotification('No API keys configured. Using demo mode.', 'warning');
+        }
+        
+    } catch (error) {
+        console.error('API test failed:', error);
+        showNotification('Failed to test APIs. Check console for details.', 'error');
+    } finally {
+        // Reset button
+        testButton.innerHTML = originalText;
+        testButton.disabled = false;
+    }
 }
 
 // Handle generating game sheet
