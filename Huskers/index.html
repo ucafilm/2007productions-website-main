@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebraska Huskers Advanced Game Sheet Generator | 2007 Productions</title>
-    <meta name="description" content="Comprehensive Nebraska football game analysis with real-time stats, betting lines, injury reports, and interactive visualizations">
-    <meta name="keywords" content="Nebraska Huskers, college football, game analysis, statistics, betting lines, injury reports">
+    <title>Nebraska Cornhuskers - Elite Football Analytics | 2007 Productions</title>
+    <meta name="description" content="Advanced Nebraska football analytics with real-time data, interactive visualizations, and comprehensive game analysis">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,185 +15,246 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="assets/css/huskers.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/images/huskers-favicon.ico">
-    
-    <!-- Open Graph tags for social sharing -->
-    <meta property="og:title" content="Nebraska Huskers Advanced Game Sheet Generator">
-    <meta property="og:description" content="Comprehensive Nebraska football game analysis with real-time stats and interactive visualizations">
-    <meta property="og:image" content="https://www.2007productions.com/huskers/assets/images/huskers-og-image.jpg">
-    <meta property="og:url" content="https://www.2007productions.com/huskers/">
-    <meta property="og:type" content="website">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Nebraska Huskers Advanced Game Sheet Generator">
-    <meta name="twitter:description" content="Comprehensive Nebraska football game analysis">
-    <meta name="twitter:image" content="https://www.2007productions.com/huskers/assets/images/huskers-og-image.jpg">
-    
-    <!-- Structured data for search engines -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Nebraska Huskers Advanced Game Sheet Generator",
-        "description": "Comprehensive Nebraska football game analysis with real-time statistics, betting lines, and interactive visualizations",
-        "url": "https://www.2007productions.com/huskers/",
-        "applicationCategory": "Sports",
-        "operatingSystem": "Web Browser",
-        "author": {
-            "@type": "Organization",
-            "name": "2007 Productions",
-            "url": "https://www.2007productions.com"
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
         }
-    }
-    </script>
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #DC2626 0%, #991B1B 50%, #7F1D1D 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 20px rgba(220, 38, 38, 0.5); }
+            to { box-shadow: 0 0 30px rgba(220, 38, 38, 0.8); }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #DC2626;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #991B1B;
+        }
+        
+        .radar-container {
+            position: relative;
+            height: 300px;
+            width: 300px;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-red-50 to-gray-100 min-h-screen">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-red-600 z-50 flex items-center justify-center">
-        <div class="text-center text-white">
-            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-            <h2 class="text-2xl font-bold">Loading Huskers Analysis...</h2>
-            <p class="text-red-200">Fetching the latest data</p>
-        </div>
-    </div>
-
-    <!-- Navigation Header -->
-    <nav class="bg-red-600 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
+<body class="bg-gray-50 min-h-screen">
+    
+    <!-- Hero Header -->
+    <header class="gradient-bg text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="relative z-10">
+            <!-- Navigation -->
+            <nav class="flex items-center justify-between p-6 max-w-7xl mx-auto">
                 <div class="flex items-center space-x-4">
-                    <div class="h-10 w-10 bg-red-700 rounded-full flex items-center justify-center text-white font-bold text-sm" id="huskers-logo">N</div>
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl font-black pulse-glow">
+                        N
+                    </div>
                     <div>
-                        <h1 class="text-xl font-bold">Nebraska Huskers</h1>
-                        <p class="text-red-200 text-sm">Advanced Game Analysis</p>
+                        <h1 class="text-xl font-bold">Nebraska Cornhuskers</h1>
+                        <p class="text-red-200 text-sm">Elite Football Analytics</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="https://www.2007productions.com" class="text-red-200 hover:text-white text-sm">
-                        <i class="fas fa-home mr-1"></i> 2007 Productions
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-2 text-sm">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="text-red-100">Live Data Active</span>
+                    </div>
+                    <a href="https://www.2007productions.com" class="text-red-200 hover:text-white text-sm transition-colors">
+                        2007 Productions
                     </a>
-                    <div id="api-status" class="flex items-center text-sm">
-                        <div class="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
-                        <span>Demo Mode</span>
+                </div>
+            </nav>
+            
+            <!-- Hero Content -->
+            <div class="text-center py-16 px-6">
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-5xl md:text-7xl font-black mb-6 floating">
+                        Advanced Game<br>
+                        <span class="bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent">Analytics</span>
+                    </h1>
+                    <p class="text-xl md:text-2xl text-red-100 mb-8 font-light">
+                        Real-time statistics, predictive analytics, and comprehensive matchup analysis
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4 text-sm font-medium">
+                        <div class="stat-card px-4 py-2 rounded-full">
+                            <i class="fas fa-chart-line mr-2"></i>Live Data
+                        </div>
+                        <div class="stat-card px-4 py-2 rounded-full">
+                            <i class="fas fa-trophy mr-2"></i>Big Ten Leaders
+                        </div>
+                        <div class="stat-card px-4 py-2 rounded-full">
+                            <i class="fas fa-target mr-2"></i>Predictive Models
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </nav>
-
+        
+        <!-- Animated Background Elements -->
+        <div class="absolute top-20 right-10 w-32 h-32 border border-white/20 rounded-full animate-spin" style="animation-duration: 20s;"></div>
+        <div class="absolute bottom-10 left-10 w-24 h-24 border border-white/20 rounded-full animate-pulse"></div>
+    </header>
+    
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Page Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900 mb-4">
-                <i class="fas fa-chart-line text-red-600 mr-3"></i>
-                Nebraska Cornhuskers Advanced Game Sheet
-            </h1>
-            <p class="text-xl text-gray-600 mb-4">
-                Comprehensive Analysis • Real-Time Data • Interactive Visualizations
-            </p>
-            <div class="text-sm text-gray-500 bg-white px-4 py-2 rounded-full inline-block">
-                <i class="fas fa-globe mr-2"></i>
-                Deployed at www.2007productions.com/huskers
-            </div>
-        </div>
-
-        <!-- API Configuration Panel - SECURE MODE -->
-        <div class="mb-8 bg-white rounded-xl shadow-lg border p-6">
-            <h3 class="text-lg font-semibold mb-4 flex items-center">
-                <i class="fas fa-shield-alt text-green-600 mr-2"></i>
-                Secure API Configuration
-            </h3>
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle text-green-500 text-2xl mr-3"></i>
-                        <div>
-                            <h4 class="font-semibold text-green-800">Secure Proxy Enabled</h4>
-                            <p class="text-green-600 text-sm">API keys are safely stored server-side. No configuration needed!</p>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Game Setup Card -->
+        <div class="glass-effect rounded-3xl p-8 mb-8 card-hover animate-fade-in">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-cog text-red-600 mr-3"></i>
+                Matchup Configuration
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Opponent Selection -->
+                <div class="lg:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-users mr-2 text-red-600"></i>Select Opponent
+                    </label>
+                    <div class="relative">
+                        <select id="opponent-select" class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors text-lg font-medium">
+                            <option value="">Choose opponent team...</option>
+                            <optgroup label="Big Ten Conference">
+                                <option value="Illinois">🔶 Illinois Fighting Illini</option>
+                                <option value="Indiana">🔴 Indiana Hoosiers</option>
+                                <option value="Iowa">⚫ Iowa Hawkeyes</option>
+                                <option value="Maryland">🔴 Maryland Terrapins</option>
+                                <option value="Michigan">🔵 Michigan Wolverines</option>
+                                <option value="Michigan State">🟢 Michigan State Spartans</option>
+                                <option value="Minnesota">🟡 Minnesota Golden Gophers</option>
+                                <option value="Northwestern">🟣 Northwestern Wildcats</option>
+                                <option value="Ohio State">🔴 Ohio State Buckeyes</option>
+                                <option value="Oregon">🟢 Oregon Ducks</option>
+                                <option value="Penn State">🔵 Penn State Nittany Lions</option>
+                                <option value="Purdue">⚫ Purdue Boilermakers</option>
+                                <option value="Rutgers">🔴 Rutgers Scarlet Knights</option>
+                                <option value="UCLA">🔵 UCLA Bruins</option>
+                                <option value="USC">🟡 USC Trojans</option>
+                                <option value="Washington">🟣 Washington Huskies</option>
+                                <option value="Wisconsin">🔴 Wisconsin Badgers</option>
+                            </optgroup>
+                            <optgroup label="Popular Matchups">
+                                <option value="Cincinnati">🔴 Cincinnati Bearcats</option>
+                                <option value="Colorado">⚫ Colorado Buffaloes</option>
+                                <option value="Oklahoma">🔴 Oklahoma Sooners</option>
+                                <option value="Texas">🟠 Texas Longhorns</option>
+                                <option value="Notre Dame">🔵 Notre Dame Fighting Irish</option>
+                            </optgroup>
+                        </select>
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400"></i>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                            🔒 LIVE DATA
-                        </div>
-                        <p class="text-xs text-green-600 mt-1">College Football Data + Odds API</p>
-                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Game Setup Controls -->
-        <div class="mb-8 bg-white rounded-xl shadow-lg border p-6">
-            <h3 class="text-lg font-semibold mb-4 flex items-center">
-                <i class="fas fa-cogs text-gray-600 mr-2"></i>
-                Game Configuration
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                
+                <!-- Date Selection -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Opponent Team
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-calendar mr-2 text-red-600"></i>Game Date
                     </label>
-                    <input type="text" id="opponent-input" value="Cincinnati"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <input type="date" id="game-date" 
+                           value="2025-08-30"
+                           class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Game Date
-                    </label>
-                    <input type="date" id="game-date" value="2025-08-28"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Season Year
-                    </label>
-                    <select id="season-year" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500">
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                    </select>
-                </div>
+                
+                <!-- Generate Button -->
                 <div class="flex items-end">
                     <button id="generate-sheet" 
-                            class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-md hover:from-red-700 hover:to-red-800 font-semibold">
-                        <i class="fas fa-rocket mr-2"></i>
-                        <span id="generate-text">Generate Game Sheet</span>
+                            class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i id="generate-icon" class="fas fa-rocket mr-2"></i>
+                        <span id="generate-text">Generate Analysis</span>
                     </button>
                 </div>
             </div>
             
-            <div id="error-message" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
-                <i class="fas fa-exclamation-triangle mr-2"></i>
-                <span id="error-text"></span>
+            <!-- Error Message -->
+            <div id="error-message" class="hidden mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                    <span id="error-text" class="text-red-700 font-medium"></span>
+                </div>
             </div>
         </div>
-
+        
         <!-- Generated Content Container -->
-        <div id="game-sheet-content" class="hidden">
+        <div id="game-analysis-content" class="hidden space-y-8">
             <!-- Content will be dynamically generated here -->
         </div>
-
-        <!-- Footer -->
-        <footer class="mt-12 text-center text-gray-500 border-t pt-8">
-            <div class="mb-4">
-                <a href="https://www.2007productions.com" class="text-red-600 hover:text-red-700 font-semibold">
-                    2007 Productions
-                </a>
-                <span class="mx-2">•</span>
-                <span>Nebraska Huskers Advanced Analytics</span>
-            </div>
-            <div class="text-sm">
-                <p>Data Sources: College Football Data API • The Odds API • ESPN Sports • NCAA Official</p>
-                <p class="mt-1">© 2025 2007 Productions. Built for Nebraska Husker fans.</p>
-            </div>
-        </footer>
+        
     </main>
-
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="glass-effect rounded-3xl p-8 text-center">
+            <div class="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Analyzing Matchup</h3>
+            <p class="text-gray-600">Fetching real-time data and generating insights...</p>
+        </div>
+    </div>
+    
     <!-- Scripts -->
     <script src="assets/js/config.js"></script>
     <script src="assets/js/api.js"></script>
