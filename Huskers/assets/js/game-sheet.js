@@ -160,6 +160,8 @@ class HuskersGameSheet {
                 }
             }
         }
+    }
+    
     async loadTeamsFromConfig() {
         // Optional: Load teams from external configuration
         if (this.config.teamsUrl) {
