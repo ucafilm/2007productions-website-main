@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hideLoadingScreen();
             setupEventListeners();
             loadSavedApiKeys();
-            updateApiStatus();
+            safeUpdateApiStatus();
             handleUrlParameters();
             
         } catch (error) {
@@ -51,89 +51,317 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Setup all event listeners
 function setupEventListeners() {
-    // API key management
-    const saveKeysButton = document.getElementById('save-api-keys');
-    if (saveKeysButton) {
-        saveKeysButton.addEventListener('click', handleSaveApiKeys);
-    }
-    
-    const testKeysButton = document.getElementById('test-api-keys');
-    if (testKeysButton) {
-        testKeysButton.addEventListener('click', handleTestApiKeys);
-    }
-    
-    // Game generation
-    const generateButton = document.getElementById('generate-sheet');
-    if (generateButton) {
-        generateButton.addEventListener('click', handleGenerateSheet);
-    }
-    
-    // Form inputs
-    const opponentInput = document.getElementById('opponent-input');
-    const dateInput = document.getElementById('game-date');
-    const yearSelect = document.getElementById('season-year');
-    
-    if (opponentInput) {
-        opponentInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                handleGenerateSheet();
-            }
-        });
-    }
-    
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + G to generate
-        if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
-            e.preventDefault();
-            handleGenerateSheet();
+    try {
+        // API key management
+        const saveKeysButton = document.getElementById('save-api-keys');
+        if (saveKeysButton) {
+            saveKeysButton.addEventListener('click', handleSaveApiKeys);
         }
         
-        // Ctrl/Cmd + D to download
-        if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-            e.preventDefault();
-            if (gameSheet.currentData) {
-                gameSheet.downloadReport();
+        const testKeysButton = document.getElementById('test-api-keys');
+        if (testKeysButton) {
+            testKeysButton.addEventListener('click', handleTestApiKeys);
+        }
+        
+        // Game generation
+        const generateButton = document.getElementById('generate-sheet');
+        if (generateButton) {
+            generateButton.addEventListener('click', handleGenerateSheet);
+        }
+        
+        // Form inputs - with null checks
+        const opponentInput = document.getElementById('opponent-input');
+        const dateInput = document.getElementById('game-date');
+        const yearSelect = document.getElementById('season-year');
+        
+        if (opponentInput) {
+            opponentInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleGenerateSheet();
+                }
+            });
+            
+            // Auto-save form data
+            opponentInput.addEventListener('input', debounce(saveFormData, 500));
+        }
+        
+        if (dateInput) {
+            dateInput.addEventListener('change', saveFormData);
+        }
+        
+        if (yearSelect) {
+            yearSelect.addEventListener('change', saveFormData);
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + G to generate
+            if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+                e.preventDefault();
+                handleGenerateSheet();
             }
-        }
-    });
-    
-    // Print functionality
-    window.addEventListener('beforeprint', function() {
-        // Optimize layout for printing
-        document.body.classList.add('printing');
-    });
-    
-    window.addEventListener('afterprint', function() {
-        document.body.classList.remove('printing');
-    });
-    
-    // Handle browser back/forward
-    window.addEventListener('popstate', function(e) {
-        if (e.state && e.state.gameData) {
-            gameSheet.currentData = e.state.gameData;
-            gameSheet.renderGameSheet();
-        }
-    });
-    
-    // Auto-save form data
-    if (opponentInput) {
-        opponentInput.addEventListener('input', debounce(saveFormData, 500));
+            
+            // Ctrl/Cmd + D to download
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                if (window.huskersGameSheet && window.huskersGameSheet.currentData) {
+                    window.huskersGameSheet.downloadReport();
+                }
+            }
+        });
+        
+        // Print functionality
+        window.addEventListener('beforeprint', function() {
+            document.body.classList.add('printing');
+        });
+        
+        window.addEventListener('afterprint', function() {
+            document.body.classList.remove('printing');
+        });
+        
+        // Handle browser back/forward
+        window.addEventListener('popstate', function(e) {
+            if (e.state && e.state.gameData && window.huskersGameSheet) {
+                window.huskersGameSheet.currentData = e.state.gameData;
+                window.huskersGameSheet.renderGameSheet();
+            }
+        });
+        
+        // Load saved form data
+        loadFormData();
+        
+    } catch (error) {
+        console.warn('Error setting up event listeners:', error);
     }
-    if (dateInput) {
-        dateInput.addEventListener('change', saveFormData);
-    }
-    if (yearSelect) {
-        yearSelect.addEventListener('change', saveFormData);
-    }
-    
-    // Load saved form data
-    loadFormData();
 }
 
-// Handle saving API keys
+// Safe API status update
+function safeUpdateApiStatus() {
+    try {
+        if (window.huskersGameSheet && typeof window.huskersGameSheet.updateApiStatus === 'function') {
+            const status = api ? api.getApiStatus() : { realData: false };
+            window.huskersGameSheet.updateApiStatus(status);
+        } else {
+            console.log('API Status: Demo mode (no live data)');
+        }
+    } catch (error) {
+        console.warn('Could not update API status:', error);
+    }
+}
+
+// Safe form data loading
+function loadFormData() {
+    try {
+        const savedData = localStorage.getItem('huskers_form_data');
+        if (savedData) {
+            const formData = JSON.parse(savedData);
+            
+            const opponentInput = document.getElementById('opponent-input');
+            const opponentSelect = document.getElementById('opponent-select');
+            const dateInput = document.getElementById('game-date');
+            const yearSelect = document.getElementById('season-year');
+            
+            if (formData.opponent) {
+                if (opponentInput) opponentInput.value = formData.opponent;
+                if (opponentSelect) opponentSelect.value = formData.opponent;
+            }
+            
+            if (formData.date && dateInput) {
+                dateInput.value = formData.date;
+            }
+            
+            if (formData.season && yearSelect) {
+                yearSelect.value = formData.season;
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to load saved form data:', error);
+    }
+}
+
+// Safe form data saving
+function saveFormData() {
+    try {
+        const opponentInput = document.getElementById('opponent-input');
+        const opponentSelect = document.getElementById('opponent-select');
+        const dateInput = document.getElementById('game-date');
+        const yearSelect = document.getElementById('season-year');
+        
+        const formData = {
+            opponent: (opponentSelect?.value || opponentInput?.value || '').trim(),
+            date: dateInput?.value || '',
+            season: yearSelect?.value || new Date().getFullYear().toString()
+        };
+        
+        localStorage.setItem('huskers_form_data', JSON.stringify(formData));
+    } catch (error) {
+        console.warn('Failed to save form data:', error);
+    }
+}
+
+// Debounce function for performance
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Safe API key loading
+function loadSavedApiKeys() {
+    try {
+        if (api && typeof api.loadSavedKeys === 'function') {
+            api.loadSavedKeys();
+        }
+    } catch (error) {
+        console.warn('Could not load saved API keys:', error);
+    }
+}
+
+// Handle URL parameters
+function handleUrlParameters() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const opponent = urlParams.get('opponent');
+        const date = urlParams.get('date');
+        
+        if (opponent) {
+            const opponentInput = document.getElementById('opponent-input');
+            const opponentSelect = document.getElementById('opponent-select');
+            if (opponentInput) opponentInput.value = opponent;
+            if (opponentSelect) opponentSelect.value = opponent;
+        }
+        
+        if (date) {
+            const dateInput = document.getElementById('game-date');
+            if (dateInput) dateInput.value = date;
+        }
+        
+        // Auto-generate if both parameters are present
+        if (opponent && date) {
+            setTimeout(() => {
+                if (window.huskersGameSheet) {
+                    window.huskersGameSheet.generateGameSheet();
+                }
+            }, 1000);
+        }
+    } catch (error) {
+        console.warn('Error handling URL parameters:', error);
+    }
+}
+
+// Handle game sheet generation
+function handleGenerateSheet() {
+    try {
+        if (window.huskersGameSheet && typeof window.huskersGameSheet.generateGameSheet === 'function') {
+            window.huskersGameSheet.generateGameSheet();
+        } else {
+            console.warn('Game sheet generator not available');
+            showNotification('Game sheet generator is not ready. Please refresh the page.', 'error');
+        }
+    } catch (error) {
+        console.error('Error generating game sheet:', error);
+        showNotification('Failed to generate game sheet. Please try again.', 'error');
+    }
+}
+
+// Handle API key saving
 function handleSaveApiKeys() {
-    const cfbdKey = document.getElementById('cfbd-api-key').value.trim();
+    try {
+        const cfbdKey = document.getElementById('cfbd-api-key')?.value?.trim();
+        const oddsKey = document.getElementById('odds-api-key')?.value?.trim();
+        
+        const keys = {};
+        if (cfbdKey) keys.cfbd = cfbdKey;
+        if (oddsKey) keys.odds = oddsKey;
+        
+        if (Object.keys(keys).length === 0) {
+            showNotification('Please enter at least one API key', 'warning');
+            return;
+        }
+        
+        if (api && typeof api.setApiKeys === 'function') {
+            api.setApiKeys(keys);
+            showNotification('API keys saved successfully!', 'success');
+            safeUpdateApiStatus();
+        } else {
+            console.warn('API handler not available');
+        }
+    } catch (error) {
+        console.error('Error saving API keys:', error);
+        showNotification('Failed to save API keys', 'error');
+    }
+}
+
+// Handle API key testing
+function handleTestApiKeys() {
+    try {
+        if (api && typeof api.testApiConnection === 'function') {
+            api.testApiConnection();
+        } else {
+            console.warn('API handler not available for testing');
+        }
+    } catch (error) {
+        console.error('Error testing API keys:', error);
+        showNotification('Failed to test API keys', 'error');
+    }
+}
+
+// Show notification helper
+function showNotification(message, type = 'info') {
+    try {
+        // Create notification element if it doesn't exist
+        let notification = document.getElementById('notification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'notification';
+            notification.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm';
+            document.body.appendChild(notification);
+        }
+        
+        // Set message and styling based on type
+        const colors = {
+            success: 'bg-green-500 text-white',
+            error: 'bg-red-500 text-white',
+            warning: 'bg-yellow-500 text-black',
+            info: 'bg-blue-500 text-white'
+        };
+        
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${colors[type] || colors.info}`;
+        notification.textContent = message;
+        notification.style.display = 'block';
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            if (notification) {
+                notification.style.display = 'none';
+            }
+        }, 3000);
+    } catch (error) {
+        console.warn('Could not show notification:', message);
+        // Fallback to alert
+        alert(message);
+    }
+}
+
+// Hide loading screen
+function hideLoadingScreen() {
+    try {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+    } catch (error) {
+        console.warn('Could not hide loading screen:', error);
+    }
+}
+
+
     const oddsKey = document.getElementById('odds-api-key').value.trim();
     
     const keys = {};
@@ -555,8 +783,8 @@ window.addEventListener('load', measurePerformance);
 window.DEBUG = {
     api,
     charts,
-    gameSheet,
-    config: CONFIG
+    gameSheet: window.huskersGameSheet || null,
+    config: CONFIG || {}
 };
 
 console.log('Nebraska Huskers Game Sheet Generator loaded successfully');
