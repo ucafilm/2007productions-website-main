@@ -16,6 +16,16 @@ class HuskersGameSheet {
             teamsUrl: './config/teams.json' // Optional: load from external file
         };
         
+        // Constants for CSS classes and strings
+        this.constants = {
+            HIDDEN_CLASS: 'hidden',
+            DISABLED_CLASS: 'opacity-50',
+            LOADING_SPINNER: '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...',
+            GENERATE_TEXT: '<i class="fas fa-rocket mr-2"></i>Generate Game Sheet',
+            SUCCESS_DURATION: 3000,
+            ERROR_DURATION: 5000
+        };
+        
         // Cache DOM elements to avoid repeated queries
         this.elements = {
             generateBtn: document.getElementById('generate-sheet'),
@@ -26,7 +36,9 @@ class HuskersGameSheet {
             errorText: document.getElementById('error-text'),
             opponentInput: document.getElementById('opponent-input'),
             gameDate: document.getElementById('game-date'),
-            seasonYear: document.getElementById('season-year')
+            seasonYear: document.getElementById('season-year'),
+            // Success notification element (will be created if doesn't exist)
+            successDiv: document.getElementById('success-message')
         };
         
         this.initializeEventListeners();
@@ -108,11 +120,51 @@ class HuskersGameSheet {
         });
     }
     
+    /**
+     * Generic API request wrapper with timeout and retry logic
+     * @param {Function} apiFunction - The API function to call
+     * @param {...any} args - Arguments to pass to the API function
+     * @returns {Promise} - The API response or throws after all retries
+     */
+    async _apiRequest(apiFunction, ...args) {
+        for (let attempt = 1; attempt <= this.config.retryAttempts; attempt++) {
+            try {
+                // Create timeout promise
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => {
+                        reject(new Error(`API request timed out after ${this.config.apiTimeout}ms`));
+                    }, this.config.apiTimeout);
+                });
+                
+                // Race between API call and timeout
+                const response = await Promise.race([
+                    apiFunction(...args),
+                    timeoutPromise
+                ]);
+                
+                console.log(`✅ API request succeeded on attempt ${attempt}`);
+                return response;
+                
+            } catch (error) {
+                const isLastAttempt = attempt === this.config.retryAttempts;
+                
+                if (isLastAttempt) {
+                    console.error(`❌ API request failed after ${this.config.retryAttempts} attempts:`, error.message);
+                    throw error;
+                } else {
+                    console.warn(`⚠️ API request attempt ${attempt}/${this.config.retryAttempts} failed: ${error.message}. Retrying...`);
+                    
+                    // Exponential backoff: wait longer between retries
+                    const backoffDelay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                    await new Promise(resolve => setTimeout(resolve, backoffDelay));
+                }
+            }
+        }
     async loadTeamsFromConfig() {
         // Optional: Load teams from external configuration
         if (this.config.teamsUrl) {
             try {
-                const response = await fetch(this.config.teamsUrl);
+                const response = await this._apiRequest(fetch.bind(null, this.config.teamsUrl));
                 if (response.ok) {
                     const teamsData = await response.json();
                     if (teamsData.teams && Array.isArray(teamsData.teams)) {
@@ -121,7 +173,7 @@ class HuskersGameSheet {
                     }
                 }
             } catch (error) {
-                console.warn('Could not load teams from external config, using defaults:', error);
+                console.warn('Could not load teams from external config, using defaults:', error.message);
             }
         }
     }
@@ -255,11 +307,14 @@ class HuskersGameSheet {
         }
         
         try {
-            const nebraska = await window.api.getTeamStats('Nebraska', this.formData.season);
-            const opponent = await window.api.getTeamStats(this.formData.opponent, this.formData.season);
+            const [nebraska, opponent] = await Promise.all([
+                this._apiRequest(window.api.getTeamStats.bind(window.api), 'Nebraska', this.formData.season),
+                this._apiRequest(window.api.getTeamStats.bind(window.api), this.formData.opponent, this.formData.season)
+            ]);
+            
             return { nebraska, opponent };
         } catch (error) {
-            console.warn('Using demo data for team stats:', error.message);
+            console.warn('Team data fetch failed after all retries, using demo data:', error.message);
             return this.getDemoTeamData();
         }
     }
@@ -268,9 +323,14 @@ class HuskersGameSheet {
         if (!window.api) return this.getDemoBettingData();
         
         try {
-            return await window.api.getBettingLines('Nebraska', this.formData.opponent);
+            const bettingData = await this._apiRequest(
+                window.api.getBettingLines.bind(window.api), 
+                'Nebraska', 
+                this.formData.opponent
+            );
+            return bettingData;
         } catch (error) {
-            console.warn('Using demo data for betting lines:', error.message);
+            console.warn('Betting data fetch failed after all retries, using demo data:', error.message);
             return this.getDemoBettingData();
         }
     }
@@ -426,24 +486,26 @@ class HuskersGameSheet {
     showLoadingState() {
         if (this.elements.generateBtn && this.elements.generateBtnText) {
             this.elements.generateBtn.disabled = true;
-            this.elements.generateBtn.classList.add('opacity-50');
-            this.elements.generateBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            this.elements.generateBtn.classList.add(this.constants.DISABLED_CLASS);
+            this.elements.generateBtnText.innerHTML = this.constants.LOADING_SPINNER;
         }
     }
     
     hideLoadingState() {
         if (this.elements.generateBtn && this.elements.generateBtnText) {
             this.elements.generateBtn.disabled = false;
-            this.elements.generateBtn.classList.remove('opacity-50');
-            this.elements.generateBtnText.innerHTML = '<i class="fas fa-rocket mr-2"></i>Generate Game Sheet';
+            this.elements.generateBtn.classList.remove(this.constants.DISABLED_CLASS);
+            this.elements.generateBtnText.innerHTML = this.constants.GENERATE_TEXT;
         }
     }
     
     showError(message) {
         if (this.elements.errorDiv && this.elements.errorText) {
             this.elements.errorText.textContent = message;
-            this.elements.errorDiv.classList.remove('hidden');
-            setTimeout(() => this.elements.errorDiv.classList.add('hidden'), 5000);
+            this.elements.errorDiv.classList.remove(this.constants.HIDDEN_CLASS);
+            setTimeout(() => {
+                this.elements.errorDiv.classList.add(this.constants.HIDDEN_CLASS);
+            }, this.constants.ERROR_DURATION);
         } else {
             alert('Error: ' + message);
         }
@@ -451,8 +513,42 @@ class HuskersGameSheet {
     
     hideError() {
         if (this.elements.errorDiv) {
-            this.elements.errorDiv.classList.add('hidden');
+            this.elements.errorDiv.classList.add(this.constants.HIDDEN_CLASS);
         }
+    }
+    
+    /**
+     * Show success notification to user
+     * @param {string} message - Success message to display
+     */
+    showSuccess(message) {
+        // Create success element if it doesn't exist
+        if (!this.elements.successDiv) {
+            this.elements.successDiv = document.createElement('div');
+            this.elements.successDiv.id = 'success-message';
+            this.elements.successDiv.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm bg-green-500 text-white transform transition-all duration-300 translate-x-full';
+            document.body.appendChild(this.elements.successDiv);
+        }
+        
+        // Set message and show
+        this.elements.successDiv.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // Animate in
+        this.elements.successDiv.classList.remove('translate-x-full');
+        this.elements.successDiv.classList.add('translate-x-0');
+        
+        // Auto-hide after duration
+        setTimeout(() => {
+            if (this.elements.successDiv) {
+                this.elements.successDiv.classList.remove('translate-x-0');
+                this.elements.successDiv.classList.add('translate-x-full');
+            }
+        }, this.constants.SUCCESS_DURATION);
     }
     
     downloadReport() {
@@ -461,17 +557,24 @@ class HuskersGameSheet {
             return;
         }
         
-        const text = `Nebraska vs ${this.currentData.gameInfo.opponent}\nGenerated: ${this.currentData.gameInfo.generatedAt}\n\nPrediction: Nebraska 31 - ${this.currentData.gameInfo.opponent} 20`;
-        const blob = new Blob([text], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `nebraska-vs-${this.currentData.gameInfo.opponent.toLowerCase().replace(/\s+/g, '-')}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        try {
+            const text = `Nebraska vs ${this.currentData.gameInfo.opponent}\nGenerated: ${this.currentData.gameInfo.generatedAt}\n\nPrediction: Nebraska 31 - ${this.currentData.gameInfo.opponent} 20`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nebraska-vs-${this.currentData.gameInfo.opponent.toLowerCase().replace(/\s+/g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showSuccess('📄 Report downloaded successfully!');
+        } catch (error) {
+            console.error('Download failed:', error);
+            this.showError('Failed to download report. Please try again.');
+        }
     }
     
     shareReport() {
@@ -482,15 +585,41 @@ class HuskersGameSheet {
         
         const shareData = {
             title: `Nebraska vs ${this.currentData.gameInfo.opponent}`,
-            text: 'Check out this game analysis!',
+            text: '🏈 Check out this game analysis!',
             url: window.location.href
         };
         
         if (navigator.share) {
-            navigator.share(shareData);
-        } else if (navigator.clipboard) {
-            navigator.clipboard.writeText(shareData.url);
-            alert('Link copied to clipboard!');
+            navigator.share(shareData)
+                .then(() => this.showSuccess('🚀 Report shared successfully!'))
+                .catch(error => {
+                    console.warn('Share failed:', error);
+                    this.fallbackShare(shareData);
+                });
+        } else {
+            this.fallbackShare(shareData);
+        }
+    }
+    
+    fallbackShare(shareData) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(shareData.url)
+                .then(() => {
+                    this.showSuccess('📋 Link copied to clipboard!');
+                })
+                .catch(() => {
+                    // Fallback to prompt if clipboard API fails
+                    const userCopied = prompt('Copy this link to share:', shareData.url);
+                    if (userCopied !== null) {
+                        this.showSuccess('🔗 Link ready to share!');
+                    }
+                });
+        } else {
+            // Final fallback for older browsers
+            const userCopied = prompt('Copy this link to share:', shareData.url);
+            if (userCopied !== null) {
+                this.showSuccess('🔗 Link ready to share!');
+            }
         }
     }
     
@@ -499,15 +628,23 @@ class HuskersGameSheet {
             this.showError('No game sheet data available.');
             return;
         }
-        window.print();
+        
+        try {
+            window.print();
+            this.showSuccess('🖨️ Print dialog opened!');
+        } catch (error) {
+            console.error('Print failed:', error);
+            this.showError('Failed to open print dialog.');
+        }
     }
     
     clearContent() {
         if (this.elements.contentContainer) {
             this.elements.contentContainer.innerHTML = '';
-            this.elements.contentContainer.classList.add('hidden');
+            this.elements.contentContainer.classList.add(this.constants.HIDDEN_CLASS);
         }
         this.currentData = null;
+        this.showSuccess('🗑️ Game sheet cleared!');
     }
     
     updateApiStatus(status) {
