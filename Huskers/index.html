@@ -194,40 +194,9 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-3">
                         <i class="fas fa-users mr-2 text-red-600"></i>Select Opponent
                     </label>
-                    <div class="relative">
-                        <select id="opponent-select" class="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-red-500 focus:outline-none transition-colors text-lg font-medium">
-                            <option value="">Choose opponent team...</option>
-                            <optgroup label="Big Ten Conference">
-                                <option value="Illinois">🔶 Illinois Fighting Illini</option>
-                                <option value="Indiana">🔴 Indiana Hoosiers</option>
-                                <option value="Iowa">⚫ Iowa Hawkeyes</option>
-                                <option value="Maryland">🔴 Maryland Terrapins</option>
-                                <option value="Michigan">🔵 Michigan Wolverines</option>
-                                <option value="Michigan State">🟢 Michigan State Spartans</option>
-                                <option value="Minnesota">🟡 Minnesota Golden Gophers</option>
-                                <option value="Northwestern">🟣 Northwestern Wildcats</option>
-                                <option value="Ohio State">🔴 Ohio State Buckeyes</option>
-                                <option value="Oregon">🟢 Oregon Ducks</option>
-                                <option value="Penn State">🔵 Penn State Nittany Lions</option>
-                                <option value="Purdue">⚫ Purdue Boilermakers</option>
-                                <option value="Rutgers">🔴 Rutgers Scarlet Knights</option>
-                                <option value="UCLA">🔵 UCLA Bruins</option>
-                                <option value="USC">🟡 USC Trojans</option>
-                                <option value="Washington">🟣 Washington Huskies</option>
-                                <option value="Wisconsin">🔴 Wisconsin Badgers</option>
-                            </optgroup>
-                            <optgroup label="Popular Matchups">
-                                <option value="Cincinnati">🔴 Cincinnati Bearcats</option>
-                                <option value="Colorado">⚫ Colorado Buffaloes</option>
-                                <option value="Oklahoma">🔴 Oklahoma Sooners</option>
-                                <option value="Texas">🟠 Texas Longhorns</option>
-                                <option value="Notre Dame">🔵 Notre Dame Fighting Irish</option>
-                            </optgroup>
-                        </select>
-                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                            <i class="fas fa-chevron-down text-gray-400"></i>
-                        </div>
-                    </div>
+                    <!-- This input will be replaced by dropdown via JavaScript -->
+                    <input type="text" id="opponent-input" placeholder="🏈 Select Opponent Team..." 
+                           class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white shadow-sm">
                 </div>
                 
                 <!-- Date Selection -->
@@ -244,8 +213,9 @@
                 <div class="flex items-end">
                     <button id="generate-sheet" 
                             class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i id="generate-icon" class="fas fa-rocket mr-2"></i>
-                        <span id="generate-text">Generate Analysis</span>
+                        <span id="generate-text">
+                            <i class="fas fa-rocket mr-2"></i>Generate Analysis
+                        </span>
                     </button>
                 </div>
             </div>
@@ -260,7 +230,7 @@
         </div>
         
         <!-- Generated Content Container -->
-        <div id="game-analysis-content" class="hidden space-y-8">
+        <div id="game-sheet-content" class="hidden space-y-8">
             <!-- Content will be dynamically generated here -->
         </div>
         
