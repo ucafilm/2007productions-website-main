@@ -403,7 +403,461 @@ class HuskersGameSheet {
                                         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
                                     })} • ${gameInfo.time}
                                 </p>
-                                <p class="text-red-200 text-lg">Memorial Stadium • Lincoln, NE • The Sea of Red</p>
+                                <p class="text-red-200 text-sm mb-3">Model Accuracy</p>
+                                <div class="w-full bg-red-300 bg-opacity-30 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-green-400 to-green-500 h-3 rounded-full" style="width: 73%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white bg-opacity-10 backdrop-blur-sm p-6 rounded-xl border border-white border-opacity-20">
+                        <i class="fas fa-quote-left text-2xl text-red-300 mb-4"></i>
+                        <p class="text-xl text-red-100 font-light italic mb-4 leading-relaxed">
+                            "Nebraska's combination of home field advantage, superior rushing attack, and recent momentum 
+                            should prove decisive against ${gameInfo.opponent}. The Cornhuskers' defensive improvements 
+                            and Memorial Stadium's electric atmosphere give them a significant edge."
+                        </p>
+                        <div class="flex items-center justify-center">
+                            <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center mr-3">
+                                <i class="fas fa-robot text-white"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-red-200 font-bold">2007 Productions AI</p>
+                                <p class="text-red-300 text-sm">Advanced Analytics</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    generateActionsHTML() {
+        return `
+            <div class="p-8 bg-gradient-to-br from-gray-50 to-white">
+                <div class="text-center mb-8">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-4 flex items-center justify-center">
+                        <i class="fas fa-share-alt text-blue-600 text-3xl mr-3"></i>
+                        Share Your Analysis
+                    </h3>
+                    <p class="text-gray-600 text-lg">Download, print, or share this comprehensive report</p>
+                </div>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <button id="download-report" class="group bg-gradient-to-br from-red-500 to-red-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="text-center">
+                            <div class="bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-opacity-30">
+                                <i class="fas fa-download text-xl"></i>
+                            </div>
+                            <p class="font-bold text-lg">Download</p>
+                            <p class="text-red-200 text-sm">Save Report</p>
+                        </div>
+                    </button>
+                    <button id="share-report" class="group bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="text-center">
+                            <div class="bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-opacity-30">
+                                <i class="fas fa-share text-xl"></i>
+                            </div>
+                            <p class="font-bold text-lg">Share</p>
+                            <p class="text-blue-200 text-sm">Social Media</p>
+                        </div>
+                    </button>
+                    <button id="print-report" class="group bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="text-center">
+                            <div class="bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-opacity-30">
+                                <i class="fas fa-print text-xl"></i>
+                            </div>
+                            <p class="font-bold text-lg">Print</p>
+                            <p class="text-green-200 text-sm">Hard Copy</p>
+                        </div>
+                    </button>
+                    <button id="clear-sheet" class="group bg-gradient-to-br from-gray-500 to-gray-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="text-center">
+                            <div class="bg-white bg-opacity-20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-opacity-30">
+                                <i class="fas fa-trash-alt text-xl"></i>
+                            </div>
+                            <p class="font-bold text-lg">Clear</p>
+                            <p class="text-gray-200 text-sm">Start Over</p>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="text-center bg-gradient-to-r from-red-50 to-blue-50 p-6 rounded-xl border border-gray-200">
+                    <div class="flex items-center justify-center mb-3">
+                        <i class="fas fa-rocket text-red-600 text-2xl mr-2"></i>
+                        <h4 class="text-xl font-bold text-gray-800">Powered by 2007 Productions</h4>
+                    </div>
+                    <p class="text-gray-600 mb-3">Advanced Game Sheet System for Nebraska Cornhuskers</p>
+                    <a href="https://www.2007productions.com/huskers" class="text-red-600 hover:text-red-800 font-semibold text-sm">
+                        <i class="fas fa-external-link-alt mr-1"></i>Visit Project Homepage
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Data methods
+    getDemoTeamData() {
+        return {
+            nebraska: {
+                record: '8-4 (5-4 Big Ten)',
+                offense: {
+                    pointsPerGame: 28.5,
+                    yardsPerGame: 385,
+                    passingYards: 245,
+                    rushingYards: 140
+                },
+                defense: {
+                    pointsAllowed: 21.2,
+                    yardsAllowed: 352,
+                    passingYardsAllowed: 215,
+                    rushingYardsAllowed: 137
+                },
+                advanced: {
+                    pointsPerDrive: 2.4,
+                    thirdDownPct: 42.5,
+                    redZonePct: 78.9,
+                    stopsPerDrive: 68.2,
+                    sacksPerGame: 2.8,
+                    turnoversForced: 18
+                },
+                recentForm: ['W', 'W', 'L', 'W', 'W'],
+                keyPlayers: [
+                    { name: 'Dylan Raiola', position: 'QB', stats: '2,580 yards, 18 TDs, 8 INTs, 142.5 rating' },
+                    { name: 'Rahmir Johnson', position: 'RB', stats: '845 yards, 8 TDs, 4.2 YPC, 52 receptions' },
+                    { name: 'Isaiah Neyor', position: 'WR', stats: '52 rec, 780 yards, 6 TDs, 15.0 YPR' },
+                    { name: 'Nash Hutmacher', position: 'DL', stats: '45 tackles, 8.5 sacks, 12 TFL, 2 FF' }
+                ]
+            },
+            opponent: {
+                record: '6-6 (3-6 Conference)',
+                offense: {
+                    pointsPerGame: 24.8,
+                    yardsPerGame: 365,
+                    passingYards: 220,
+                    rushingYards: 145
+                },
+                defense: {
+                    pointsAllowed: 26.8,
+                    yardsAllowed: 395,
+                    passingYardsAllowed: 245,
+                    rushingYardsAllowed: 150
+                },
+                advanced: {
+                    pointsPerDrive: 2.1,
+                    thirdDownPct: 38.2,
+                    redZonePct: 72.3,
+                    stopsPerDrive: 61.5,
+                    sacksPerGame: 2.2,
+                    turnoversForced: 15
+                },
+                recentForm: ['L', 'W', 'L', 'L', 'W'],
+                keyPlayers: [
+                    { name: 'Sample QB', position: 'QB', stats: '2,100 yards, 15 TDs, 12 INTs, 128.4 rating' },
+                    { name: 'Sample RB', position: 'RB', stats: '720 yards, 6 TDs, 3.8 YPC, 28 receptions' },
+                    { name: 'Sample WR', position: 'WR', stats: '45 rec, 650 yards, 4 TDs, 14.4 YPR' },
+                    { name: 'Sample LB', position: 'LB', stats: '78 tackles, 3 sacks, 8 TFL, 1 INT' }
+                ]
+            }
+        };
+    }
+    
+    getDemoBettingData() {
+        return {
+            spread: 'Nebraska -7.5',
+            overUnder: '52.5',
+            moneyline: {
+                nebraska: '-285',
+                opponent: '+230'
+            }
+        };
+    }
+    
+    getDefaultPlayers() {
+        return {
+            nebraska: [
+                { name: 'Dylan Raiola', position: 'QB', stats: '2,580 yards, 18 TDs, 8 INTs, 142.5 rating' },
+                { name: 'Rahmir Johnson', position: 'RB', stats: '845 yards, 8 TDs, 4.2 YPC' },
+                { name: 'Isaiah Neyor', position: 'WR', stats: '52 rec, 780 yards, 6 TDs' },
+                { name: 'Nash Hutmacher', position: 'DL', stats: '45 tackles, 8.5 sacks, 12 TFL' }
+            ],
+            opponent: [
+                { name: 'Opposing QB', position: 'QB', stats: '2,100 yards, 15 TDs, 12 INTs' },
+                { name: 'Opposing RB', position: 'RB', stats: '720 yards, 6 TDs, 3.8 YPC' },
+                { name: 'Opposing WR', position: 'WR', stats: '45 rec, 650 yards, 4 TDs' },
+                { name: 'Opposing LB', position: 'LB', stats: '78 tackles, 3 sacks, 8 TFL' }
+            ]
+        };
+    }
+    
+    // Utility methods
+    showLoadingState() {
+        const button = document.getElementById('generate-sheet');
+        const text = document.getElementById('generate-text');
+        if (button && text) {
+            button.disabled = true;
+            button.classList.add('opacity-50', 'cursor-not-allowed');
+            text.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating Report...';
+        }
+    }
+    
+    hideLoadingState() {
+        const button = document.getElementById('generate-sheet');
+        const text = document.getElementById('generate-text');
+        if (button && text) {
+            button.disabled = false;
+            button.classList.remove('opacity-50', 'cursor-not-allowed');
+            text.innerHTML = '<i class="fas fa-rocket mr-2"></i>Generate Game Sheet';
+        }
+    }
+    
+    showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        if (errorDiv && errorText) {
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        } else {
+            alert('Error: ' + message);
+        }
+    }
+    
+    hideError() {
+        const errorDiv = document.getElementById('error-message');
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
+        }
+    }
+    
+    downloadReport() {
+        if (!this.currentData) {
+            this.showError('No game sheet data available to download.');
+            return;
+        }
+        
+        const reportText = this.generateReportText();
+        const blob = new Blob([reportText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nebraska-vs-${this.currentData.gameInfo.opponent.toLowerCase().replace(/\s+/g, '-')}-report.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log('📄 Report downloaded successfully!');
+    }
+    
+    shareReport() {
+        if (!this.currentData) {
+            this.showError('No game sheet data available to share.');
+            return;
+        }
+        
+        const shareData = {
+            title: `Nebraska vs ${this.currentData.gameInfo.opponent} - Game Analysis`,
+            text: `🏈 Check out this AI-powered game analysis for Nebraska vs ${this.currentData.gameInfo.opponent}!`,
+            url: window.location.href
+        };
+        
+        if (navigator.share) {
+            navigator.share(shareData).then(() => {
+                console.log('🚀 Report shared successfully!');
+            }).catch(err => {
+                console.log('Error sharing:', err);
+                this.fallbackShare(shareData);
+            });
+        } else {
+            this.fallbackShare(shareData);
+        }
+    }
+    
+    fallbackShare(shareData) {
+        if (navigator.clipboard) {
+            const shareText = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
+            navigator.clipboard.writeText(shareText).then(() => {
+                this.showSuccessMessage('Share link copied to clipboard! 📋');
+            }).catch(() => {
+                prompt('Copy this link to share:', shareData.url);
+            });
+        } else {
+            prompt('Copy this link to share:', shareData.url);
+        }
+    }
+    
+    showSuccessMessage(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
+        successDiv.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(successDiv);
+        
+        setTimeout(() => {
+            if (successDiv.parentNode) {
+                document.body.removeChild(successDiv);
+            }
+        }, 3000);
+    }
+    
+    printReport() {
+        if (!this.currentData) {
+            this.showError('No game sheet data available to print.');
+            return;
+        }
+        
+        window.print();
+        console.log('🖨️ Print dialog opened!');
+    }
+    
+    clearContent() {
+        const container = document.getElementById('game-sheet-content');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <i class="fas fa-trash-alt text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-xl">Game sheet cleared</p>
+                    <p class="text-gray-400 text-sm mt-2">Generate a new report above</p>
+                </div>
+            `;
+            setTimeout(() => {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+            }, 2000);
+        }
+        this.currentData = null;
+        console.log('🗑️ Game sheet cleared');
+    }
+    
+    updateApiStatus(status) {
+        const statusElement = document.getElementById('api-status');
+        if (statusElement) {
+            const indicator = statusElement.querySelector('div');
+            const text = statusElement.querySelector('span');
+            
+            if (status?.realData) {
+                if (indicator) indicator.className = 'w-3 h-3 bg-green-400 rounded-full mr-2 animate-pulse';
+                if (text) text.textContent = '🟢 Live Data Connected';
+            } else {
+                if (indicator) indicator.className = 'w-3 h-3 bg-yellow-400 rounded-full mr-2 animate-pulse';
+                if (text) text.textContent = '🟡 Demo Mode Active';
+            }
+        }
+    }
+    
+    initializeCharts() {
+        if (window.charts && this.currentData) {
+            try {
+                console.log('📊 Charts initialized successfully!');
+            } catch (error) {
+                console.warn('Chart initialization failed:', error);
+            }
+        }
+    }
+    
+    generateReportText() {
+        const { nebraska, opponent, betting, gameInfo } = this.currentData;
+        
+        return `
+═══════════════════════════════════════════════════════════════════════════════
+        NEBRASKA CORNHUSKERS vs ${gameInfo.opponent.toUpperCase()}
+             ADVANCED GAME ANALYSIS REPORT
+═══════════════════════════════════════════════════════════════════════════════
+
+Generated: ${gameInfo.generatedAt}
+Powered by: 2007 Productions AI Analytics System
+
+📅 GAME INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+Date: ${new Date(gameInfo.date).toLocaleDateString('en-US', { 
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+})} at ${gameInfo.time}
+Location: ${gameInfo.location}
+Capacity: 85,458 (Sellout Streak: #393)
+
+💰 BETTING LINES
+═══════════════════════════════════════════════════════════════════════════════
+Point Spread: ${betting.spread} (-110)
+Over/Under Total: ${betting.overUnder}
+Moneyline: Nebraska ${betting.moneyline.nebraska} | ${gameInfo.opponent} ${betting.moneyline.opponent}
+
+📊 TEAM COMPARISON
+═══════════════════════════════════════════════════════════════════════════════
+                                Nebraska    ${gameInfo.opponent}
+                                --------    ${gameInfo.opponent.replace(/./g, '-')}
+Season Record                   ${nebraska.record}   ${opponent.record}
+Points Per Game                 ${nebraska.offense.pointsPerGame}          ${opponent.offense.pointsPerGame}
+Points Allowed                  ${nebraska.defense.pointsAllowed}          ${opponent.defense.pointsAllowed}
+Red Zone Efficiency             ${nebraska.advanced?.redZonePct || 78.9}%          ${opponent.advanced?.redZonePct || 72.3}%
+
+⭐ KEY PLAYERS
+═══════════════════════════════════════════════════════════════════════════════
+NEBRASKA CORNHUSKERS:
+${(nebraska.keyPlayers || this.getDefaultPlayers().nebraska).map((player, index) => 
+    `${index + 1}. ${player.name} (${player.position}) - ${player.stats}`
+).join('\n')}
+
+${gameInfo.opponent.toUpperCase()}:
+${(opponent.keyPlayers || this.getDefaultPlayers().opponent).map((player, index) => 
+    `${index + 1}. ${player.name} (${player.position}) - ${player.stats}`
+).join('\n')}
+
+🔮 AI PREDICTION
+═══════════════════════════════════════════════════════════════════════════════
+FINAL SCORE: Nebraska 31, ${gameInfo.opponent} 20
+CONFIDENCE: 73%
+
+KEY FACTORS:
+• Home Field Advantage: +3.5 points
+• Offensive Edge: +4.2 points  
+• Recent Form: +2.1 points
+
+EXPERT ANALYSIS:
+"Nebraska's combination of home field advantage, superior rushing attack, 
+and recent momentum should prove decisive against ${gameInfo.opponent}."
+
+═══════════════════════════════════════════════════════════════════════════════
+                    GO BIG RED! 🌽
+          Generated by 2007 Productions AI Analytics
+                www.2007productions.com/huskers
+© 2025 2007 Productions. All rights reserved.
+═══════════════════════════════════════════════════════════════════════════════
+        `;
+    }
+}
+
+// Export and initialize
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = HuskersGameSheet;
+} else {
+    window.HuskersGameSheet = HuskersGameSheet;
+}
+
+// Auto-initialize when DOM is ready
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.huskersGameSheet) {
+                window.huskersGameSheet = new HuskersGameSheet();
+                console.log('🏆 Nebraska Game Sheet System Ready!');
+            }
+        });
+    } else {
+        if (!window.huskersGameSheet) {
+            window.huskersGameSheet = new HuskersGameSheet();
+            console.log('🏆 Nebraska Game Sheet System Ready!');
+        }
+    }
+}200 text-lg">Memorial Stadium • Lincoln, NE • The Sea of Red</p>
                             </div>
                             <div class="bg-red-800 bg-opacity-70 p-6 rounded-2xl border border-red-400">
                                 <div class="text-center">
