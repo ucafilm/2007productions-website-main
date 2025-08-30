@@ -1,66 +1,135 @@
-// Nebraska Huskers Game Sheet Generator - Clean Production Version
+// Nebraska Huskers Game Sheet Generator - Enhanced Production Version
 class HuskersGameSheet {
     constructor() {
         this.currentData = null;
         this.isGenerating = false;
         this.formData = {};
         
+        // Configuration object for easy maintenance
+        this.config = {
+            defaultLocation: 'Memorial Stadium, Lincoln, NE',
+            defaultTv: 'TBD',
+            defaultTime: '2:30 PM CT',
+            apiTimeout: 10000,
+            retryAttempts: 3,
+            // Teams can be overridden by loading from external source
+            teamsUrl: './config/teams.json' // Optional: load from external file
+        };
+        
+        // Cache DOM elements to avoid repeated queries
+        this.elements = {
+            generateBtn: document.getElementById('generate-sheet'),
+            generateBtnText: document.getElementById('generate-text'),
+            form: document.getElementById('game-form'),
+            contentContainer: document.getElementById('game-sheet-content'),
+            errorDiv: document.getElementById('error-message'),
+            errorText: document.getElementById('error-text'),
+            opponentInput: document.getElementById('opponent-input'),
+            gameDate: document.getElementById('game-date'),
+            seasonYear: document.getElementById('season-year')
+        };
+        
         this.initializeEventListeners();
         
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initializeTeamDropdown());
+            document.addEventListener('DOMContentLoaded', () => this.initializeAsync());
         } else {
-            this.initializeTeamDropdown();
+            this.initializeAsync();
         }
         
         console.log('🏈 Nebraska Game Sheet Generator initialized');
     }
     
+    async initializeAsync() {
+        // Load teams configuration if available
+        await this.loadTeamsFromConfig();
+        
+        // Initialize team dropdown
+        this.initializeTeamDropdown();
+    }
+    
     initializeEventListeners() {
-        const generateBtn = document.getElementById('generate-sheet');
-        if (generateBtn) {
-            generateBtn.addEventListener('click', () => this.generateGameSheet());
+        // Main generation button
+        if (this.elements.generateBtn) {
+            this.elements.generateBtn.addEventListener('click', () => this.generateGameSheet());
         }
         
+        // Improved delegated event listener using data-action attributes
         document.addEventListener('click', (e) => {
-            if (e.target.id === 'download-report' || e.target.closest('#download-report')) {
-                this.downloadReport();
-            } else if (e.target.id === 'share-report' || e.target.closest('#share-report')) {
-                this.shareReport();
-            } else if (e.target.id === 'print-report' || e.target.closest('#print-report')) {
-                this.printReport();
-            } else if (e.target.id === 'clear-sheet' || e.target.closest('#clear-sheet')) {
-                this.clearContent();
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+            
+            const action = target.dataset.action;
+            
+            // Action map for cleaner code
+            const actions = {
+                download: () => this.downloadReport(),
+                share: () => this.shareReport(),
+                print: () => this.printReport(),
+                clear: () => this.clearContent()
+            };
+            
+            if (actions[action]) {
+                e.preventDefault();
+                actions[action]();
             }
         });
         
-        const form = document.getElementById('game-form');
-        if (form) {
-            form.addEventListener('submit', (e) => {
+        // Form submission
+        if (this.elements.form) {
+            this.elements.form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.generateGameSheet();
             });
         }
         
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'g') {
-                e.preventDefault();
-                this.generateGameSheet();
-            } else if (e.ctrlKey && e.key === 'd') {
-                e.preventDefault();
-                this.downloadReport();
-            } else if (e.ctrlKey && e.key === 'p') {
-                e.preventDefault();
-                this.printReport();
-            } else if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                this.shareReport();
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'g':
+                        e.preventDefault();
+                        this.generateGameSheet();
+                        break;
+                    case 'd':
+                        e.preventDefault();
+                        this.downloadReport();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        this.printReport();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        this.shareReport();
+                        break;
+                }
             }
         });
     }
     
+    async loadTeamsFromConfig() {
+        // Optional: Load teams from external configuration
+        if (this.config.teamsUrl) {
+            try {
+                const response = await fetch(this.config.teamsUrl);
+                if (response.ok) {
+                    const teamsData = await response.json();
+                    if (teamsData.teams && Array.isArray(teamsData.teams)) {
+                        this.config.teams = teamsData.teams;
+                        console.log('🏈 Teams loaded from external config');
+                    }
+                }
+            } catch (error) {
+                console.warn('Could not load teams from external config, using defaults:', error);
+            }
+        }
+    }
+    
     getTeamsList() {
-        return [
+        // In production, this could be loaded from a JSON file or API
+        // For now, keeping it as a method to make it easily configurable
+        return this.config.teams || [
             'Alabama', 'Arizona', 'Arizona State', 'Arkansas', 'Auburn',
             'Baylor', 'Boston College', 'BYU', 'California', 'Cincinnati',
             'Clemson', 'Colorado', 'Colorado State', 'Duke', 'Florida',
@@ -79,8 +148,7 @@ class HuskersGameSheet {
     }
     
     initializeTeamDropdown() {
-        const opponentInput = document.getElementById('opponent-input');
-        if (!opponentInput) return;
+        if (!this.elements.opponentInput) return;
         
         const dropdown = document.createElement('select');
         dropdown.id = 'opponent-select';
@@ -101,7 +169,10 @@ class HuskersGameSheet {
             }
         });
         
-        opponentInput.parentNode.replaceChild(dropdown, opponentInput);
+        this.elements.opponentInput.parentNode.replaceChild(dropdown, this.elements.opponentInput);
+        
+        // Update the cached element reference
+        this.elements.opponentSelect = dropdown;
     }
     
     async generateGameSheet() {
@@ -133,16 +204,13 @@ class HuskersGameSheet {
     }
     
     getFormData() {
-        const opponentSelect = document.getElementById('opponent-select');
-        const opponentInput = document.getElementById('opponent-input');
-        
         return {
-            opponent: (opponentSelect?.value || opponentInput?.value || '').trim(),
-            date: document.getElementById('game-date')?.value || '',
-            season: document.getElementById('season-year')?.value || new Date().getFullYear().toString(),
-            location: 'Memorial Stadium, Lincoln, NE',
-            tv: 'TBD',
-            time: '2:30 PM CT'
+            opponent: (this.elements.opponentSelect?.value || this.elements.opponentInput?.value || '').trim(),
+            date: this.elements.gameDate?.value || '',
+            season: this.elements.seasonYear?.value || new Date().getFullYear().toString(),
+            location: this.config.defaultLocation,
+            tv: this.config.defaultTv,
+            time: this.config.defaultTime
         };
     }
     
@@ -208,8 +276,7 @@ class HuskersGameSheet {
     }
     
     async renderGameSheet(gameData) {
-        const container = document.getElementById('game-sheet-content');
-        if (!container) return;
+        if (!this.elements.contentContainer) return;
         
         this.currentData = {
             ...gameData,
@@ -221,11 +288,11 @@ class HuskersGameSheet {
         };
         
         const html = this.generateGameSheetHTML();
-        container.innerHTML = html;
-        container.classList.remove('hidden');
+        this.elements.contentContainer.innerHTML = html;
+        this.elements.contentContainer.classList.remove('hidden');
         
         setTimeout(() => {
-            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            this.elements.contentContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
     }
     
@@ -287,16 +354,16 @@ class HuskersGameSheet {
                 </div>
                 
                 <div class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button id="download-report" class="bg-red-600 text-white p-4 rounded-lg hover:bg-red-700 transition-colors">
+                    <button data-action="download" id="download-report" class="bg-red-600 text-white p-4 rounded-lg hover:bg-red-700 transition-colors">
                         <i class="fas fa-download mr-2"></i>Download
                     </button>
-                    <button id="share-report" class="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    <button data-action="share" id="share-report" class="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors">
                         <i class="fas fa-share mr-2"></i>Share
                     </button>
-                    <button id="print-report" class="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors">
+                    <button data-action="print" id="print-report" class="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors">
                         <i class="fas fa-print mr-2"></i>Print
                     </button>
-                    <button id="clear-sheet" class="bg-gray-600 text-white p-4 rounded-lg hover:bg-gray-700 transition-colors">
+                    <button data-action="clear" id="clear-sheet" class="bg-gray-600 text-white p-4 rounded-lg hover:bg-gray-700 transition-colors">
                         <i class="fas fa-trash mr-2"></i>Clear
                     </button>
                 </div>
@@ -357,40 +424,35 @@ class HuskersGameSheet {
     }
     
     showLoadingState() {
-        const button = document.getElementById('generate-sheet');
-        const text = document.getElementById('generate-text');
-        if (button && text) {
-            button.disabled = true;
-            button.classList.add('opacity-50');
-            text.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+        if (this.elements.generateBtn && this.elements.generateBtnText) {
+            this.elements.generateBtn.disabled = true;
+            this.elements.generateBtn.classList.add('opacity-50');
+            this.elements.generateBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
         }
     }
     
     hideLoadingState() {
-        const button = document.getElementById('generate-sheet');
-        const text = document.getElementById('generate-text');
-        if (button && text) {
-            button.disabled = false;
-            button.classList.remove('opacity-50');
-            text.innerHTML = '<i class="fas fa-rocket mr-2"></i>Generate Game Sheet';
+        if (this.elements.generateBtn && this.elements.generateBtnText) {
+            this.elements.generateBtn.disabled = false;
+            this.elements.generateBtn.classList.remove('opacity-50');
+            this.elements.generateBtnText.innerHTML = '<i class="fas fa-rocket mr-2"></i>Generate Game Sheet';
         }
     }
     
     showError(message) {
-        const errorDiv = document.getElementById('error-message');
-        const errorText = document.getElementById('error-text');
-        if (errorDiv && errorText) {
-            errorText.textContent = message;
-            errorDiv.classList.remove('hidden');
-            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+        if (this.elements.errorDiv && this.elements.errorText) {
+            this.elements.errorText.textContent = message;
+            this.elements.errorDiv.classList.remove('hidden');
+            setTimeout(() => this.elements.errorDiv.classList.add('hidden'), 5000);
         } else {
             alert('Error: ' + message);
         }
     }
     
     hideError() {
-        const errorDiv = document.getElementById('error-message');
-        if (errorDiv) errorDiv.classList.add('hidden');
+        if (this.elements.errorDiv) {
+            this.elements.errorDiv.classList.add('hidden');
+        }
     }
     
     downloadReport() {
@@ -441,10 +503,9 @@ class HuskersGameSheet {
     }
     
     clearContent() {
-        const container = document.getElementById('game-sheet-content');
-        if (container) {
-            container.innerHTML = '';
-            container.classList.add('hidden');
+        if (this.elements.contentContainer) {
+            this.elements.contentContainer.innerHTML = '';
+            this.elements.contentContainer.classList.add('hidden');
         }
         this.currentData = null;
     }
