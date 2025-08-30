@@ -6,8 +6,28 @@
     <title>Nebraska Cornhuskers - Elite Football Analytics | 2007 Productions</title>
     <meta name="description" content="Advanced Nebraska football analytics with real-time data, interactive visualizations, and comprehensive game analysis">
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Local Tailwind CSS -->
+    <link rel="stylesheet" href="./assets/css/tailwind.css">
+    
+    <!-- Fallback to CDN if local file fails -->
+    <script>
+        // Check if local CSS loaded, fallback to CDN
+        document.addEventListener('DOMContentLoaded', function() {
+            const testElement = document.createElement('div');
+            testElement.className = 'bg-red-500';
+            document.body.appendChild(testElement);
+            const computedStyle = window.getComputedStyle(testElement);
+            
+            if (computedStyle.backgroundColor === 'rgba(0, 0, 0, 0)' || computedStyle.backgroundColor === 'transparent') {
+                console.warn('Local Tailwind CSS failed to load, falling back to CDN');
+                const fallbackCSS = document.createElement('script');
+                fallbackCSS.src = 'https://cdn.tailwindcss.com';
+                document.head.appendChild(fallbackCSS);
+            }
+            
+            document.body.removeChild(testElement);
+        });
+    </script>
     
     <!-- Chart.js for visualizations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>

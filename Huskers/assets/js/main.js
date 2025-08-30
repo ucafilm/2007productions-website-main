@@ -10,25 +10,41 @@ let gameSheet;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing Nebraska Huskers Game Sheet Generator...');
     
-    // Initialize core components
-    api = new HuskersAPI();
-    charts = new HuskersCharts();
-    gameSheet = new HuskersGameSheet();
-    
-    // Hide loading screen
-    hideLoadingScreen();
-    
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Load saved API keys
-    loadSavedApiKeys();
-    
-    // Update API status
-    updateApiStatus();
-    
-    // Handle URL parameters
-    handleUrlParameters();
+    // Wait a moment for all scripts to load
+    setTimeout(() => {
+        try {
+            // Initialize core components if classes are available
+            if (typeof HuskersAPI !== 'undefined') {
+                api = new HuskersAPI();
+            } else {
+                console.warn('HuskersAPI class not found');
+            }
+            
+            if (typeof HuskersCharts !== 'undefined') {
+                charts = new HuskersCharts();
+            } else {
+                console.warn('HuskersCharts class not found');
+            }
+            
+            if (typeof HuskersGameSheet !== 'undefined') {
+                gameSheet = new HuskersGameSheet();
+            } else {
+                console.warn('HuskersGameSheet class not found - this will be initialized by the class itself');
+            }
+            
+            // Continue with other initialization
+            hideLoadingScreen();
+            setupEventListeners();
+            loadSavedApiKeys();
+            updateApiStatus();
+            handleUrlParameters();
+            
+        } catch (error) {
+            console.error('Error during initialization:', error);
+            // Continue with initialization even if some parts fail
+            hideLoadingScreen();
+        }
+    }, 100);
     
     console.log('Application initialized successfully');
 });

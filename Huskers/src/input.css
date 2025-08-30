@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Nebraska Huskers styles */
+@layer base {
+  html {
+    font-family: 'Roboto Condensed', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-huskers {
+    @apply bg-nebraska-red-600 hover:bg-nebraska-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .btn-huskers-secondary {
+    @apply bg-nebraska-cream-500 hover:bg-nebraska-cream-600 text-nebraska-red-800 font-bold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .card-huskers {
+    @apply bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-200;
+  }
+  
+  .gradient-huskers {
+    @apply bg-gradient-to-br from-nebraska-red-600 via-nebraska-red-700 to-nebraska-red-900;
+  }
+  
+  .text-huskers-gradient {
+    @apply bg-gradient-to-r from-nebraska-red-600 to-nebraska-red-800 bg-clip-text text-transparent;
+  }
+}
+
+@layer utilities {
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Loading animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-before: always;
+  }
+  
+  .print-avoid-break {
+    page-break-inside: avoid;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-nebraska-red-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-nebraska-red-600;
+}
