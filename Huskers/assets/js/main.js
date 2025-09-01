@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Initialize core components if classes are available
             if (typeof HuskersAPI !== 'undefined') {
                 api = new HuskersAPI();
+                window.api = api; // ⭐ EXPOSE API GLOBALLY
+                console.log('🚀 API handler initialized and exposed globally');
             } else {
                 console.warn('HuskersAPI class not found');
             }
@@ -361,23 +363,129 @@ function hideLoadingScreen() {
     }
 }
 
+// Utility functions
+const CONFIG = {
+    version: '2.0.0',
+    apiTimeout: 10000,
+    cacheDuration: 300000, // 5 minutes
+    maxRetries: 3
+};
 
-    const oddsKey = document.getElementById('odds-api-key').value.trim();
+// Expose utilities globally
+window.huskersUtils = {
+    // Export settings
+    exportSettings() {
+        const settings = {
+            formData: localStorage.getItem('huskers_form_data'),
+            apiKeys: localStorage.getItem('huskers_api_keys'),
+            version: CONFIG.version,
+            exportDate: new Date().toISOString()
+        };
+        
+        const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'huskers-settings.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
     
-    const keys = {};
-    if (cfbdKey) keys.cfbd = cfbdKey;
-    if (oddsKey) keys.odds = oddsKey;
+    // Import settings
+    importSettings(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const settings = JSON.parse(e.target.result);
+                if (settings.formData) {
+                    localStorage.setItem('huskers_form_data', settings.formData);
+                    loadFormData();
+                }
+                showNotification('Settings imported successfully', 'success');
+            } catch (error) {
+                showNotification('Failed to import settings', 'error');
+            }
+        };
+        reader.readAsText(file);
+    },
     
-    if (Object.keys(keys).length === 0) {
-        showNotification('Please enter at least one API key', 'warning');
-        return;
+    // Get API statistics
+    getApiStats() {
+        return {
+            apiStatus: api ? api.getApiStatus() : { realData: false },
+            cacheStats: api ? api.getCacheStats() : null,
+            chartStats: charts ? charts.getChartStats() : null
+        };
+    },
+    
+    // Generate quick report
+    async generateQuickReport(opponent, date) {
+        try {
+            const opponentInput = document.getElementById('opponent-input');
+            const opponentSelect = document.getElementById('opponent-select');
+            const dateInput = document.getElementById('game-date');
+            
+            if (opponentInput) opponentInput.value = opponent;
+            if (opponentSelect) opponentSelect.value = opponent;
+            if (dateInput) dateInput.value = date;
+            
+            await handleGenerateSheet();
+        } catch (error) {
+            console.error('Failed to generate quick report:', error);
+        }
     }
-    
-    // Save keys
-    api.setApiKeys(keys);
-    
-    // Update UI status
-    updateApiStatus();
+};
+
+// Analytics and error tracking (if needed)
+window.addEventListener('error', function(e) {
+    console.error('Global error:', e.error);
+    showNotification('An unexpected error occurred. Please refresh the page.', 'error');
+});
+
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
+});
+
+// Service Worker registration (for offline support if needed)
+if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/huskers/sw.js')
+            .then(function(registration) {
+                console.log('ServiceWorker registration successful');
+            })
+            .catch(function(err) {
+                console.log('ServiceWorker registration failed');
+            });
+    });
+}
+
+// Performance monitoring
+function measurePerformance() {
+    if ('performance' in window) {
+        const navigation = performance.getEntriesByType('navigation')[0];
+        if (navigation) {
+            console.log(`Page load time: ${navigation.loadEventEnd - navigation.loadEventStart}ms`);
+        }
+    }
+}
+
+// Call performance measurement after page load
+window.addEventListener('load', measurePerformance);
+
+// Expose main objects globally for debugging
+window.DEBUG = {
+    api: window.api || api,
+    charts,
+    gameSheet: window.huskersGameSheet || null,
+    config: CONFIG || {},
+    version: '2.0.1'
+};
+
+console.log('Nebraska Huskers Game Sheet Generator loaded successfully');
+console.log('Available utilities: window.huskersUtils');
+console.log('Debug objects: window.DEBUG');
     
     // Show success message
     showNotification('API keys saved successfully!', 'success');
