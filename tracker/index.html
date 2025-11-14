@@ -57,9 +57,17 @@
             <p class="mt-2">Alerts will appear automatically. Click anywhere on the page to enable sound.</p>
         </div>
 
-        <!-- Sync Buttons -->
+        <!-- Mute Button -->
         <div class="space-y-3">
-            <!-- START TRACKER BUTTON REMOVED -->
+             <button id="mute-button" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-200 ease-in-out flex items-center justify-center space-x-2">
+                <svg id="mute-icon-unmuted" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707a1 1 0 011.414 0v16.414a1 1 0 01-1.414 0L5.586 15z" />
+                </svg>
+                <svg id="mute-icon-muted" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h7.586l4.707-4.707a1 1 0 011.414 0v16.414a1 1 0 01-1.414 0L11.586 15zM17 14l2-2m0 0l2-2m-2 2l-2 2m2-2l2 2" />
+                </svg>
+                <span id="mute-text">Mute</span>
+            </button>
         </div>
 
         <!-- Status Indicators -->
@@ -100,7 +108,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             const messageList = document.getElementById('message-list');
             const clock = document.getElementById('real-time-clock');
-            // startButton removed
+            const muteButton = document.getElementById('mute-button');
+            const muteIconUnmuted = document.getElementById('mute-icon-unmuted');
+            const muteIconMuted = document.getElementById('mute-icon-muted');
+            const muteText = document.getElementById('mute-text');
 
             // Status Indicators
             const statusGood = document.getElementById('status-good');
@@ -111,6 +122,7 @@
             let synth;
             // A flag to ensure audio context is started by user gesture
             let audioReady = false;
+            let isMuted = false;
 
             async function initAudio() {
                 if (audioReady) return;
@@ -123,7 +135,7 @@
 
             // Function to play a notification sound
             function playAlertSound(note = "C5") {
-                if (!audioReady) return;
+                if (isMuted || !audioReady) return; // Check for mute
                 try {
                     synth.triggerAttackRelease(note, "8n");
                 } catch (e) {
@@ -364,6 +376,27 @@
             
             // Add a one-time click listener to the body to enable audio
             document.body.addEventListener('click', initAudio, { once: true });
+
+            // Add click listener for the mute button
+            muteButton.addEventListener('click', () => {
+                isMuted = !isMuted; // Toggle mute state
+                
+                if (isMuted) {
+                    muteIconUnmuted.classList.add('hidden');
+                    muteIconMuted.classList.remove('hidden');
+                    muteText.textContent = 'Unmute';
+                    muteButton.classList.remove('bg-gray-600', 'hover:bg-gray-500');
+                    muteButton.classList.add('bg-red-600', 'hover:bg-red-700');
+                } else {
+                    muteIconUnmuted.classList.remove('hidden');
+                    muteIconMuted.classList.add('hidden');
+                    muteText.textContent = 'Mute';
+                    muteButton.classList.add('bg-gray-600', 'hover:bg-gray-500');
+                    muteButton.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    // Play a little sound to confirm unmuting, if audio is ready
+                    playAlertSound("G5"); 
+                }
+            });
 
             // Start the first loop
             scheduleLoop(0); 
