@@ -53,12 +53,12 @@
         <!-- Instructions -->
         <div class="text-sm text-gray-300 bg-gray-700 p-3 rounded-lg">
             <h3 class="font-bold mb-2">How to Use:</h3>
-            <p>This tracker is live and pre-calibrated based on the 3:56 PM event.</p>
-            <p class="mt-2">Alerts will appear automatically. Click anywhere on the page to enable sound.</p>
+            <p>This tracker is live. If the alerts seem off, use the **Re-Calibrate** button below.</p>
+            <p class="mt-2">Click anywhere to enable sound.</p>
         </div>
 
         <!-- Mute Button -->
-        <div class="space-y-3">
+         <div class="space-y-3">
              <button id="mute-button" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-200 ease-in-out flex items-center justify-center space-x-2">
                 <svg id="mute-icon-unmuted" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707a1 1 0 011.414 0v16.414a1 1 0 01-1.414 0L5.586 15z" />
@@ -69,6 +69,31 @@
                 <span id="mute-text">Mute</span>
             </button>
         </div>
+
+        <!-- Re-Calibrate Button -->
+         <div class="space-y-3 pt-3">
+             <button id="re-calibrate-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-200 ease-in-out">
+                Re-Calibrate
+            </button>
+        </div>
+
+        <!-- Sync Panel (Hidden by default) -->
+        <div id="sync-panel" class="hidden bg-gray-900 rounded-lg p-3 space-y-2">
+            <p class="text-sm text-gray-300">When a boat arrives, click the matching event:</p>
+            <button id="sync-state-0" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
+                SYNC: Good@Evil / Chaos@Good
+            </button>
+            <button id="sync-state-1" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
+                SYNC: Good@Chaos / Evil@Good
+            </button>
+            <button id="sync-state-2" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
+                SYNC: Good@Good / Chaos@Chaos
+            </button>
+            <button id="cancel-sync-button" class="w-full bg-gray-600 hover:bg-gray-500 text-white text-sm py-1 px-3 rounded mt-2">
+                Cancel
+            </button>
+        </div>
+
 
         <!-- Status Indicators -->
         <div class="space-y-2 pt-4">
@@ -108,10 +133,20 @@
         document.addEventListener('DOMContentLoaded', () => {
             const messageList = document.getElementById('message-list');
             const clock = document.getElementById('real-time-clock');
+            
+            // Mute Button
             const muteButton = document.getElementById('mute-button');
             const muteIconUnmuted = document.getElementById('mute-icon-unmuted');
             const muteIconMuted = document.getElementById('mute-icon-muted');
             const muteText = document.getElementById('mute-text');
+
+            // Re-Calibrate Buttons
+            const reCalibrateButton = document.getElementById('re-calibrate-button');
+            const syncPanel = document.getElementById('sync-panel');
+            const cancelSyncButton = document.getElementById('cancel-sync-button');
+            const syncState0 = document.getElementById('sync-state-0');
+            const syncState1 = document.getElementById('sync-state-1');
+            const syncState2 = document.getElementById('sync-state-2');
 
             // Status Indicators
             const statusGood = document.getElementById('status-good');
@@ -120,7 +155,6 @@
 
             // Audio synth for alerts
             let synth;
-            // A flag to ensure audio context is started by user gesture
             let audioReady = false;
             let isMuted = false;
 
@@ -134,9 +168,11 @@
             }
 
             // Function to play a notification sound
-            function playAlertSound(note = "C5") {
-                if (isMuted || !audioReady) return; // Check for mute
+            function playAlertSound(note = "C5") { // Removed delay parameter
+                if (isMuted || !audioReady) return;
+                
                 try {
+                    // Play immediately
                     synth.triggerAttackRelease(note, "8n");
                 } catch (e) {
                     console.error("Audio play failed:", e);
@@ -145,54 +181,80 @@
 
             // --- Time Constants (in milliseconds) ---
             const MINUTE = 60 * 1000;
-            const STEP_TIME = 6 * MINUTE;  // 6 minutes per step (5 min travel + 1 min dock)
+            const STEP_TIME = 6 * MINUTE;
             const DOCK_TIME = 1 * MINUTE;
-            const CYCLE_TIME = 18 * MINUTE; // 3 steps * 6 minutes
+            const CYCLE_TIME = 18 * MINUTE;
 
             // --- System State & Logic ---
             let allTimers = [];
-            // trackerStarted variable removed
+            let seedTimestamp; // This will be set by our calibration logic
 
-            // Define the seed time: 3:56 PM today.
-            // We get the current date and set the time to 15:56 (3:56 PM)
-            const seedDate = new Date();
-            seedDate.setHours(15, 56, 37, 0); // 3:56:37 PM (Calibrated to 4:08:37 event)
-            
-            // If it's already past 3:56 PM, the seed time might be from "yesterday"
-            // Let's find the *most recent* 3:56 PM.
-            const now = new Date().getTime();
-            while (seedDate.getTime() > now) {
-                // If 3:56 PM is in the future, subtract 18 minutes until it's in the past
-                seedDate.setTime(seedDate.getTime() - CYCLE_TIME);
-            }
-            // Now, find the most recent *step* time.
-            while (seedDate.getTime() < now - CYCLE_TIME) {
-                 seedDate.setTime(seedDate.getTime() + CYCLE_TIME);
-            }
-            const seedTimestamp = seedDate.getTime();
-            console.log("Calibrated seed time to:", new Date(seedTimestamp).toLocaleString());
-            
-
-            // Define the rotation states based on your 3:56 PM snapshot
-            // State 0 (3:56 PM): Good @ Evil, Chaos @ Good, Evil @ Chaos
-            // State 1 (4:02 PM): Good @ Chaos, Chaos @ Evil, Evil @ Good
-            // State 2 (4:08 PM): Good @ Good, Chaos @ Chaos, Evil @ Evil
+            // Define the rotation states
             const states = [
                 { stateId: 0, good: "Evil", chaos: "Good", evil: "Chaos" }, 
                 { stateId: 1, good: "Chaos", chaos: "Evil", evil: "Good" }, 
                 { stateId: 2, good: "Good", chaos: "Chaos", evil: "Evil" }  
             ];
             
-            // Map state 0 to the seed time
-            // Find how many steps we are past the seed time
-            const timeSinceSeed = now - seedTimestamp;
-            const stepsSinceSeed = Math.floor(timeSinceSeed / STEP_TIME);
-            const initialStateIndex = (stepsSinceSeed) % 3;
-            
-            console.log(`Time since seed: ${timeSinceSeed / MINUTE} mins`);
-            console.log(`Steps since seed: ${stepsSinceSeed}`);
-            console.log(`Initial state index: ${initialStateIndex}`);
+            // --- Seed Time and Calibration Logic ---
 
+            // This is our default "best guess" seed time (3:56:47 PM MST -> 22:56:47 UTC)
+            // It will be used if no local calibration is saved.
+            const DEFAULT_SEED = new Date(Date.UTC(2025, 10, 14, 22, 56, 47, 0)).getTime(); // Note: Month is 0-indexed (10 = Nov)
+
+            function setSeed(newSeed, isNewCalibration = false) {
+                seedTimestamp = newSeed;
+                localStorage.setItem('boatTrackerSeed', newSeed.toString());
+                
+                if (isNewCalibration) {
+                    postMessage(`**Tracker Re-Calibrated!** New seed time locked.`, 'system');
+                }
+                
+                // Restart the scheduling loop with the new time
+                scheduleLoop(0); 
+            }
+
+            function handleSyncClick(stateIndex) {
+                const syncTime = new Date().getTime(); // Get exact UTC time of click
+                // Calculate the "State 0" seed time based on what state we just saw
+                const newSeed = syncTime - (stateIndex * STEP_TIME);
+                
+                setSeed(newSeed, true); // Set and save the new seed
+
+                // Hide sync panel and show re-calibrate button
+                syncPanel.classList.add('hidden');
+                reCalibrateButton.classList.remove('hidden');
+            }
+
+            // On load, check for a saved seed, otherwise use the default
+            function initializeSeed() {
+                const savedSeed = localStorage.getItem('boatTrackerSeed');
+                let seedType = "default";
+                let finalSeed;
+
+                if (savedSeed) {
+                    finalSeed = parseInt(savedSeed);
+                    seedType = "saved";
+                } else {
+                    finalSeed = DEFAULT_SEED;
+                }
+
+                // Set the seedTimestamp. We don't want to post a message or restart the loop here.
+                seedTimestamp = finalSeed;
+
+                // Find the *most recent* seed-time equivalent.
+                const now = new Date().getTime();
+                while (seedTimestamp > now) {
+                    seedTimestamp -= CYCLE_TIME;
+                }
+                while (seedTimestamp < now - CYCLE_TIME) {
+                    seedTimestamp += CYCLE_TIME;
+                }
+                
+                console.log(`Using ${seedType} seed: ${new Date(seedTimestamp).toUTCString()}`);
+                postMessage(`Tracker activated. Using ${seedType} calibration. Calculating next event...`, 'system');
+            }
+            
 
             // --- Utility Functions ---
 
@@ -201,12 +263,12 @@
                 const now = new Date();
                 clock.textContent = now.toLocaleTimeString();
             }
-            // Start the clock
             setInterval(updateRealTimeClock, 1000);
             updateRealTimeClock();
 
-            // Function to post a message to the "Discord" channel
+            // Function to post a message
             function postMessage(text, type = 'bot') {
+                // (Same postMessage function as before)
                 const message = document.createElement('div');
                 message.className = 'flex items-start space-x-3';
                 
@@ -231,7 +293,7 @@
                         avatarLetter = 'E';
                         botName = 'Evil Alert';
                         pulseClass = 'arrival-pulse';
-                        playAlertSound("C5");
+                        // playAlertSound("C5", 0); // Sound Removed
                         break;
                     case 'chaos-alert':
                         avatarColor = 'bg-purple-500';
@@ -243,7 +305,7 @@
                         avatarLetter = 'C';
                         botName = 'Chaos Alert';
                         pulseClass = 'arrival-pulse';
-                        playAlertSound("D5");
+                        // playAlertSound("D5", 100); // Sound Removed
                         break;
                     case 'good-alert':
                         avatarColor = 'bg-blue-500';
@@ -255,7 +317,16 @@
                         avatarLetter = 'G';
                         botName = 'Good Alert';
                         pulseClass = 'arrival-pulse';
-                        playAlertSound("E5");
+                        // playAlertSound("E5", 200); // Sound Removed
+                        break;
+                    
+                    // NEW TYPE
+                    case 'arrival-all':
+                        avatarColor = 'bg-green-500';
+                        avatarLetter = 'A';
+                        botName = 'Arrival Alert';
+                        pulseClass = 'arrival-pulse';
+                        playAlertSound("E5"); // Play one sound for all
                         break;
                 }
 
@@ -270,17 +341,12 @@
                     </div>
                 `;
                 messageList.appendChild(message);
-                // Auto-scroll to the bottom
                 messageList.scrollTop = messageList.scrollHeight;
             }
 
             // Function to schedule an alert
             function scheduleAlert(delay, message, type, timerArray) {
-                if (delay <= 0) {
-                    // Don't schedule alerts for the past
-                    return;
-                }
-                
+                if (delay <= 0) return;
                 const timerId = setTimeout(() => {
                     postMessage(message, type);
                 }, delay);
@@ -297,7 +363,7 @@
                 
                 if (statusEl) {
                     statusEl.innerHTML = `
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9:586V6z" clip-rule="evenodd"></path></svg>
                         <span>${boat} Boat: Next stop <strong>${destination}</strong> in ~${minutesToArrival} min @ ${nextArrivalTime.toLocaleTimeString()}</span>
                     `;
                 }
@@ -310,77 +376,68 @@
 
             // --- Main Scheduling Loop ---
 
-            // startButton.addEventListener('click', ...) REMOVED
-
             function scheduleLoop(loopCount) {
-                clearTimers(allTimers);
+                clearTimers(allTimers); // Clear any old timers from a previous seed
 
                 const now = new Date().getTime();
 
-                // Find the time of the *next* 6-minute step
                 const timeSinceSeed = now - seedTimestamp;
                 const timeIntoCurrentStep = timeSinceSeed % STEP_TIME;
                 let nextStepTime = now - timeIntoCurrentStep + STEP_TIME;
 
-                // Adjust if we are perfectly on time
                 if (nextStepTime <= now) {
                     nextStepTime += STEP_TIME;
                 }
 
-                // Find out which state we are *entering*
                 const stepsFromSeed = Math.round((nextStepTime - seedTimestamp) / STEP_TIME);
                 const nextStateIndex = stepsFromSeed % 3;
                 
                 const nextState = states[nextStateIndex];
-                const arrivalTime = new Date(nextStepTime);
+                const arrivalTime = new Date(nextStepTime); 
 
-                console.log(`--- Scheduling Loop ${loopCount} ---`);
-                console.log(`Current Time: ${new Date(now).toLocaleTimeString()}`);
-                console.log(`Next Step Time: ${arrivalTime.toLocaleTimeString()}`);
-                console.log(`Next State Index: ${nextStateIndex} (State ${nextState.stateId})`);
+                console.log(`--- Scheduling Loop ${loopCount} (Seed: ${new Date(seedTimestamp).toUTCString()}) ---`);
+                console.log(`Next Step Time (Local): ${arrivalTime.toLocaleTimeString()}`);
                 console.log(`Next State: Good @ ${nextState.good}, Evil @ ${nextState.evil}, Chaos @ ${nextState.chaos}`);
 
                 // --- Schedule All Alerts for this Step ---
                 const departureTime = new Date(nextStepTime + DOCK_TIME);
                 const alertTime1Min = nextStepTime - (1 * MINUTE);
                 
-                // --- GOOD BOAT ---
-                scheduleAlert(alertTime1Min - now, `Good Boat arriving at ${nextState.good} in 1 MINUTE!`, 'good-alert', allTimers);
-                scheduleAlert(nextStepTime - now, `<strong>ALERT: Good Boat has ARRIVED at ${nextState.good}.</strong>`, 'good-arrival', allTimers);
-                scheduleAlert(departureTime.getTime() - now, `Good Boat has DEPARTED from ${nextState.good}.`, 'good-alert', allTimers);
+                // --- COMBINED 1-MINUTE ALERT ---
+                const alertMsg1Min = `Boats arriving in 1 MINUTE!
+                    <br>• Good &rarr; <strong>${nextState.good}</strong>
+                    <br>• Evil &rarr; <strong>${nextState.evil}</strong>
+                    <br>• Chaos &rarr; <strong>${nextState.chaos}</strong>`;
+                scheduleAlert(alertTime1Min - now, alertMsg1Min, 'system', allTimers);
+
+                // --- COMBINED ARRIVAL ALERT ---
+                const alertMsgArrival = `<strong>ALERT: Boats have ARRIVED!</strong>
+                    <br>• Good @ <strong>${nextState.good}</strong>
+                    <br>• Evil @ <strong>${nextState.evil}</strong>
+                    <br>• Chaos @ <strong>${nextState.chaos}</strong>`;
+                scheduleAlert(nextStepTime - now, alertMsgArrival, 'arrival-all', allTimers);
+
+                // --- COMBINED DEPARTURE ALERT ---
+                const alertMsgDeparture = `Boats have DEPARTED.
+                    <br>• Good from <strong>${nextState.good}</strong>
+                    <br>• Evil from <strong>${nextState.evil}</strong>
+                    <br>• Chaos from <strong>${nextState.chaos}</strong>`;
+                scheduleAlert(departureTime.getTime() - now, alertMsgDeparture, 'system', allTimers);
+
+                // --- Update Statuses (still needed) ---
                 updateStatus("Good", arrivalTime, nextState.good);
-
-                // --- EVIL BOAT ---
-                scheduleAlert(alertTime1Min - now, `Evil Boat arriving at ${nextState.evil} in 1 MINUTE!`, 'evil-alert', allTimers);
-                scheduleAlert(nextStepTime - now, `<strong>ALERT: Evil Boat has ARRIVED at ${nextState.evil}.</strong>`, 'evil-arrival', allTimers);
-                scheduleAlert(departureTime.getTime() - now, `Evil Boat has DEPARTED from ${nextState.evil}.`, 'evil-alert', allTimers);
                 updateStatus("Evil", arrivalTime, nextState.evil);
-
-                // --- CHAOS BOAT ---
-                scheduleAlert(alertTime1Min - now, `Chaos Boat arriving at ${nextState.chaos} in 1 MINUTE!`, 'chaos-alert', allTimers);
-                scheduleAlert(nextStepTime - now, `<strong>ALERT: Chaos Boat has ARRIVED at ${nextState.chaos}.</strong>`, 'chaos-arrival', allTimers);
-                scheduleAlert(departureTime.getTime() - now, `Chaos Boat has DEPARTED from ${nextState.chaos}.`, 'chaos-alert', allTimers);
                 updateStatus("Chaos", arrivalTime, nextState.chaos);
 
-                // Schedule the next loop to run just after this step's departure
+                // Schedule the next loop
                 const nextLoopDelay = (departureTime.getTime() - now) + 1000; // 1 second after departure
                 const loopTimerId = setTimeout(() => scheduleLoop(loopCount + 1), nextLoopDelay);
                 allTimers.push(loopTimerId);
             }
 
-            // --- Initial Welcome Message ---
-            postMessage("Welcome to the Realm Boat Tracker! This tracker is live. Alerts will appear automatically.", 'system');
-
-            // --- Auto-start the tracker ---
-            postMessage(`Tracker activated. Calibrated to 3:56 PM seed time. Calculating next event...`, 'system');
-            
-            // Add a one-time click listener to the body to enable audio
-            document.body.addEventListener('click', initAudio, { once: true });
-
-            // Add click listener for the mute button
+            // Mute Button Listener
             muteButton.addEventListener('click', () => {
-                isMuted = !isMuted; // Toggle mute state
-                
+                isMuted = !isMuted;
                 if (isMuted) {
                     muteIconUnmuted.classList.add('hidden');
                     muteIconMuted.classList.remove('hidden');
@@ -393,13 +450,29 @@
                     muteText.textContent = 'Mute';
                     muteButton.classList.add('bg-gray-600', 'hover:bg-gray-500');
                     muteButton.classList.remove('bg-red-600', 'hover:bg-red-700');
-                    // Play a little sound to confirm unmuting, if audio is ready
                     playAlertSound("G5"); 
                 }
             });
 
-            // Start the first loop
-            scheduleLoop(0); 
+            // Re-Calibrate Button Listeners
+            reCalibrateButton.addEventListener('click', () => {
+                syncPanel.classList.remove('hidden');
+                reCalibrateButton.classList.add('hidden');
+            });
+
+            cancelSyncButton.addEventListener('click', () => {
+                syncPanel.classList.add('hidden');
+                reCalibrateButton.classList.remove('hidden');
+            });
+
+            syncState0.addEventListener('click', () => handleSyncClick(0));
+            syncState1.addEventListener('click', () => handleSyncClick(1));
+            syncState2.addEventListener('click', () => handleSyncClick(2));
+
+
+            // --- Start the Tracker ---
+            initializeSeed(); // Load saved or default seed
+            scheduleLoop(0); // Start the first loop
 
         });
     </script>
