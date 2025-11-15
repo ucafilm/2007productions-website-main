@@ -435,6 +435,15 @@
                 allTimers.push(loopTimerId);
             }
 
+            // --- Initial Setup & Event Listeners ---
+            
+            postMessage("Welcome to the Realm Boat Tracker! This tracker is live. Alerts will appear automatically.", 'system');
+
+            // Add a one-time click listener to the body to enable audio
+            // THIS IS THE LINE I ACCIDENTALLY DELETED. IT IS NOW BACK.
+            document.body.addEventListener('click', initAudio, { once: true });
+
+
             // Mute Button Listener
             muteButton.addEventListener('click', () => {
                 isMuted = !isMuted;
