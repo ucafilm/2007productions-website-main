@@ -53,8 +53,19 @@
         <!-- Instructions -->
         <div class="text-sm text-gray-300 bg-gray-700 p-3 rounded-lg">
             <h3 class="font-bold mb-2">How to Use:</h3>
-            <p>This tracker is live. If the alerts seem off, use the **Re-Calibrate** button below.</p>
+            <p>This tracker is live. Use the filter below to track specific boats.</p>
             <p class="mt-2">Click anywhere to enable sound.</p>
+        </div>
+
+        <!-- Filter Dropdown -->
+        <div class="space-y-1 pt-2">
+            <label for="realm-filter" class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filter Alerts</label>
+            <select id="realm-filter" class="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-500 transition-colors text-sm font-medium shadow-sm">
+                <option value="all">Track All Realms</option>
+                <option value="good">Track Good Boat</option>
+                <option value="evil">Track Evil Boat</option>
+                <option value="chaos">Track Chaos Boat</option>
+            </select>
         </div>
 
         <!-- Mute Button -->
@@ -98,15 +109,15 @@
         <!-- Status Indicators -->
         <div class="space-y-2 pt-4">
             <h3 class="text-lg font-semibold text-white">Tracker Status</h3>
-            <div id="status-good" class="flex items-center space-x-2 text-blue-300">
+            <div id="status-good" class="flex items-center space-x-2 text-blue-300 transition-opacity duration-300">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
                 <span>Good Boat: Tracker Offline</span>
             </div>
-            <div id="status-evil" class="flex items-center space-x-2 text-red-300">
+            <div id="status-evil" class="flex items-center space-x-2 text-red-300 transition-opacity duration-300">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
                 <span>Evil Boat: Tracker Offline</span>
             </div>
-            <div id="status-chaos" class="flex items-center space-x-2 text-purple-300">
+            <div id="status-chaos" class="flex items-center space-x-2 text-purple-300 transition-opacity duration-300">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
                 <span>Chaos Boat: Tracker Offline</span>
             </div>
@@ -134,7 +145,8 @@
             const messageList = document.getElementById('message-list');
             const clock = document.getElementById('real-time-clock');
             
-            // Mute Button
+            // Controls
+            const realmFilter = document.getElementById('realm-filter');
             const muteButton = document.getElementById('mute-button');
             const muteIconUnmuted = document.getElementById('mute-icon-unmuted');
             const muteIconMuted = document.getElementById('mute-icon-muted');
@@ -168,11 +180,9 @@
             }
 
             // Function to play a notification sound
-            function playAlertSound(note = "C5") { // Removed delay parameter
+            function playAlertSound(note = "C5") { 
                 if (isMuted || !audioReady) return;
-                
                 try {
-                    // Play immediately
                     synth.triggerAttackRelease(note, "8n");
                 } catch (e) {
                     console.error("Audio play failed:", e);
@@ -187,7 +197,7 @@
 
             // --- System State & Logic ---
             let allTimers = [];
-            let seedTimestamp; // This will be set by our calibration logic
+            let seedTimestamp; 
 
             // Define the rotation states
             const states = [
@@ -197,10 +207,7 @@
             ];
             
             // --- Seed Time and Calibration Logic ---
-
-            // This is our default "best guess" seed time (3:56:47 PM MST -> 22:56:47 UTC)
-            // It will be used if no local calibration is saved.
-            const DEFAULT_SEED = new Date(Date.UTC(2025, 10, 14, 22, 56, 47, 0)).getTime(); // Note: Month is 0-indexed (10 = Nov)
+            const DEFAULT_SEED = new Date(Date.UTC(2025, 10, 14, 22, 56, 47, 0)).getTime();
 
             function setSeed(newSeed, isNewCalibration = false) {
                 seedTimestamp = newSeed;
@@ -209,24 +216,17 @@
                 if (isNewCalibration) {
                     postMessage(`**Tracker Re-Calibrated!** New seed time locked.`, 'system');
                 }
-                
-                // Restart the scheduling loop with the new time
                 scheduleLoop(0); 
             }
 
             function handleSyncClick(stateIndex) {
-                const syncTime = new Date().getTime(); // Get exact UTC time of click
-                // Calculate the "State 0" seed time based on what state we just saw
+                const syncTime = new Date().getTime();
                 const newSeed = syncTime - (stateIndex * STEP_TIME);
-                
-                setSeed(newSeed, true); // Set and save the new seed
-
-                // Hide sync panel and show re-calibrate button
+                setSeed(newSeed, true);
                 syncPanel.classList.add('hidden');
                 reCalibrateButton.classList.remove('hidden');
             }
 
-            // On load, check for a saved seed, otherwise use the default
             function initializeSeed() {
                 const savedSeed = localStorage.getItem('boatTrackerSeed');
                 let seedType = "default";
@@ -238,27 +238,25 @@
                 } else {
                     finalSeed = DEFAULT_SEED;
                 }
-
-                // Set the seedTimestamp. We don't want to post a message or restart the loop here.
                 seedTimestamp = finalSeed;
-
-                // Find the *most recent* seed-time equivalent.
                 const now = new Date().getTime();
-                while (seedTimestamp > now) {
-                    seedTimestamp -= CYCLE_TIME;
-                }
-                while (seedTimestamp < now - CYCLE_TIME) {
-                    seedTimestamp += CYCLE_TIME;
-                }
+                while (seedTimestamp > now) { seedTimestamp -= CYCLE_TIME; }
+                while (seedTimestamp < now - CYCLE_TIME) { seedTimestamp += CYCLE_TIME; }
                 
                 console.log(`Using ${seedType} seed: ${new Date(seedTimestamp).toUTCString()}`);
-                postMessage(`Tracker activated. Using ${seedType} calibration. Calculating next event...`, 'system');
+                
+                // Also initialize filter
+                const savedFilter = localStorage.getItem('boatTrackerFilter');
+                if (savedFilter) {
+                    realmFilter.value = savedFilter;
+                }
+                
+                postMessage(`Tracker activated. Using ${seedType} calibration.`, 'system');
             }
             
 
             // --- Utility Functions ---
 
-            // Function to update the real-time clock
             function updateRealTimeClock() {
                 const now = new Date();
                 clock.textContent = now.toLocaleTimeString();
@@ -268,11 +266,10 @@
 
             // Function to post a message
             function postMessage(text, type = 'bot') {
-                // (Same postMessage function as before)
                 const message = document.createElement('div');
                 message.className = 'flex items-start space-x-3';
                 
-                let avatarColor = 'bg-blue-500'; // Default bot
+                let avatarColor = 'bg-blue-500'; 
                 let avatarLetter = 'B';
                 let botName = 'Boat-Bot';
                 let pulseClass = '';
@@ -283,50 +280,34 @@
                         avatarLetter = 'S';
                         botName = 'System';
                         break;
-                    case 'evil-alert':
-                        avatarColor = 'bg-red-500';
-                        avatarLetter = 'E';
-                        botName = 'Evil Alert';
-                        break;
-                    case 'evil-arrival':
-                        avatarColor = 'bg-red-600';
-                        avatarLetter = 'E';
-                        botName = 'Evil Alert';
-                        pulseClass = 'arrival-pulse';
-                        // playAlertSound("C5", 0); // Sound Removed
-                        break;
-                    case 'chaos-alert':
-                        avatarColor = 'bg-purple-500';
-                        avatarLetter = 'C';
-                        botName = 'Chaos Alert';
-                        break;
-                    case 'chaos-arrival':
-                        avatarColor = 'bg-purple-600';
-                        avatarLetter = 'C';
-                        botName = 'Chaos Alert';
-                        pulseClass = 'arrival-pulse';
-                        // playAlertSound("D5", 100); // Sound Removed
-                        break;
-                    case 'good-alert':
-                        avatarColor = 'bg-blue-500';
-                        avatarLetter = 'G';
-                        botName = 'Good Alert';
-                        break;
-                    case 'good-arrival':
-                        avatarColor = 'bg-blue-600';
-                        avatarLetter = 'G';
-                        botName = 'Good Alert';
-                        pulseClass = 'arrival-pulse';
-                        // playAlertSound("E5", 200); // Sound Removed
-                        break;
-                    
-                    // NEW TYPE
+                    // Specialized alert types (colors match realm)
                     case 'arrival-all':
                         avatarColor = 'bg-green-500';
                         avatarLetter = 'A';
                         botName = 'Arrival Alert';
                         pulseClass = 'arrival-pulse';
-                        playAlertSound("E5"); // Play one sound for all
+                        playAlertSound("E5"); 
+                        break;
+                    case 'arrival-good':
+                        avatarColor = 'bg-blue-600';
+                        avatarLetter = 'G';
+                        botName = 'Good Alert';
+                        pulseClass = 'arrival-pulse';
+                        playAlertSound("E5"); 
+                        break;
+                    case 'arrival-evil':
+                        avatarColor = 'bg-red-600';
+                        avatarLetter = 'E';
+                        botName = 'Evil Alert';
+                        pulseClass = 'arrival-pulse';
+                        playAlertSound("E5"); 
+                        break;
+                    case 'arrival-chaos':
+                        avatarColor = 'bg-purple-600';
+                        avatarLetter = 'C';
+                        botName = 'Chaos Alert';
+                        pulseClass = 'arrival-pulse';
+                        playAlertSound("E5"); 
                         break;
                 }
 
@@ -344,7 +325,6 @@
                 messageList.scrollTop = messageList.scrollHeight;
             }
 
-            // Function to schedule an alert
             function scheduleAlert(delay, message, type, timerArray) {
                 if (delay <= 0) return;
                 const timerId = setTimeout(() => {
@@ -353,14 +333,12 @@
                 timerArray.push(timerId);
             }
 
-            // Function to update status
             function updateStatus(boat, nextArrivalTime, destination) {
                 const now = new Date();
                 let minutesToArrival = Math.ceil((nextArrivalTime.getTime() - now.getTime()) / MINUTE);
                 if (minutesToArrival < 0) minutesToArrival = 0;
                 
                 const statusEl = document.getElementById(`status-${boat.toLowerCase()}`);
-                
                 if (statusEl) {
                     statusEl.innerHTML = `
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9:586V6z" clip-rule="evenodd"></path></svg>
@@ -371,78 +349,98 @@
             
             function clearTimers(timerArray) {
                 timerArray.forEach(clearTimeout);
-                timerArray.length = 0; // Clear the array
+                timerArray.length = 0; 
             }
 
             // --- Main Scheduling Loop ---
 
             function scheduleLoop(loopCount) {
-                clearTimers(allTimers); // Clear any old timers from a previous seed
+                clearTimers(allTimers); 
 
                 const now = new Date().getTime();
+                const filter = realmFilter.value; // Get current filter
 
+                // Update Sidebar Visibility immediately based on filter
+                statusGood.style.display = (filter === 'all' || filter === 'good') ? 'flex' : 'none';
+                statusEvil.style.display = (filter === 'all' || filter === 'evil') ? 'flex' : 'none';
+                statusChaos.style.display = (filter === 'all' || filter === 'chaos') ? 'flex' : 'none';
+
+
+                // Calculate Timings
                 const timeSinceSeed = now - seedTimestamp;
                 const timeIntoCurrentStep = timeSinceSeed % STEP_TIME;
                 let nextStepTime = now - timeIntoCurrentStep + STEP_TIME;
-
-                if (nextStepTime <= now) {
-                    nextStepTime += STEP_TIME;
-                }
+                if (nextStepTime <= now) nextStepTime += STEP_TIME;
 
                 const stepsFromSeed = Math.round((nextStepTime - seedTimestamp) / STEP_TIME);
                 const nextStateIndex = stepsFromSeed % 3;
-                
                 const nextState = states[nextStateIndex];
                 const arrivalTime = new Date(nextStepTime); 
 
-                console.log(`--- Scheduling Loop ${loopCount} (Seed: ${new Date(seedTimestamp).toUTCString()}) ---`);
-                console.log(`Next Step Time (Local): ${arrivalTime.toLocaleTimeString()}`);
-                console.log(`Next State: Good @ ${nextState.good}, Evil @ ${nextState.evil}, Chaos @ ${nextState.chaos}`);
+                console.log(`--- Scheduling Loop (Filter: ${filter}) ---`);
 
-                // --- Schedule All Alerts for this Step ---
+                // --- Construct Alerts based on Filter ---
                 const departureTime = new Date(nextStepTime + DOCK_TIME);
                 const alertTime1Min = nextStepTime - (1 * MINUTE);
                 
-                // --- COMBINED 1-MINUTE ALERT ---
-                const alertMsg1Min = `Boats arriving in 1 MINUTE!
-                    <br>• Good &rarr; <strong>${nextState.good}</strong>
-                    <br>• Evil &rarr; <strong>${nextState.evil}</strong>
-                    <br>• Chaos &rarr; <strong>${nextState.chaos}</strong>`;
+                let alertMsg1Min = "";
+                let alertMsgArrival = "";
+                let alertMsgDeparture = "";
+                let arrivalType = 'system'; // default type
+
+                if (filter === 'all') {
+                    alertMsg1Min = `Boats arriving in 1 MINUTE!<br>• Good &rarr; <strong>${nextState.good}</strong><br>• Evil &rarr; <strong>${nextState.evil}</strong><br>• Chaos &rarr; <strong>${nextState.chaos}</strong>`;
+                    alertMsgArrival = `<strong>ALERT: Boats have ARRIVED!</strong><br>• Good @ <strong>${nextState.good}</strong><br>• Evil @ <strong>${nextState.evil}</strong><br>• Chaos @ <strong>${nextState.chaos}</strong>`;
+                    alertMsgDeparture = `Boats have DEPARTED.<br>• Good from <strong>${nextState.good}</strong><br>• Evil from <strong>${nextState.evil}</strong><br>• Chaos from <strong>${nextState.chaos}</strong>`;
+                    arrivalType = 'arrival-all';
+                } else if (filter === 'good') {
+                    alertMsg1Min = `Good Boat arriving at <strong>${nextState.good}</strong> in 1 MINUTE!`;
+                    alertMsgArrival = `<strong>ALERT: Good Boat has ARRIVED at ${nextState.good}.</strong>`;
+                    alertMsgDeparture = `Good Boat has DEPARTED from ${nextState.good}.`;
+                    arrivalType = 'arrival-good';
+                } else if (filter === 'evil') {
+                    alertMsg1Min = `Evil Boat arriving at <strong>${nextState.evil}</strong> in 1 MINUTE!`;
+                    alertMsgArrival = `<strong>ALERT: Evil Boat has ARRIVED at ${nextState.evil}.</strong>`;
+                    alertMsgDeparture = `Evil Boat has DEPARTED from ${nextState.evil}.`;
+                    arrivalType = 'arrival-evil';
+                } else if (filter === 'chaos') {
+                    alertMsg1Min = `Chaos Boat arriving at <strong>${nextState.chaos}</strong> in 1 MINUTE!`;
+                    alertMsgArrival = `<strong>ALERT: Chaos Boat has ARRIVED at ${nextState.chaos}.</strong>`;
+                    alertMsgDeparture = `Chaos Boat has DEPARTED from ${nextState.chaos}.`;
+                    arrivalType = 'arrival-chaos';
+                }
+
+                // Schedule Alerts
                 scheduleAlert(alertTime1Min - now, alertMsg1Min, 'system', allTimers);
-
-                // --- COMBINED ARRIVAL ALERT ---
-                const alertMsgArrival = `<strong>ALERT: Boats have ARRIVED!</strong>
-                    <br>• Good @ <strong>${nextState.good}</strong>
-                    <br>• Evil @ <strong>${nextState.evil}</strong>
-                    <br>• Chaos @ <strong>${nextState.chaos}</strong>`;
-                scheduleAlert(nextStepTime - now, alertMsgArrival, 'arrival-all', allTimers);
-
-                // --- COMBINED DEPARTURE ALERT ---
-                const alertMsgDeparture = `Boats have DEPARTED.
-                    <br>• Good from <strong>${nextState.good}</strong>
-                    <br>• Evil from <strong>${nextState.evil}</strong>
-                    <br>• Chaos from <strong>${nextState.chaos}</strong>`;
+                scheduleAlert(nextStepTime - now, alertMsgArrival, arrivalType, allTimers);
                 scheduleAlert(departureTime.getTime() - now, alertMsgDeparture, 'system', allTimers);
 
-                // --- Update Statuses (still needed) ---
+                // Update Statuses (logic handles hiding via CSS, but we still need to update text)
                 updateStatus("Good", arrivalTime, nextState.good);
                 updateStatus("Evil", arrivalTime, nextState.evil);
                 updateStatus("Chaos", arrivalTime, nextState.chaos);
 
-                // Schedule the next loop
-                const nextLoopDelay = (departureTime.getTime() - now) + 1000; // 1 second after departure
+                // Schedule next loop
+                const nextLoopDelay = (departureTime.getTime() - now) + 1000; 
                 const loopTimerId = setTimeout(() => scheduleLoop(loopCount + 1), nextLoopDelay);
                 allTimers.push(loopTimerId);
             }
 
             // --- Initial Setup & Event Listeners ---
             
-            postMessage("Welcome to the Realm Boat Tracker! This tracker is live. Alerts will appear automatically.", 'system');
+            postMessage("Welcome to the Realm Boat Tracker! Alerts will appear automatically.", 'system');
+
+            // Listen for filter changes
+            realmFilter.addEventListener('change', () => {
+                const selectedFilter = realmFilter.value;
+                localStorage.setItem('boatTrackerFilter', selectedFilter);
+                postMessage(`Filter changed to: ${realmFilter.options[realmFilter.selectedIndex].text}`, 'system');
+                // Restart loop to apply filter immediately to upcoming alerts
+                scheduleLoop(0);
+            });
 
             // Add a one-time click listener to the body to enable audio
-            // THIS IS THE LINE I ACCIDENTALLY DELETED. IT IS NOW BACK.
             document.body.addEventListener('click', initAudio, { once: true });
-
 
             // Mute Button Listener
             muteButton.addEventListener('click', () => {
