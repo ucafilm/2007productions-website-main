@@ -68,6 +68,12 @@
             </select>
         </div>
 
+        <!-- Glory Bea Toggle -->
+        <div class="flex items-center space-x-2 pt-2 bg-gray-700 p-2 rounded">
+            <input type="checkbox" id="glory-toggle" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500 focus:ring-2">
+            <label for="glory-toggle" class="text-sm font-medium text-white cursor-pointer select-none">Track "Glory Bea" Event</label>
+        </div>
+
         <!-- Mute Button -->
          <div class="space-y-3">
              <button id="mute-button" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-200 ease-in-out flex items-center justify-center space-x-2">
@@ -89,17 +95,37 @@
         </div>
 
         <!-- Sync Panel (Hidden by default) -->
-        <div id="sync-panel" class="hidden bg-gray-900 rounded-lg p-3 space-y-2">
-            <p class="text-sm text-gray-300">When a boat arrives, click the matching event:</p>
-            <button id="sync-state-0" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
-                SYNC: Good @ Evil
-            </button>
-            <button id="sync-state-1" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
-                SYNC: Good @ Chaos
-            </button>
-            <button id="sync-state-2" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
-                SYNC: Good @ Good
-            </button>
+        <div id="sync-panel" class="hidden bg-gray-900 rounded-lg p-3 space-y-4">
+            
+            <!-- Standard Boats Sync -->
+            <div class="space-y-2">
+                <p class="text-xs font-bold text-gray-400 uppercase">Standard Boats</p>
+                <button id="sync-state-0" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
+                    SYNC: Good @ Evil
+                </button>
+                <button id="sync-state-1" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
+                    SYNC: Good @ Chaos
+                </button>
+                <button id="sync-state-2" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded text-sm">
+                    SYNC: Good @ Good
+                </button>
+            </div>
+
+            <!-- Glory Bea Sync -->
+            <div id="glory-sync-section" class="space-y-2 hidden border-t border-gray-700 pt-3">
+                <p class="text-xs font-bold text-yellow-400 uppercase">Glory Bea Event</p>
+                <p class="text-xs text-gray-400">Click only if boat JUST arrived (12h cycle)</p>
+                <button id="sync-glory-evil" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm">
+                    SYNC: Glory @ Evil
+                </button>
+                <button id="sync-glory-good" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm">
+                    SYNC: Glory @ Good
+                </button>
+                <button id="sync-glory-chaos" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm">
+                    SYNC: Glory @ Chaos
+                </button>
+            </div>
+
             <button id="cancel-sync-button" class="w-full bg-gray-600 hover:bg-gray-500 text-white text-sm py-1 px-3 rounded mt-2">
                 Cancel
             </button>
@@ -109,17 +135,24 @@
         <!-- Status Indicators -->
         <div class="space-y-2 pt-4">
             <h3 class="text-lg font-semibold text-white">Tracker Status</h3>
+            
+            <!-- Glory Bea Status -->
+            <div id="status-glory" class="hidden flex items-center space-x-2 text-yellow-300 bg-gray-800 p-2 rounded border border-yellow-800/50">
+                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9:586V6z" clip-rule="evenodd"></path></svg>
+                <span class="text-sm">Glory Bea: Calculating...</span>
+            </div>
+
             <div id="status-good" class="flex items-center space-x-2 text-blue-300 transition-opacity duration-300">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
-                <span>Good Boat: Tracker Offline</span>
+                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
+                <span class="text-sm">Good Boat: Tracker Offline</span>
             </div>
             <div id="status-evil" class="flex items-center space-x-2 text-red-300 transition-opacity duration-300">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
-                <span>Evil Boat: Tracker Offline</span>
+                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
+                <span class="text-sm">Evil Boat: Tracker Offline</span>
             </div>
             <div id="status-chaos" class="flex items-center space-x-2 text-purple-300 transition-opacity duration-300">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
-                <span>Chaos Boat: Tracker Offline</span>
+                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V12a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg>
+                <span class="text-sm">Chaos Boat: Tracker Offline</span>
             </div>
         </div>
 
@@ -147,6 +180,7 @@
             
             // Controls
             const realmFilter = document.getElementById('realm-filter');
+            const gloryToggle = document.getElementById('glory-toggle');
             const muteButton = document.getElementById('mute-button');
             const muteIconUnmuted = document.getElementById('mute-icon-unmuted');
             const muteIconMuted = document.getElementById('mute-icon-muted');
@@ -155,15 +189,21 @@
             // Re-Calibrate Buttons
             const reCalibrateButton = document.getElementById('re-calibrate-button');
             const syncPanel = document.getElementById('sync-panel');
+            const glorySyncSection = document.getElementById('glory-sync-section');
             const cancelSyncButton = document.getElementById('cancel-sync-button');
             const syncState0 = document.getElementById('sync-state-0');
             const syncState1 = document.getElementById('sync-state-1');
             const syncState2 = document.getElementById('sync-state-2');
+            
+            const syncGloryEvil = document.getElementById('sync-glory-evil');
+            const syncGloryGood = document.getElementById('sync-glory-good');
+            const syncGloryChaos = document.getElementById('sync-glory-chaos');
 
             // Status Indicators
             const statusGood = document.getElementById('status-good');
             const statusEvil = document.getElementById('status-evil');
             const statusChaos = document.getElementById('status-chaos');
+            const statusGlory = document.getElementById('status-glory');
 
             // Audio synth for alerts
             let synth;
@@ -191,15 +231,24 @@
 
             // --- Time Constants (in milliseconds) ---
             const MINUTE = 60 * 1000;
+            const HOUR = 60 * MINUTE;
             const STEP_TIME = 6 * MINUTE;
             const DOCK_TIME = 1 * MINUTE;
             const CYCLE_TIME = 18 * MINUTE;
 
+            // Glory Bea Constants (36h cycle)
+            const GLORY_STEP_TIME = 12 * HOUR;
+            const GLORY_CYCLE_TIME = 36 * HOUR;
+            const GLORY_STATES = ['Evil', 'Good', 'Chaos'];
+
             // --- System State & Logic ---
             let allTimers = [];
+            let gloryTimers = [];
             let seedTimestamp; 
+            let glorySeedTimestamp;
+            let gloryEnabled = false;
 
-            // Define the rotation states
+            // Define the rotation states for standard boats
             const states = [
                 { stateId: 0, good: "Evil", chaos: "Good", evil: "Chaos" }, 
                 { stateId: 1, good: "Chaos", chaos: "Evil", evil: "Good" }, 
@@ -209,14 +258,35 @@
             // --- Seed Time and Calibration Logic ---
             const DEFAULT_SEED = new Date(Date.UTC(2025, 10, 14, 22, 56, 47, 0)).getTime();
 
+            // Auto-calculate Glory Seed based on "12:01 PM Local Today" for Good Arrival
+            function getAutoGlorySeed() {
+                const now = new Date();
+                // Create a date for Today at 12:01 PM local time
+                const seedTarget = new Date();
+                seedTarget.setHours(12, 1, 0, 0);
+                
+                // If 12:01 is in the future, maybe they meant yesterday? 
+                // But safer to assume today for initial setup.
+                // 12:01 PM Good Arrival = Start of Good Phase (Index 1)
+                // Cycle starts at Index 0 (Evil).
+                // So cycle start = 12:01 PM - 12 hours = 00:01 AM today.
+                
+                let baseSeed = seedTarget.getTime() - (12 * HOUR);
+                return baseSeed;
+            }
+
             function setSeed(newSeed, isNewCalibration = false) {
                 seedTimestamp = newSeed;
                 localStorage.setItem('boatTrackerSeed', newSeed.toString());
-                
-                if (isNewCalibration) {
-                    postMessage(`**Tracker Re-Calibrated!** New seed time locked.`, 'system');
-                }
+                if (isNewCalibration) postMessage(`**Standard Tracker Re-Calibrated!**`, 'system');
                 scheduleLoop(0); 
+            }
+            
+            function setGlorySeed(newSeed, isNewCalibration = false) {
+                glorySeedTimestamp = newSeed;
+                localStorage.setItem('gloryTrackerSeed', newSeed.toString());
+                if (isNewCalibration) postMessage(`**Glory Bea Re-Calibrated!**`, 'system');
+                scheduleGloryLoop(0);
             }
 
             function handleSyncClick(stateIndex) {
@@ -226,32 +296,47 @@
                 syncPanel.classList.add('hidden');
                 reCalibrateButton.classList.remove('hidden');
             }
+            
+            function handleGlorySyncClick(stateIndex) {
+                const syncTime = new Date().getTime();
+                // stateIndex: 0=Evil, 1=Good, 2=Chaos
+                const newSeed = syncTime - (stateIndex * GLORY_STEP_TIME);
+                setGlorySeed(newSeed, true);
+                syncPanel.classList.add('hidden');
+                reCalibrateButton.classList.remove('hidden');
+            }
 
             function initializeSeed() {
+                // Standard Seed
                 const savedSeed = localStorage.getItem('boatTrackerSeed');
-                let seedType = "default";
-                let finalSeed;
-
-                if (savedSeed) {
-                    finalSeed = parseInt(savedSeed);
-                    seedType = "saved";
-                } else {
-                    finalSeed = DEFAULT_SEED;
-                }
-                seedTimestamp = finalSeed;
+                seedTimestamp = savedSeed ? parseInt(savedSeed) : DEFAULT_SEED;
                 const now = new Date().getTime();
                 while (seedTimestamp > now) { seedTimestamp -= CYCLE_TIME; }
                 while (seedTimestamp < now - CYCLE_TIME) { seedTimestamp += CYCLE_TIME; }
                 
-                console.log(`Using ${seedType} seed: ${new Date(seedTimestamp).toUTCString()}`);
+                // Glory Seed
+                const savedGlorySeed = localStorage.getItem('gloryTrackerSeed');
+                // Use saved, or auto-calc based on 12:01 PM rule
+                glorySeedTimestamp = savedGlorySeed ? parseInt(savedGlorySeed) : getAutoGlorySeed();
                 
-                // Also initialize filter
+                // Normalize Glory seed to recent past
+                while (glorySeedTimestamp > now) { glorySeedTimestamp -= GLORY_CYCLE_TIME; }
+                while (glorySeedTimestamp < now - GLORY_CYCLE_TIME) { glorySeedTimestamp += GLORY_CYCLE_TIME; }
+
+                // UI Settings
                 const savedFilter = localStorage.getItem('boatTrackerFilter');
-                if (savedFilter) {
-                    realmFilter.value = savedFilter;
-                }
+                if (savedFilter) realmFilter.value = savedFilter;
                 
-                postMessage(`Tracker activated. Using ${seedType} calibration.`, 'system');
+                const savedGloryToggle = localStorage.getItem('gloryTrackerEnabled');
+                if (savedGloryToggle === 'true') {
+                    gloryToggle.checked = true;
+                    gloryEnabled = true;
+                    statusGlory.classList.remove('hidden');
+                    glorySyncSection.classList.remove('hidden');
+                }
+
+                console.log(`Initialized. Standard Seed: ${new Date(seedTimestamp).toUTCString()}`);
+                postMessage(`Tracker activated.`, 'system');
             }
             
 
@@ -280,7 +365,6 @@
                         avatarLetter = 'S';
                         botName = 'System';
                         break;
-                    // Specialized alert types (colors match realm)
                     case 'arrival-all':
                         avatarColor = 'bg-green-500';
                         avatarLetter = 'A';
@@ -309,10 +393,17 @@
                         pulseClass = 'arrival-pulse';
                         playAlertSound("E5"); 
                         break;
+                    case 'glory-alert':
+                        avatarColor = 'bg-yellow-600';
+                        avatarLetter = 'GB';
+                        botName = 'Glory Bea';
+                        pulseClass = 'arrival-pulse';
+                        playAlertSound("C4"); // Lower tone for Glory Bea
+                        break;
                 }
 
                 message.innerHTML = `
-                    <div class="flex-shrink-0 ${avatarColor} ${pulseClass} w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-xl">${avatarLetter}</div>
+                    <div class="flex-shrink-0 ${avatarColor} ${pulseClass} w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm">${avatarLetter}</div>
                     <div>
                         <div class="flex items-baseline space-x-2">
                             <span class="font-bold text-white">${botName}</span>
@@ -341,8 +432,8 @@
                 const statusEl = document.getElementById(`status-${boat.toLowerCase()}`);
                 if (statusEl) {
                     statusEl.innerHTML = `
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9:586V6z" clip-rule="evenodd"></path></svg>
-                        <span>${boat} Boat: Next stop <strong>${destination}</strong> in ~${minutesToArrival} min @ ${nextArrivalTime.toLocaleTimeString()}</span>
+                        <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9:586V6z" clip-rule="evenodd"></path></svg>
+                        <span class="text-sm">${boat} Boat: Next stop <strong>${destination}</strong> in ~${minutesToArrival} min @ ${nextArrivalTime.toLocaleTimeString()}</span>
                     `;
                 }
             }
@@ -352,21 +443,18 @@
                 timerArray.length = 0; 
             }
 
-            // --- Main Scheduling Loop ---
-
+            // --- Main Scheduling Loop (Standard Boats) ---
             function scheduleLoop(loopCount) {
                 clearTimers(allTimers); 
-
                 const now = new Date().getTime();
-                const filter = realmFilter.value; // Get current filter
+                const filter = realmFilter.value; 
 
-                // Update Sidebar Visibility immediately based on filter
+                // Sidebar Vis
                 statusGood.style.display = (filter === 'all' || filter === 'good') ? 'flex' : 'none';
                 statusEvil.style.display = (filter === 'all' || filter === 'evil') ? 'flex' : 'none';
                 statusChaos.style.display = (filter === 'all' || filter === 'chaos') ? 'flex' : 'none';
 
-
-                // Calculate Timings
+                // Timing
                 const timeSinceSeed = now - seedTimestamp;
                 const timeIntoCurrentStep = timeSinceSeed % STEP_TIME;
                 let nextStepTime = now - timeIntoCurrentStep + STEP_TIME;
@@ -377,16 +465,14 @@
                 const nextState = states[nextStateIndex];
                 const arrivalTime = new Date(nextStepTime); 
 
-                console.log(`--- Scheduling Loop (Filter: ${filter}) ---`);
-
-                // --- Construct Alerts based on Filter ---
+                // Alerts
                 const departureTime = new Date(nextStepTime + DOCK_TIME);
                 const alertTime1Min = nextStepTime - (1 * MINUTE);
                 
                 let alertMsg1Min = "";
                 let alertMsgArrival = "";
                 let alertMsgDeparture = "";
-                let arrivalType = 'system'; // default type
+                let arrivalType = 'system'; 
 
                 if (filter === 'all') {
                     alertMsg1Min = `Boats arriving in 1 MINUTE!<br>• Good &rarr; <strong>${nextState.good}</strong><br>• Evil &rarr; <strong>${nextState.evil}</strong><br>• Chaos &rarr; <strong>${nextState.chaos}</strong>`;
@@ -410,39 +496,102 @@
                     arrivalType = 'arrival-chaos';
                 }
 
-                // Schedule Alerts
                 scheduleAlert(alertTime1Min - now, alertMsg1Min, 'system', allTimers);
                 scheduleAlert(nextStepTime - now, alertMsgArrival, arrivalType, allTimers);
                 scheduleAlert(departureTime.getTime() - now, alertMsgDeparture, 'system', allTimers);
 
-                // Update Statuses (logic handles hiding via CSS, but we still need to update text)
                 updateStatus("Good", arrivalTime, nextState.good);
                 updateStatus("Evil", arrivalTime, nextState.evil);
                 updateStatus("Chaos", arrivalTime, nextState.chaos);
 
-                // Schedule next loop
                 const nextLoopDelay = (departureTime.getTime() - now) + 1000; 
                 const loopTimerId = setTimeout(() => scheduleLoop(loopCount + 1), nextLoopDelay);
                 allTimers.push(loopTimerId);
             }
 
-            // --- Initial Setup & Event Listeners ---
+            // --- Glory Bea Scheduling Loop (12 Hour Cycle) ---
+            function scheduleGloryLoop(loopCount) {
+                clearTimers(gloryTimers);
+                if (!gloryEnabled) return;
+
+                const now = new Date().getTime();
+                
+                const timeSinceSeed = now - glorySeedTimestamp;
+                const timeIntoStep = timeSinceSeed % GLORY_STEP_TIME;
+                let nextStepTime = now - timeIntoStep + GLORY_STEP_TIME;
+                if (nextStepTime <= now) nextStepTime += GLORY_STEP_TIME;
+
+                const stepsFromSeed = Math.round((nextStepTime - glorySeedTimestamp) / GLORY_STEP_TIME);
+                const nextStateIndex = stepsFromSeed % 3;
+                const nextRealm = GLORY_STATES[nextStateIndex];
+                
+                // Current Realm (The one it is in NOW)
+                // If next is Index 1, current is Index 0.
+                const currentStateIndex = (nextStateIndex - 1 + 3) % 3;
+                const currentRealm = GLORY_STATES[currentStateIndex];
+                
+                const arrivalTime = new Date(nextStepTime);
+                const minutesToNext = Math.ceil((nextStepTime - now) / MINUTE);
+                const hoursToNext = (minutesToNext / 60).toFixed(1);
+
+                // Update UI
+                if (statusGlory) {
+                    statusGlory.innerHTML = `
+                         <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9:586V6z" clip-rule="evenodd"></path></svg>
+                        <span class="text-sm">Glory Bea: In <strong>${currentRealm}</strong>. Departing in ${hoursToNext} hrs (${arrivalTime.toLocaleTimeString()}) &rarr; ${nextRealm}</span>
+                    `;
+                }
+
+                // Alerts (60 min warning, 5 min warning, Arrival)
+                const alertTime60Min = nextStepTime - (60 * MINUTE);
+                const alertTime5Min = nextStepTime - (5 * MINUTE);
+                
+                scheduleAlert(alertTime60Min - now, `Glory Bea departing ${currentRealm} in 1 HOUR.`, 'system', gloryTimers);
+                scheduleAlert(alertTime5Min - now, `Glory Bea arriving at ${nextRealm} in 5 MINUTES!`, 'system', gloryTimers);
+                scheduleAlert(nextStepTime - now, `<strong>GLORY BEA ARRIVED AT ${nextRealm}!</strong> (Stays 12 hrs)`, 'glory-alert', gloryTimers);
+
+                // Re-run loop frequently to update the "Hours remaining" text
+                // We'll update status text every minute, but alert scheduling covers the big events.
+                // Just strictly re-schedule after the next event to keep it simple, 
+                // BUT add a separate setInterval for just the text update?
+                // Actually, just re-running this function every minute is safe/easy since we clearTimers.
+                
+                const updateDelay = MINUTE; 
+                const loopTimerId = setTimeout(() => scheduleGloryLoop(loopCount + 1), updateDelay);
+                gloryTimers.push(loopTimerId);
+            }
+
+
+            // --- Listeners ---
             
             postMessage("Welcome to the Realm Boat Tracker! Alerts will appear automatically.", 'system');
 
-            // Listen for filter changes
             realmFilter.addEventListener('change', () => {
                 const selectedFilter = realmFilter.value;
                 localStorage.setItem('boatTrackerFilter', selectedFilter);
                 postMessage(`Filter changed to: ${realmFilter.options[realmFilter.selectedIndex].text}`, 'system');
-                // Restart loop to apply filter immediately to upcoming alerts
                 scheduleLoop(0);
             });
+            
+            gloryToggle.addEventListener('change', () => {
+                gloryEnabled = gloryToggle.checked;
+                localStorage.setItem('gloryTrackerEnabled', gloryEnabled);
+                
+                if (gloryEnabled) {
+                    statusGlory.classList.remove('hidden');
+                    glorySyncSection.classList.remove('hidden');
+                    postMessage('Glory Bea Tracker ENABLED.', 'system');
+                    scheduleGloryLoop(0);
+                } else {
+                    statusGlory.classList.add('hidden');
+                    glorySyncSection.classList.add('hidden');
+                    clearTimers(gloryTimers);
+                    postMessage('Glory Bea Tracker DISABLED.', 'system');
+                }
+            });
 
-            // Add a one-time click listener to the body to enable audio
             document.body.addEventListener('click', initAudio, { once: true });
 
-            // Mute Button Listener
             muteButton.addEventListener('click', () => {
                 isMuted = !isMuted;
                 if (isMuted) {
@@ -461,7 +610,6 @@
                 }
             });
 
-            // Re-Calibrate Button Listeners
             reCalibrateButton.addEventListener('click', () => {
                 syncPanel.classList.remove('hidden');
                 reCalibrateButton.classList.add('hidden');
@@ -475,11 +623,16 @@
             syncState0.addEventListener('click', () => handleSyncClick(0));
             syncState1.addEventListener('click', () => handleSyncClick(1));
             syncState2.addEventListener('click', () => handleSyncClick(2));
+            
+            syncGloryEvil.addEventListener('click', () => handleGlorySyncClick(0));
+            syncGloryGood.addEventListener('click', () => handleGlorySyncClick(1));
+            syncGloryChaos.addEventListener('click', () => handleGlorySyncClick(2));
 
 
             // --- Start the Tracker ---
-            initializeSeed(); // Load saved or default seed
-            scheduleLoop(0); // Start the first loop
+            initializeSeed(); 
+            scheduleLoop(0); 
+            if (gloryEnabled) scheduleGloryLoop(0);
 
         });
     </script>
