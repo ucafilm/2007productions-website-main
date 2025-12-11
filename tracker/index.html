@@ -115,11 +115,12 @@
             <div id="glory-sync-section" class="space-y-2 hidden border-t border-gray-700 pt-3">
                 <p class="text-xs font-bold text-yellow-400 uppercase">Glory Bea Event</p>
                 <p class="text-xs text-gray-400">Click only if boat JUST arrived (12h cycle)</p>
-                <button id="sync-glory-evil" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm">
-                    SYNC: Glory @ Evil
-                </button>
+                <!-- Updated order to Good -> Evil -> Chaos -->
                 <button id="sync-glory-good" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm">
                     SYNC: Glory @ Good
+                </button>
+                <button id="sync-glory-evil" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm">
+                    SYNC: Glory @ Evil
                 </button>
                 <button id="sync-glory-chaos" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-3 rounded text-sm">
                     SYNC: Glory @ Chaos
@@ -138,7 +139,7 @@
             
             <!-- Glory Bea Status -->
             <div id="status-glory" class="hidden flex items-center space-x-2 text-yellow-300 bg-gray-800 p-2 rounded border border-yellow-800/50">
-                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9:586V6z" clip-rule="evenodd"></path></svg>
+                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>
                 <span class="text-sm">Glory Bea: Calculating...</span>
             </div>
 
@@ -239,7 +240,8 @@
             // Glory Bea Constants (36h cycle)
             const GLORY_STEP_TIME = 12 * HOUR;
             const GLORY_CYCLE_TIME = 36 * HOUR;
-            const GLORY_STATES = ['Evil', 'Good', 'Chaos'];
+            // NEW CYCLE ORDER: Good -> Evil -> Chaos
+            const GLORY_STATES = ['Good', 'Evil', 'Chaos'];
 
             // --- System State & Logic ---
             let allTimers = [];
@@ -258,20 +260,17 @@
             // --- Seed Time and Calibration Logic ---
             const DEFAULT_SEED = new Date(Date.UTC(2025, 10, 14, 22, 56, 47, 0)).getTime();
 
-            // Auto-calculate Glory Seed based on "12:01 PM Local Today" for Good Arrival
+            // Auto-calculate Glory Seed based on "12:00 PM Local Today" for CHAOS Arrival (Index 2)
             function getAutoGlorySeed() {
-                const now = new Date();
-                // Create a date for Today at 12:01 PM local time
+                // With new cycle: ['Good', 'Evil', 'Chaos']
+                // If 12:00 PM today is Index 2 (Chaos), we need the seed for Index 0 (Good).
+                // Chaos (Index 2) is 24 hours (2 steps) after Good (Index 0).
+                // So Good was 24 hours BEFORE today's 12:00 PM.
+                
                 const seedTarget = new Date();
-                seedTarget.setHours(12, 1, 0, 0);
+                seedTarget.setHours(12, 0, 0, 0); // 12:00 PM today
                 
-                // If 12:01 is in the future, maybe they meant yesterday? 
-                // But safer to assume today for initial setup.
-                // 12:01 PM Good Arrival = Start of Good Phase (Index 1)
-                // Cycle starts at Index 0 (Evil).
-                // So cycle start = 12:01 PM - 12 hours = 00:01 AM today.
-                
-                let baseSeed = seedTarget.getTime() - (12 * HOUR);
+                let baseSeed = seedTarget.getTime() - (24 * HOUR); 
                 return baseSeed;
             }
 
@@ -299,7 +298,7 @@
             
             function handleGlorySyncClick(stateIndex) {
                 const syncTime = new Date().getTime();
-                // stateIndex: 0=Evil, 1=Good, 2=Chaos
+                // stateIndex: 0=Good, 1=Evil, 2=Chaos
                 const newSeed = syncTime - (stateIndex * GLORY_STEP_TIME);
                 setGlorySeed(newSeed, true);
                 syncPanel.classList.add('hidden');
@@ -316,7 +315,7 @@
                 
                 // Glory Seed
                 const savedGlorySeed = localStorage.getItem('gloryTrackerSeed');
-                // Use saved, or auto-calc based on 12:01 PM rule
+                // Use saved, or auto-calc based on new 12:00 PM Chaos rule
                 glorySeedTimestamp = savedGlorySeed ? parseInt(savedGlorySeed) : getAutoGlorySeed();
                 
                 // Normalize Glory seed to recent past
@@ -624,9 +623,9 @@
             syncState1.addEventListener('click', () => handleSyncClick(1));
             syncState2.addEventListener('click', () => handleSyncClick(2));
             
-            syncGloryEvil.addEventListener('click', () => handleGlorySyncClick(0));
-            syncGloryGood.addEventListener('click', () => handleGlorySyncClick(1));
-            syncGloryChaos.addEventListener('click', () => handleGlorySyncClick(2));
+            syncGloryEvil.addEventListener('click', () => handleGlorySyncClick(1)); // Good -> Evil
+            syncGloryGood.addEventListener('click', () => handleGlorySyncClick(0)); // Good -> Good
+            syncGloryChaos.addEventListener('click', () => handleGlorySyncClick(2)); // Good -> Chaos
 
 
             // --- Start the Tracker ---
